@@ -1,0 +1,2 @@
+[27-Jan-2021 09:02:40 UTC] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /home/saasmonksin/public_html/App-Demo/eventRight-45342/storage/framework/views/485139aaa45c858cc8374847b9b5b30ac391e8a5.php on line 29
+[27-Jan-2021 09:02:45 UTC] PHP Fatal error:  Cannot use isset() on the result of an expression (you can use "null !== expression" instead) in /home/saasmonksin/public_html/App-Demo/eventRight-45342/storage/framework/views/485139aaa45c858cc8374847b9b5b30ac391e8a5.php on line 29

@@ -1,0 +1,24 @@
+<?php
+
+namespace Illuminate\Auth\Middleware;
+
+use Auth;
+use Closure;
+
+class AuthenticateOnceWithBasicAuth
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+
+    public function handle($request, Closure $next)
+    {
+        return Auth::onceBasic() ?: $next($request);
+
+    }
+
+}

@@ -1,0 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=Comforter&display=swap');
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.ticket {
+    width: 400px;
+    background-color: white;
+    margin: 25px auto;
+    position: relative;
+}
+
+.holes-top {
+    height: 50px;
+    width: 50px;
+    background-color: #000544;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    margin-left: -25px;
+    top: -25px;
+}
+
+.holes-top:before,
+.holes-top:after {
+    content: '';
+    height: 50px;
+    width: 50px;
+    background-color: #000544;
+    position: absolute;
+    border-radius: 50%;
+}
+
+.holes-top:before {
+    left: -200px;
+}
+
+.holes-top:after {
+    left: 200px;
+}
+
+.holes-lower {
+    position: relative;
+    margin: 25px;
+    border: 1px dashed #aaa;
+}
+
+.holes-lower:before,
+.holes-lower:after {
+    content: '';
+    height: 50px;
+    width: 50px;
+    background-color: #000544;
+    position: absolute;
+    border-radius: 50%;
+}
+
+.holes-lower:before {
+    top: -25px;
+    left: -50px;
+}
+
+.holes-lower:after {
+    top: -25px;
+    left: 350px;
+}
+
+.title {
+    padding: 50px 25px 10px;
+}
+
+.cinema {
+    color: #aaa;
+    font-size: 22px;
+    font-family: 'Yanone Kaffeesatz', sans-serif;
+    font-weight: 600;
+}
+
+.movie-title {
+    font-size: 50px;
+    font-family: 'Yanone Kaffeesatz', sans-serif;
+    font-weight: 600;
+    color: #000544;
+}
+
+.info {
+    padding: 15px 25px;
+}
+
+table {
+    width: 100%;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+table tr {
+    margin-bottom: 10px;
+}
+
+table th {
+    text-align: left;
+}
+
+table th:nth-of-type(1) {
+    width: 38%;
+}
+
+table th:nth-of-type(2) {
+    width: 40%;
+}
+
+table th:nth-of-type(3) {
+    width: 15%;
+}
+
+table td {
+    width: 33%;
+    font-size: 32px;
+    color: rgb(0, 0, 0) !important;
+    text-align: left;
+}
+
+.bigger {
+    font-size: 40px;
+}
+
+.serial {
+    padding-top: 0px !important;
+    padding: 25px;
+}
+
+.serial table {
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+.serial td {
+    width: 3px;
+    height: 50px;
+}
+
+.numbers td {
+    font-size: 16px;
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .ticket {
+        width: 280px;
+        height: 690px;
+        margin: 0px auto;
+    }
+    .movie-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        /* number of lines to show */
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
+    }
+    .holes-top {
+        height: 30px;
+        width: 30px;
+        margin-left: -18px;
+        top: -18px;
+    }
+    .holes-top:before,
+    .holes-top:after {
+        height: 30px;
+        width: 30px;
+    }
+    .holes-top:before {
+        left: -140px;
+    }
+    .holes-top:after {
+        left: 140px;
+    }
+    .cinema {
+        font-size: 16px;
+    }
+    .movie-title {
+        font-size: 30px;
+    }
+    .info {
+        padding: 10px 20px;
+    }
+    table {
+        font-size: 14px;
+    }
+    .bigger {
+        font-size: 30px;
+    }
+    table td {
+        font-size: 20px;
+    }
+    .holes-lower {
+        margin-top: 0px;
+    }
+    .holes-lower::before,
+    .holes-lower::after {
+        height: 30px;
+        width: 30px;
+    }
+    .holes-lower::before {
+        top: -20px;
+        left: -45px;
+    }
+    .holes-lower::after {
+        top: -20px;
+        left: 240px;
+    }
+    .serial {
+        padding-top: 0px;
+    }
+}

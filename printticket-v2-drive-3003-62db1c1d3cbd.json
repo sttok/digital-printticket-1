@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "printticket-v2-drive-3003",
+  "private_key_id": "62db1c1d3cbd8224d70293c07eded5bb64fd7fc0",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCsSYcIi9nWn6U0\ns/KX7/JUccJ5BJn5IpddvyUkAvzcle3RAboU9LTCMcihryHxazvAF2COVUm7UYlu\nk4XC95B2CpJWdiMzLVM3CNNLOImrRcX4xnEYVLp1DsVXaniQ+16m8t96aXvagaVR\nt6PYcSmxFPI11gAyOXfvf5YfHLn5jLLMCKPWbTICttyr3mrwGBVa9a7CT3I6kMwm\nDejvcXR2gngJ4fjB9ka+VAdL3iqrmscv/IVjDcIC699hnt9vMygXdOSEjbBG95zK\n8LNe+2C+lCw4/8UgC5BB1OItmRN7Zpp+05niN+Pzx232hUXWxazhRa02B07ziFF3\nitInxWY7AgMBAAECggEANnz+pvZMC/PrtPJgfCsYEhr0bX/GDqQhCTYl0fDb9gu4\n7gxExNHrxSsnj/MqogbPG96I3BsfOY39ECq5+EKBvsNzKsMsOMhR9CrnYHfeGnvz\ns81XAWHyoojsYsw6m2fUtKpFgZqQ4Dd2iJSyzgZkMCw2uk4XO8svImDQosBcFQ8j\ncKmrlGbjBB1xHZBdUOl4+T+snH0Wa6webJTiH/c/VTFn81yhzZVxIddax+lH2gGv\nGAX30bH9lTe7Ed0Mkso+IxChBdO5CyRrQgrMCMlJS5YDMhG4ppTVOdgoiNDfuZjw\n449Jv1qaDp0e9gsi+3FDQWACYl9Ie8wEeemLcWmmIQKBgQDxVWddpJAhhOmbHh9x\nuTtE3f0OL4CPm5QFZ3REGObujV8bBaxQHXp+K4r76uVIgVfNb3ZfbcymwFeE41xF\nZ8nHv8aI/X21wBV9Jh5VEki8sFxUctWEy+7FiVIQyBti7wwKLDqU2bKdMbGmgqus\nEw2mb1M0s0RFtzBcm4EUerdPqwKBgQC2weupWRjWmiEhDtuazK7rWulQTVMtqBVd\ntwmcFUFNbIgfEQXVYBSYFGdKZyJ1wadwDc2/y1yogQXB1uCdkDbJkc7W9U+ZtXDl\njRtpVY/Y0h06pKU1l35njuhwCJTXVkj4SZqfGsVpB5UJgP2EY9wB6rAJl/9V7B4N\nKtAOozjzsQKBgQC9XDTJ/lj1ZBPkmcM0eZIu3Dw2SEGI7Rs9DkrlL+Drp1PLoSzu\ng+LcYxAf0NTtike5s07fXAkrglpps/hvoRtrt2dxj+12keyKkUFVoQ4fuAYKYTx2\ngYmtx6zz6//JJiZ9SO0CZLrIqvho3bkUQLMCN/HCtTLJvQ6ea4nh5tQ1FwKBgQCE\nvasekLFCxiZD7ZfCAuMV3S1TfyZoJgqGy/h13tZUlvzzm5iiF6w9naw8VVapMyQb\ndls38Ex3s2bsGNeCegnhND+I0Bql6Sx7/panVlcpw8spGgdJOqS8MQdQwFrjYS+U\n71kYMQirta8hfQgmTaWx2rVL8pOp49sb8zm1OAaYsQKBgCHgkTy5QGXg2lfu+V2Y\n7vLrO5kZtCMMb/6Yjplc2W2S8b3HSmQtWAdmG0NIRCAIrl4ZpoIV+Ka7IMskbpqx\nSAq8WkrlMjzceIHLFWLdEFyS+QbiQcUhpKE1Q7hlGGbGLq8vMXkRVfuJQUrZGmRF\nglov3afOwAuX5HktEiuIgFNE\n-----END PRIVATE KEY-----\n",
+  "client_email": "printticket-v2-drive@printticket-v2-drive-3003.iam.gserviceaccount.com",
+  "client_id": "100423139689687917996",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/printticket-v2-drive%40printticket-v2-drive-3003.iam.gserviceaccount.com"
+}
