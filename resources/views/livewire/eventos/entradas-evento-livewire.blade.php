@@ -21,7 +21,7 @@
                         </div>
                         <div class="col-lg-2 col-md-6 col-12 mb-2">
                             <span>{{ __('Buscar privacidad') }}</span>
-                           <select class="form-control @error('search_estado') is-invalid @enderror" name="" id="" style="color: #fefefe" wire:model="search_estado">
+                           <select class="form-control @error('search_estado') is-invalid @enderror" name="" id=""  wire:model="search_estado">
                                 <option value="" selected>{{ __('Seleccione una opción') }}</option>
                                <option value="1">{{ __('Publico') }}</option>
                                <option value="2">{{ __('Privado') }}</option>
@@ -32,7 +32,7 @@
                         </div>
                         <div class="col-lg-2 col-md-6 col-12 mb-2">
                             <span>{{ __('Buscar tipo') }}</span>
-                           <select class="form-control @error('search_tipo') is-invalid @enderror" name="" id="" style="color: #fefefe" wire:model="search_tipo">
+                           <select class="form-control @error('search_tipo') is-invalid @enderror" name="" id=""  wire:model="search_tipo">
                                 <option value="" selected>{{ __('Seleccione una opción') }}</option>
                                <option value="1">{{ __('Ticket') }}</option>
                                <option value="2">{{ __('Manilla') }}</option>

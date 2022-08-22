@@ -10,13 +10,10 @@
     "require": {
         "php": "^7.3|^8.0",
         "barcode-bakery/barcode-1d": "^7.0",
-        "barryvdh/laravel-dompdf": "^0.9.0",
         "fideloper/proxy": "^4.4",
         "firebase/php-jwt": "^6.1",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
-        "intervention/image": "^2.7",
-        "khanamiryan/qrcode-detector-decoder": "1.0.5.1",
         "laravel/framework": "^8.12",
         "laravel/passport": "^10.1",
         "laravel/socialite": "^5.5",
@@ -31,8 +28,7 @@
         "silviolleite/laravelpwa": "^2.0",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^3.18",
-        "stripe/stripe-php": "^7.67",
-        "tanmuhittin/laravel-google-translate": "^2.0"
+        "stripe/stripe-php": "^7.67"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

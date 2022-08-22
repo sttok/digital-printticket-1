@@ -35,7 +35,7 @@
                         </div>
                         <div class="col-lg-3 col-md-4 col-12 mb-2">
                             <span>{{ __('Buscar estado') }}</span>
-                           <select class="form-control @error('search_estado') is-invalid @enderror" name="" id="" style="color: #fefefe" wire:model="search_estado">
+                           <select class="form-control @error('search_estado') is-invalid @enderror" name="" id=""  wire:model="search_estado">
                                 <option value="" selected>{{ __('Seleccione una opción') }}</option>
                                <option value="1">{{ __('Disponible') }}</option>
                                <option value="2">{{ __('Finalizado') }}</option>

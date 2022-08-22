@@ -1143,7 +1143,7 @@ body.sidebar-hidden .main-wrapper {
     margin-bottom: 28px;
     border-radius: 15px;
     border: none;
-    box-shadow: 0px 1px 3px 0px rgba(54, 74, 99, 0.05);
+    box-shadow: 0px 1px 3px 0px rgba(54, 74, 99, 0.17);
 }
 
 .card-title {
@@ -1311,8 +1311,12 @@ body.sidebar-hidden .main-wrapper {
 }
 
 .card.bg-info .card-header {
-    background-color: #9465fcea;
-    border-color: #9465fcea;
+    background-color: #9c71fc;
+    border-color: #9c71fc;
+  }
+
+.card.bg-info .card-header h3 {
+    color: rgba(225,235,245,.87);
 }
 
 .card.bg-info .card-title {
@@ -2698,6 +2702,10 @@ body.error-page .container {
 
 .card-file-manager .card-text {
     opacity: 0.6;
+}
+
+.card-file-manager{
+    border: 1px solid #ececec;
 }
 
 .card-file-header {

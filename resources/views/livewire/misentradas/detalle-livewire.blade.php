@@ -18,9 +18,7 @@
                 padding-top: 10px;
                 position: unset !important;
             }
-            .card-file-manager{
-                border: 1px solid #fefefe4f;
-            }
+            
         </style>
     @else
         <style>
@@ -76,7 +74,7 @@
                             
                             <div class="col-md-6 col-12 mb-2">
                                 <span>{{ __('Buscar zona') }}</span>
-                                <select class="form-control @error('search_estado') is-invalid @enderror" style="color: #fefefe" wire:model="search_estado">
+                                <select class="form-control @error('search_estado') is-invalid @enderror"  wire:model="search_estado">
                                     <option value="">{{ __('Todos') }}</option>
                                     @foreach ($entradas as $it)
                                         <option value="{{ $it->id }}">{{ $it->name }}</option>
@@ -89,7 +87,7 @@
     
                             <div class="col-md-6 col-12 mb-2">
                                 <span>{{ __('Organizar') }}</span>
-                                <select class="form-control @error('organizar') is-invalid @enderror" style="color: #fefefe" wire:model="organizar">
+                                <select class="form-control @error('organizar') is-invalid @enderror"  wire:model="organizar">
                                     <option value="1">{{ __('Por defecto') }}</option>
                                     <option value="2">{{ __('Tabla') }}</option>
                                 </select>
@@ -105,7 +103,7 @@
                         </div>
                         <div class="col-lg-6 col-md-12 col-12 mb-3">
                             <div class="card stat-widget bg-info" >
-                                <div class="card-header text-center justify-content-center" style="padding-bottom: 5px">
+                                <div class="card-header text-center justify-content-center" style="padding-bottom: 5px;">
                                     <h3>{{ __('Estadisticas de tu evento') }}</h3>
                                 </div>
                                 <div class="card-body text-center justify-content-center" style="padding-top: 5px">
@@ -196,7 +194,7 @@
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" value="{{ $entrada->id }}" id="flexCheckChecked" wire:model="entradas_array">
                                         </div>
-                                        <i class="fas fa-file-pdf" style="color: #fefefe"></i>
+                                        <i class="fas fa-file-pdf" ></i>
                                     </div>
                                     <div class="card-body">
                                         <h6 class="card-subtitle mb-2 text-muted">{{ $entrada->zona->name. ' - ' . $entrada->identificador }} 
