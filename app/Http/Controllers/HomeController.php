@@ -141,9 +141,24 @@ class HomeController extends Controller
             return Storage::disk('custom')->download('ticket-digital/'.$url);
 
         }elseif($entrada->provider == 'drive'){
-
+        }elseif($entrada->provider == 'drive'){
+            $filename = "121-General etapa final.pdf";
+                $dir = '/';
+                $recursive = false;
+                $contents = collect(Storage::disk("google")->ListContents($dir, $recursive));
+                 //return $contents;
+                $file = $contents
+                        ->where('type', '=', 'file')
+                        ->where('filename', '=', pathinfo($filename, PATHINFO_FILENAME))
+                        ->where('extension', '=', pathinfo($filename, PATHINFO_EXTENSION))
+                        ->first();
+                        
+                $rawData = Storage::disk("google")->get($file['path']);
+                return response($rawData, 200)
+                    ->header('ContentType', $file['mimetype'])
+                    ->header('Content-Disposition', "attachment; filename=$filename");        
         }
-        return $entrada;
+       
 
     }
 

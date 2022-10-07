@@ -15,12 +15,12 @@ use Livewire\WithFileUploads;
 use App\Models\OrderChildsDigital;
 use Illuminate\Support\Facades\DB;
 use App\Exports\EntradasExcelExport;
+use App\Models\DireccionesEvento;
+use App\Models\DireccionesUsuarios;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
-
-
 use Google\Client;
 use Google\Service\Drive;
 
@@ -141,6 +141,7 @@ class EntradasEventoLivewire extends Component
                 $ent = OrderChild::where([
                     ['ticket_id', $this->Entrada->id], ['identificador', (int)$identificador]
                 ])->first();
+               
                 if(!empty($ent)){
                     DB::beginTransaction();
                     try{
@@ -167,10 +168,31 @@ class EntradasEventoLivewire extends Component
                                     $r->provider = 'local';
 
                                 }elseif($this->lugar_almacenamiento == 2){
-                                    $url =  '110ZAuq7gQsCzrF_PnUMhgffNybqvaaU_';
+                                    $url_organizador = DireccionesUsuarios::where('usuario_id', $this->Evento->organizador_id)->first();
+                                    if(empty($url_organizador)){
+                                        $url_organizador = $this->createDirUser();
+                                        //$url_organizador = DireccionesUsuarios::where('usuario_id', $this->Evento->organizador_id)->first();
+                                    }
+                                    $url_entrada = DireccionesEvento::where([
+                                        ['direccion_usuario', $url_organizador['id']]
+                                    ])->first();
+
+                                    if(empty($url_entrada)){
+                                        $url_entrada = $this->createDirEvent($url_organizador);
+                                    }
+
+                                    $url =  $url_entrada['path'];
                                     $i->storeAs($url, $nombre, 'google');
-                                    $path = Storage::disk("google")->putFileAs($url, $i, $nombre);
-                                    $r->url = '';
+                                    Storage::disk("google")->putFileAs($url, $i, $nombre);
+                                    $dir = '/'.$url_entrada['path'];
+                                    $recursive = false; // Get subdirectories also?
+                                    $file = collect(Storage::disk('google')->listContents($dir, $recursive))
+                                        ->where('type', '=', 'file')
+                                        ->where('filename', '=', pathinfo($nombre, PATHINFO_FILENAME))
+                                        ->where('extension', '=', pathinfo($nombre, PATHINFO_EXTENSION))
+                                        ->sortBy('timestamp')
+                                        ->last();
+                                    $r->url = $file['path'];
                                     $r->provider = 'drive';
                                 }
                             $r->save();
@@ -195,10 +217,10 @@ class EntradasEventoLivewire extends Component
                                 $rr1->provider = 'local';
 
                             }elseif($this->lugar_almacenamiento == 2){
-                                $url =  '110ZAuq7gQsCzrF_PnUMhgffNybqvaaU_';
+                                $url =  env('GOOGLE_DRIVE_FOLDER_ID');
                                 //$i->storeAs($url, $nombre, 'google');
                                 $path = Storage::disk("google")->putFileAs($url, $i, $nombre);
-                                dd($path);
+                                $this->obtenerarchivo($nombre);
                                 $rr1->url = '';
                                 $rr1->provider = 'drive';
                             }
@@ -240,6 +262,98 @@ class EntradasEventoLivewire extends Component
         }      
         $this->reset('uploads');
     }
+    
+    private function createDirUser(){
+        $nombre_folder = $this->Evento->organizador->first_name . ' ' . $this->Evento->organizador->last_name;
+        Storage::disk('google')->makeDirectory($nombre_folder);
+            // Find parent dir for reference
+        $dir = '/';
+        $recursive = false; // Get subdirectories also?
+        $contents = collect(Storage::disk('google')->listContents($dir, $recursive));
+
+        $dir = $contents->where('type', '=', 'dir')
+            ->where('filename', '=', $nombre_folder)
+            ->first(); // There could be duplicate directory names!
+
+        if (!$dir) {
+            return 'Directory does not exist!';
+        }
+
+        $direc = new DireccionesUsuarios();
+            $direc->usuario_id = $this->Evento->organizador_id;
+            $direc->path = $dir['path'];
+            $direc->drivers = 'google';
+        $direc->save();
+
+        return $direc;
+    }
+
+    private function createDirEvent($dirUser){
+
+        $nombre_folder = $this->Evento->id . ' - ' .$this->Evento->name;
+        Storage::disk('google')->makeDirectory($dirUser['path'].'/'.$nombre_folder);
+
+        $dirEvent = '/'.$dirUser['path'];
+        $recursive = false; // Get subdirectories also?
+        $contents = collect(Storage::disk('google')->listContents($dirEvent, $recursive));
+
+        $dirEvent = $contents->where('type', '=', 'dir')
+            ->where('filename', '=', $nombre_folder)
+            ->first(); // There could be duplicate directory names!
+
+        if (!$dirEvent) {
+            return 'Directory does not exist!';
+        }
+
+        $nombre_folder = $this->Entrada->ticket_number . ' - ' . $this->Entrada->name;;
+        Storage::disk('google')->makeDirectory($dirEvent['path'].'/'.$nombre_folder);
+
+        $dirEntrada = '/'.$dirEvent['path'];
+        $recursive = false; // Get subdirectories also?
+        $contents = collect(Storage::disk('google')->listContents($dirEntrada, $recursive));
+
+        $dirEntrada = $contents->where('type', '=', 'dir')
+            ->where('filename', '=', $nombre_folder)
+            ->first(); // There could be duplicate directory names!
+
+        if (!$dirEntrada) {
+            return 'Directory does not exist!';
+        }
+
+       $direc = new DireccionesEvento();
+            $direc->evento_id = $this->Evento->id;
+            $direc->usuario_id = $this->Evento->organizador_id;
+            $direc->direccion_usuario = $dirUser->id;
+            $direc->entrada_id = $this->Entrada->id;
+            $direc->path = $dirEntrada['path'];
+       $direc->save();
+
+       return $direc;
+       
+    }
+
+   
+
+
+    private function obtenerarchivo($name_file){
+        $filename = $name_file;
+        
+        $dir = '/';
+        $recursive = false;
+        $contents = collect(Storage::disk("google")->ListContents($dir, $recursive));
+        
+        $file = $contents
+                ->where('type', '=', 'file')
+                ->where('filename', '=', pathinfo($filename, PATHINFO_FILENAME))
+                ->where('extension', '=', pathinfo($filename, PATHINFO_EXTENSION))
+                ->first();
+                
+        $rawData = Storage::disk("google")->get($file['path']);
+        
+        return response($rawData, 200)
+            ->header('ContentType', $file['mimetype'])
+            ->header('Content-Disposition', "attachment; filename='$filename'");
+    }
 
     public function veruploads($id){
         $this->limpiar();
@@ -256,13 +370,14 @@ class EntradasEventoLivewire extends Component
     public function getEntradasProperty()
     {
         return Ticket::where([
-            ['name', 'LIKE', '%' . $this->search . '%'], ['privacidad', 'LIKE', '%' . $this->search_estado],
+            ['name', 'LIKE', '%' . $this->search . '%'], ['status', 'LIKE', '%' . $this->search_estado],
             ['tipo', 'LIKE', '%' . $this->search_tipo], ['event_id', $this->Evento->id], ['is_deleted', 0]
         ])->orWhere([
-            ['ticket_number', 'LIKE', '%' . $this->search . '%'], ['privacidad', 'LIKE', '%' . $this->search_estado],
+            ['ticket_number', 'LIKE', '%' . $this->search . '%'], ['status', 'LIKE', '%' . $this->search_estado],
             ['tipo', 'LIKE', '%' . $this->search_tipo], ['event_id', $this->Evento->id], ['is_deleted', 0]
         ])->paginate(12);
     }
+    
     public function getEntradaProperty()
     {
         return Ticket::findorfail($this->entrada_id);
