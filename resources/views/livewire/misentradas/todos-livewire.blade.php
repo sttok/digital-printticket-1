@@ -22,7 +22,7 @@
     <div class="col-sm-12 col-md-10">
         <div class="row">
             <h4 class="m-b-md m-t-md">{{ __('Carpetas') }}</h4>
-            @foreach ($this->Folders as $event)
+            @forelse ($this->Folders as $event)
                 <div class="col-md-4 col-6">
                     <div class="card folder">
                         @if ($event['estado'] == 1)
@@ -52,7 +52,11 @@
                         </div>
                     </div>
                 </div>
-            @endforeach
+            @empty
+                <div class="col-12 mb-3 text-center justify-content-center">
+                    <h4>¡{{ __('No tiene eventos disponibles') }}!</h4>
+                </div>
+            @endforelse
         </div>
     </div>
 </div>

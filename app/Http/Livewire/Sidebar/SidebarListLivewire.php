@@ -29,7 +29,8 @@ class SidebarListLivewire extends Component
                     'nombre' => $event->name,
                     'contador' => count($digital),
                     'total' => $event->people,
-                    'estado' => 1
+                    'estado' => 1,
+                    'entradas' => $event->ticket
                 );
             }else{
                 $evenn[] = array(

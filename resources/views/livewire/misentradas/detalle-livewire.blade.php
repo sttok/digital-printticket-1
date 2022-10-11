@@ -1,15 +1,14 @@
 <div class="row" wire:init="loadDatos">
     @if ($organizar == 1)
         <style>
-            .form-check-input{
+            .form-check-input[type="checkbox"]{
                 margin-left: -60px !important;
                 width: 30px !important;
                 height: 30px !important;   
                 margin-top: -35px;
-            }
-            .form-check-input[type="checkbox"] {
                 border-radius: 8px !important;
             }
+            
             .float-right{
                 float: right !important;
             }
@@ -22,13 +21,12 @@
         </style>
     @else
         <style>
-            .form-check-input{
+            .form-check-input[type="checkbox"]{
                 width: 30px !important;
                 height: 30px !important;
+                  border-radius: 8px !important;
             }
-            .form-check-input[type="checkbox"] {
-                border-radius: 8px !important;
-            }
+            
         </style>
     @endif  
     <style>
@@ -53,6 +51,12 @@
         .card-header{
             background: transparent
         }
+        .zoom {
+          transition: transform .5s; /* Animation */
+        }
+        .zoom:hover {
+          transform: scale(1.03); 
+        }
     </style> 
     <div class="col-sm-12 col-md-3">
         @livewire('sidebar.sidebar-list-livewire')
@@ -63,7 +67,7 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ __('Archivos') }}</h5>
                     <div class="row">
-                        <div class="row col-lg-6 col-md-12 col-1 mb-3">
+                        <div class="row col-lg-6 col-md-12 col-12 mb-3">
                             <div class="col-md-6 col-12 mb-2">
                                 <span>{{ __('Buscar por identificador') }}</span>
                                 <input type="search" class="form-control @error('search') is-invalid @enderror" placeholder="{{ __('Buscar por identificador') }}" wire:model="search">
@@ -88,8 +92,8 @@
                             <div class="col-md-6 col-12 mb-2">
                                 <span>{{ __('Organizar') }}</span>
                                 <select class="form-control @error('organizar') is-invalid @enderror"  wire:model="organizar">
-                                    <option value="1">{{ __('Por defecto') }}</option>
-                                    <option value="2">{{ __('Tabla') }}</option>
+                                    <option value="1">{{ __('Icono grande') }}</option>
+                                    <option value="2">{{ __('Listar') }}</option>
                                 </select>
                                 @error('organizar')
                                     <div class="invalid-feedback ">{{ $message }}  </div>
@@ -129,8 +133,8 @@
             <div class="card">
                 <div class="card-header">
                     <nav class="nav nav-pills nav-justified">
-                        <a class="nav-item nav-link nav-link-1 {{ $filtrar_por == 0 ? 'active' : 'desactive' }}" href="#" wire:click="cambiarfiltrar()">{{ __('Sin endosar') . ' ( ' .  number_format($total_sin_endosar, 0 ,',','.') . ' )' }}</a>
-                        <a class="nav-item nav-link nav-link-2 {{ $filtrar_por == 1 ? 'active' : 'desactive' }}" href="#" wire:click="cambiarfiltrar()">{{ __('Endosadas') . ' ( ' .  number_format($total_endosadas, 0 ,',','.') . ' )' }}</a>
+                        <a class="nav-item nav-link nav-link-1 {{ $filtrar_por == 0 ? 'active' : 'desactive' }}" href="#" wire:click="cambiarfiltrar()">{{ __('Sin vender') . ' ( ' .  number_format($total_sin_endosar, 0 ,',','.') . ' )' }}</a>
+                        <a class="nav-item nav-link nav-link-2 {{ $filtrar_por == 1 ? 'active' : 'desactive' }}" href="#" wire:click="cambiarfiltrar()">{{ __('Vendido') . ' ( ' .  number_format($total_endosadas, 0 ,',','.') . ' )' }}</a>
                     </nav>
                 </div>
                 
@@ -145,8 +149,8 @@
                         <div class="row col-12">
                             <div class="col-md-6 col-12 mb-2 float-left">
                                 <div class="mb-4 form-check ml-1" >
-                                    <input type="checkbox" class="form-check-input" style="margin-left: 0px !important; margin-top: 0px; margin-right: 10px;" wire:click="seleccionartodos()" {{ $seleccionar_todos == true ? 'checked' : '' }}>
-                                    <label class="form-check-label" wire:click="seleccionartodos()">{{ __('Seleccionar todos') }}</label>
+                                    <input type="checkbox" class="form-check-input" style="margin-left: 0px !important; margin-top: 0px; margin-right: 10px;" wire:click.lazy="seleccionartodos()" {{ $seleccionar_todos == true ? 'checked' : '' }}>
+                                    <label class="form-check-label" wire:click.lazy="seleccionartodos()">{{ __('Seleccionar todos') }}</label>
                                 </div>        
                             </div>
                             <div class="col-md-6 col-12 mb-2 ">
@@ -156,7 +160,7 @@
                                         </div>
                                     </div>
                                     <div wire:loading.remove wire:target="descargarmasivo">
-                                        {{ __('Descargar') }}
+                                        <i class="fas fa-download"></i> {{ __('Descargar reporte global') }}
                                     </div>
                                 </button>
                             </div>
@@ -165,8 +169,12 @@
                     
                     @if ($organizar == 1)
                         @forelse ($this->Entradas as $entrada)
+                            @php
+                                $acep = in_array($entrada->id, $this->entradas_array) !== false ? true : false;
+                                
+                            @endphp
                             <div class="col-lg-3 col-md-6 col-12">
-                                <div class="card card-file-manager" >
+                                <div class="card card-file-manager zoom {{ $acep == true ? 'bg-primary' : '' }}"  >
                                     <div class="dropdown card-dropdown">
                                         <button class="btn btn-primary dropdown-toggle float-right" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                             <div wire:loading.inline wire:target="descargarentrada({{ $entrada->id }})">
@@ -180,7 +188,13 @@
                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="">
                                             <li>
                                                 <button class="dropdown-item" type="button" wire:click="veruploads('{{ $entrada->id }}')">
-                                                    <i class="fas fa-tag"></i> {{ __('Vender') }}
+                                                    <i class="fas fa-tag"></i> {{ __('Venta') }}
+                                                </button>
+                                                <button class="dropdown-item" type="button" >
+                                                    <i class="fas fa-shipping-fast"></i> {{ __('Venta rapida') }}
+                                                </button>
+                                                <button class="dropdown-item" type="button">
+                                                    <i class="fas fa-user-check" ></i> {{ __('Endosar') }}
                                                 </button>
                                                 @if ($entrada->permiso_descargar == 1)
                                                     <button class="dropdown-item" type="button" wire:click="descargar('{{ $entrada->id }}')">
@@ -190,19 +204,19 @@
                                             </li>
                                         </ul>
                                     </div>
-                                    <div class="card-file-header " style="background: transparent;">
+                                    <div class="card-file-header {{ $acep == true ? 'text-white' : '' }}" style="background: transparent;">
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" value="{{ $entrada->id }}" id="flexCheckChecked" wire:model="entradas_array">
                                         </div>
                                         <i class="fas fa-file-pdf" ></i>
                                     </div>
                                     <div class="card-body">
-                                        <h6 class="card-subtitle mb-2 text-muted">{{ $entrada->zona->name. ' - ' . $entrada->identificador }} 
+                                        <h6 class="card-subtitle mb-2 {{ $acep == true ? 'text-white' : 'text-muted' }} ">{{ $entrada->zona->name. ' - ' . $entrada->identificador }} 
                                             @if ($entrada->endosado > 0)
                                                 <span class="badge bg-success" style="margin-left: 5px"><i class="fas fa-user-tag"></i></span>
                                             @endif
                                         </h6>
-                                        <p class="card-text">{{ Str::afterLast($entrada->url, '/')  }}</p>
+                                        <p class="card-text {{ $acep == true ? 'text-white' : '' }}">{{ Str::afterLast($entrada->url, '/')  }}</p>
                                     </div>
                                 </div>
                             </div>

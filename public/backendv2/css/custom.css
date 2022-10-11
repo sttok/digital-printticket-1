@@ -110,3 +110,32 @@
         right: 20px;
     }
 }
+
+@media (max-width: 1200px) {
+    body.dark .profile-name h3 {
+        color: rgba(225, 235, 245, .87)!important;
+    }
+}
+
+@media (max-width: 1200px) {
+    body.dark .profile-header .profile-header-menu ul li a.active,
+    body.dark .profile-header .profile-header-menu ul li a:hover {
+        color: rgba(225, 235, 245, .87);
+    }
+}
+body.dark select.form-control option{
+    color: rgba(225, 235, 245, .87) !important;
+}
+body.dark select.form-control{
+    color: rgba(225, 235, 245, .87) !important;
+}
+body.dark .nav-brand-claro{
+    display: none;
+}
+body.dark .nav-brand-oscuro{
+    display: block;
+}
+ 
+.nav-brand-oscuro{
+    display: none;
+}

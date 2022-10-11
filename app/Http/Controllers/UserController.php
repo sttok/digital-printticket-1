@@ -46,8 +46,9 @@ class UserController extends Controller
             $config = Setting::find(1);
             $data = array(
                 'titulo' => $config->app_name,
-                'logo' => $config->logo,
-                'icono' => $config->favicon
+                'logo' => $config->logo_oscuro,
+                'icono' => $config->favicon,
+                'fondo' => $config->fondo_digital
             );
             return view('backendv2.auth.login', compact('data'));
         } else {

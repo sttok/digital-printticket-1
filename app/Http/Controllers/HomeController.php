@@ -102,20 +102,27 @@ class HomeController extends Controller
     }
 
     public function indexeventos(){
-
         abort_if(Gate::denies('event_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         return view('backendv2.eventos.index');
-        
     }
 
     public function showevento($id){
-        abort_if(Gate::denies('event_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('backendv2.eventos.show', compact('id'));
+        if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') || Auth::user()->hasRole('organization')) {
+             return view('backendv2.eventos.show', compact('id'));
+        }else{
+            abort(403);
+        }
+       
     }
 
     public function miseventos(){
-        abort_if(Gate::denies('asignar_ticket'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return view('backendv2.miseventos.index');
+        //abort_if(Gate::denies('asignar_ticket'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') || Auth::user()->hasRole('organization')) {
+             return view('backendv2.miseventos.index');
+        }else{
+            abort(403);
+        }
+       
     }
 
     public function miseventosshow($id){
@@ -127,40 +134,47 @@ class HomeController extends Controller
         $id = base64_decode($base64);
         $id = Str::after($id, '@kf#');
         $entrada = OrderChildsDigital::findorfail($id);
-
-        if($entrada->provider == "local"){
-            $r = 'storage/ticket-digital/';
-            $url = Str::after($entrada->url, $r) ;
-            if($entrada->descargas == null){
-                $entrada->descargas = 1;
-            }else{
-                $entrada->descargas++;
+        
+        if($entrada->permiso_descargar == 1){
+            if($entrada->provider == "local"){
+                    $r = 'storage/ticket-digital/';
+                    $url = Str::after($entrada->url, $r) ;
+                    if($entrada->descargas == null){
+                        $entrada->descargas = 1;
+                    }else{
+                        $entrada->descargas++;
+                    }
+                    $entrada->update();
+                    return Storage::disk('custom')->download('ticket-digital/'.$url);
+        
+            }elseif($entrada->provider == 'drive'){
+                    $filename = Storage::disk("google")->url($entrada['url']);
+                    if($entrada->descargas == null){
+                        $entrada->descargas = 1;
+                    }else{
+                        $entrada->descargas++;
+                    }
+                    $entrada->update();
+                    return redirect()->to($filename);
+                    //$dir = Storage::disk("google")->get($entrada['url']);
+                   /* return $dir->size();
+                    $recursive = false;
+                    $contents = collect(Storage::disk("google")->ListContents($dir, $recursive));
+                    $file = $contents
+                            ->where('type', '=', 'file')
+                            //->where('path', '=', $entrada['url'])
+                            /*->where('filename', '=', pathinfo($filename, PATHINFO_FILENAME))
+                            ->where('extension', '=', pathinfo($filename, PATHINFO_EXTENSION))
+                            ->first();
+                
+                    return $file;
+                    $rawData = Storage::disk("google")->get($entrada['url']);
+                    return response($rawData, 200)
+                        ->header('ContentType', Storage::disk("google")->mimetype($entrada['url']))
+                        ->header('Content-Disposition', "attachment; filename=$filename");*/
             }
-            
-            $entrada->update();
-            return Storage::disk('custom')->download('ticket-digital/'.$url);
-
-        }elseif($entrada->provider == 'drive'){
-        }elseif($entrada->provider == 'drive'){
-            $filename = "121-General etapa final.pdf";
-                $dir = '/';
-                $recursive = false;
-                $contents = collect(Storage::disk("google")->ListContents($dir, $recursive));
-                 //return $contents;
-                $file = $contents
-                        ->where('type', '=', 'file')
-                        ->where('filename', '=', pathinfo($filename, PATHINFO_FILENAME))
-                        ->where('extension', '=', pathinfo($filename, PATHINFO_EXTENSION))
-                        ->first();
-                        
-                $rawData = Storage::disk("google")->get($file['path']);
-                return response($rawData, 200)
-                    ->header('ContentType', $file['mimetype'])
-                    ->header('Content-Disposition', "attachment; filename=$filename");        
+        }else{
+            abort(403);
         }
-       
-
     }
-
-
 }

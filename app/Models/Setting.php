@@ -11,12 +11,12 @@ class Setting extends Model
 
     protected $fillable = [
         'app_name',
-        'descripcion',
         'email',
         'logo',
-        'logo_dark',
         'favicon',
-        'map_key',
+        'logo_oscuro',
+        'fondo_digital',
+        'map_key',        
         'currency',
         'timezone',
         'footer_copyright',
@@ -33,7 +33,7 @@ class Setting extends Model
         'or_onesignal_project_number',
         'or_onesignal_api_key',
         'or_onesignal_auth_key',
-        'mail_notification',
+        'mail_notification',    
         'mail_host',
         'mail_port',
         'mail_username',
@@ -47,9 +47,9 @@ class Setting extends Model
         'privacy_policy',
         'cookie_policy',
         'terms_services',
-        'acknowledgement',
-        'primary_color',
-        'app_version',
+        'acknowledgement',  
+        'primary_color',    
+        'app_version',  
         'privacy_policy_organizer',
         'terms_use_organizer',
         'license_key',
@@ -61,4 +61,6 @@ class Setting extends Model
     ];
 
     protected $table = 'general_settng';
+
+    
 }

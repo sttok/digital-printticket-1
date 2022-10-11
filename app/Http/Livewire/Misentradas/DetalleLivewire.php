@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Query\Builder;
 use App\Http\Controllers\ApiController;
+use App\Models\DigitalOrdenCompra;
 use Illuminate\Support\Facades\Storage;
 
 class DetalleLivewire extends Component
@@ -33,15 +34,13 @@ class DetalleLivewire extends Component
         'search_estado' => ['except' => '', 'as' => 'zona'],
         'page' => ['except' => 1, 'as' => 'p'],
         'organizar' => ['except' => '1', 'as' => 'org'],
-        'filtrar_por' => ['except' => 0, 'as' => 'endosado'],
+        'filtrar_por' => ['except' => 0, 'as' => 'vendidos'],
     ];
     public $entradas_array = [];
     public $organizar_por = 1;
     public $entradas_seleccionadas = [];
-
-    public $search_telefono, $encontrado = false, $cliente, $envio_correo = true, $envio_sms = true;
-    public $nombre_cliente, $apellido_cliente, $correo_cliente, $imagen, $telefono, $prefijo_telefono = '+57', $phone, $contraseña_cliente, $notificar_nuevo = false;
-
+    public $search_telefono, $encontrado = false, $cliente, $estado_venta = 1, $abonado = 0, $total = 0, $metodo_de_pago = 1;
+    public $nombre_cliente, $apellido_cliente, $correo_cliente, $imagen, $telefono, $prefijo_telefono = '+57', $phone, $contraseña_cliente, $notificar_nuevo = false, $cedula_cliente;
     public $search_telefono_endosado, $endosado_id, $endosado_identificador, $encontrado_endosado = false, $cliente_endosado;
     public $enviado = false;
     public $entradas = [], $digital_id;
@@ -51,7 +50,7 @@ class DetalleLivewire extends Component
     public function mount($id){
         $this->evento_id = $id;
     }
-
+    
     public function render()
     {
         return view('livewire.misentradas.detalle-livewire');
@@ -78,10 +77,15 @@ class DetalleLivewire extends Component
 
     public function buscarcliente(){
         $this->validate([
-            'search_telefono' => 'required|phone:AUTO,CO'
+            'search_telefono' => 'required'
         ]);
 
-        $cl = AppUser::where('phone', 'LIKE',  '%'.$this->search_telefono.'%')->first();
+        $cl = AppUser::where([
+            ['phone', 'LIKE',  $this->search_telefono]
+        ])->orWhere([
+             ['cedula', 'LIKE',  $this->search_telefono]
+        ])->first();
+        
         if($cl != ''){
             $this->encontrado = true;
             $this->cliente = $cl->makeVisible(['name', 'last_name', 'phone', 'email']);
@@ -92,15 +96,21 @@ class DetalleLivewire extends Component
     }
 
     public function buscarcliente2(){
+        $this->reset(['encontrado_endosado', 'cliente_endosado', 'encontrado']);
         $this->validate([
-            'search_telefono_endosado' => 'required|phone:AUTO,CO'
+            'search_telefono_endosado' => 'required'
         ]);
-        $cl = AppUser::where('phone', 'LIKE',  '%'.$this->search_telefono_endosado.'%')->first();
+        $cl = AppUser::where([
+            ['phone', 'LIKE',  $this->search_telefono_endosado]
+        ])->orWhere([
+              ['cedula', 'LIKE',  $this->search_telefono_endosado]
+        ])->first();
+        
         if($cl != ''){
             $this->encontrado_endosado = true;
             $this->cliente_endosado = $cl->makeVisible(['name', 'last_name', 'phone', 'email']);
         }else{
-            $this->reset(['encontrado_endosado', 'cliente_endosado']);
+            $this->reset(['encontrado_endosado', 'cliente_endosado', 'encontrado']);
             $this->dispatchBrowserEvent('clientenoencontrado');
         }
     }
@@ -141,16 +151,16 @@ class DetalleLivewire extends Component
                 $rr->endosado = false;
                 $rr->cliente_id = '';
                 $rr->cliente_name = '';
-            }           
+            }
         }
         $this->dispatchBrowserEvent('quitarendosado');
     }
 
     public function veruploads($id){
-        $this->reset(['entradas_array', 'entradas_seleccionadas']);
+        $this->reset(['entradas_array', 'entradas_seleccionadas', 'abonado', 'total']);
         $this->dispatchBrowserEvent('abrirmodalventa');
         $this->entradas_array[] = $id;
-        $this->entradas_seleccionadas = OrderChildsDigital::whereIn('id', $this->entradas_array)->get();
+        $this->entradas_seleccionadas = OrderChildsDigital::whereIn('id', $this->entradas_array)->get();        
     }
 
     public function descargar($id){
@@ -167,43 +177,43 @@ class DetalleLivewire extends Component
     }
 
     public function enviarentradas(){
-        if ($this->envio_sms == true || $this->envio_correo == true) {
+        if ($this->estado_venta != null ) {
             if ($this->encontrado == true && $this->cliente != '') {
                 DB::beginTransaction();
+                $array = [];
                 try {
-                    if ($this->envio_sms == true) {
-                        $telefono = $this->cliente->phone;
-                        $mensaje =  urlencode(Str::upper($this->Setting)) . '%0d%0a' . 
-                        urlencode('Tus entradas para el evento : '). '%0d%0a' . urlencode($this->Evento) . '%0d%0a' . '%0d%0a';
-                    }
-                   
                     foreach ($this->entradas_seleccionadas as $es) {
-                        $key = base64_encode('@kf#'.$es->id);
-                        $url = route('ver.archivo', $key);
                         $ent = OrderChild::findorfail($es->order_child_id);
                         $ent->customer_id = $this->cliente->id;
-                           $ent->vendedor_id = Auth::user()->id;
-                            if($ent->endosado == true){
-                                $ent->endosado_id = $es->cliente_id;
-                                if ($this->envio_sms == true) {
-                                    $telefono1 =  AppUser::findorfail($es->cliente_id)->phone;
-                                    $mensaje1 =  urlencode(Str::upper($this->Setting)) . '%0d%0a' . 
-                                    urlencode('Se ha endosado una entrada para el evento '. $this->Evento. ':') . '%0d%0a' . '%0d%0a';
-                                    $mensaje .= urlencode($ent->evento->name . ' - ' . $es->identificador) . '%0d%0a' . urlencode($url) . '%0d%0a';
-                                    $this->enviarsms2($telefono1, $mensaje1);
-                                }
-                            }
+                        $ent->vendedor_id = Auth::user()->id;
+                        if($ent->endosado == true){
+                            $ent->endosado_id = $es->cliente_id;
+                        }
                         $ent->update();
+                        $key = base64_encode('@kf#'.$es->id);
+                        $es->url_1 = route('ver.archivo', $key);
                         $es->endosado = 1;
                         $es->update();
-                        if ($this->envio_sms == true) {
-                            $mensaje .= urlencode($ent->evento->name . ' - ' . $es->identificador) . '%0d%0a' . urlencode($url) . '%0d%0a';
-                        }
-                        $es->url_1 = $url;
+                        $array[] = array(
+                            'order_child_id' => $es->order_child_id,
+                            'endosado_id' => $es->cliente_id != null ? $es->cliente_id : null,
+                            'digital_id' => $es['id'],
+                        );
                     }
-                    if ($this->envio_sms == true) {
-                        $this->enviarsms2($telefono, $mensaje);
-                    }
+
+                    $ordencompra = new DigitalOrdenCompra();
+                        $ordencompra->identificador = Str::upper(Str::random(7));
+                        $ordencompra->evento_id = $this->evento_id;
+                        $ordencompra->vendedor_id = Auth::user()->id;
+                        $ordencompra->cliente_id = $this->cliente->id;
+                        $ordencompra->cantidad_entradas = count($this->entradas_seleccionadas);
+                        $ordencompra->metodo_pago = $this->metodo_de_pago;
+                        $ordencompra->abonado = $this->abonado;
+                        $ordencompra->total = $this->total;
+                        $ordencompra->array_entradas = json_encode($array);
+                        $ordencompra->estado_venta = $this->estado_venta;
+                    $ordencompra->save();
+                    
                     DB::commit();
                     $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente','entradas']);
                     $this->enviado = true;
@@ -213,10 +223,10 @@ class DetalleLivewire extends Component
                     $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
                 }
             }else{
-                $this->dispatchBrowserEvent('errores', ['error' => __('Ha ocurrido un error, revisa todos los campos y intentalo nuevamente')]);
+                $this->dispatchBrowserEvent('errores', ['error' => __('Ha ocurrido un error, debe seleccionar un cliente')]);
             }
         }else{
-            $this->dispatchBrowserEvent('errores', ['error' => __('Debe seleccionar al menos un metodo de envio')]);
+            $this->dispatchBrowserEvent('errores', ['error' => __('Debe seleccionar el estado de la venta')]);
         }        
     }
 
@@ -260,6 +270,10 @@ class DetalleLivewire extends Component
     public function regresarcliente(){
         $this->dispatchBrowserEvent('regresarcliente1');
     }
+    
+    public function generarpass(){
+        $this->contraseña_cliente = Str::random(8);
+    }
 
     public function storecliente(){
         $this->phone = $this->prefijo_telefono . $this->telefono;
@@ -269,9 +283,10 @@ class DetalleLivewire extends Component
             'correo_cliente' => 'nullable|email|unique:app_user,email',
             'prefijo_telefono' => 'required',
             'telefono' => 'required|integer',
-            'phone' => 'required|phone:AUTO|unique:app_user,phone',
+            'phone' => 'required|phone:CO,AUTO|unique:app_user,phone',
             'contraseña_cliente' => 'required|min:3|max:120',
-            'notificar_nuevo' => 'required'
+            'notificar_nuevo' => 'required',
+            'cedula_cliente' => 'required|integer'
         ]);
 
         DB::beginTransaction();
@@ -282,13 +297,11 @@ class DetalleLivewire extends Component
                 $cliente->email = $this->correo_cliente;
                 $cliente->password = Hash::make($this->contraseña_cliente);
                 $cliente->phone = $this->phone;
+                $cliente->cedula = $this->cedula_cliente;
                 $cliente->provider = 'LOCAL';
-                $cliente->notificacion_sms = 1;
-                $cliente->notificacion_email = 1;
                 $cliente->status = 1;
                 $cliente->borrado = 0;
                 $cliente->image = 'defaultuser.png';
-                
             $cliente->save();
             DB::commit();
             if($this->notificar_nuevo == true){
@@ -384,6 +397,7 @@ class DetalleLivewire extends Component
 
     private function cargarentradas(){
         $this->entradas_seleccionadas = OrderChildsDigital::whereIn('id', $this->entradas_array)->get();
+        $this->reset(['abonado', 'total']);
         foreach ($this->entradas_seleccionadas as $rr) {
             $rr->endosado = false;
         }
@@ -432,7 +446,15 @@ class DetalleLivewire extends Component
                 foreach ($this->entradas_seleccionadas as $ent) {
                     if($ent->permiso_descargar == 1){
                         $url = Str::after($ent->url, 'ticket-digital/');
-                        $zip->addFile($public_dir . '/storage/ticket-digital/' . $url, $url);
+                        if($ent->provider == "local"){
+                             $zip->addFile($public_dir . '/storage/ticket-digital/' . $url, $url);
+                        }elseif($ent->provider == "drive"){
+                            //$url_evento = $ent->;
+                            //$url = Storage::disk("google")->url($ent['url']);
+                            //dd(Storage::disk("google")->files($ent['url']));
+                            //$zip->addFile(Storage::disk("google")->files($url));
+                        }
+                       
                         if($ent->descargas == null){
                             $ent->descargas = 1;
                         }else{

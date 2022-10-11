@@ -16,19 +16,30 @@
                         <span><i class="fas fa-moon"></i></span>
                     </button>
                 </li>
+                <li>
+                    <a class="nav-link" href="#" >
+                        <img class="img-fluid" src="{{ asset('images/googleplay.png') }}" style="width: 120px;margin-top: -10px;" >
+                    </a>
+                </li>
             </ul>
         </div>
         <div class="logo">
             @desktop
-                <a class="navbar-brand" style="background: url({{ asset(route('inicio.frontend') .'/storage/public/'.\App\Models\Setting::find(1)->logo)}}) center center no-repeat  " href="{{ route('index.eventos') }}"></a>
+                <a class="navbar-brand nav-brand-claro" style="background: url({{ asset(route('inicio.frontend') .'/images/upload/'.\App\Models\Setting::find(1)->logo)}}) center center no-repeat" href="{{ route('index.eventos') }}"></a>
+                <a class="navbar-brand nav-brand-oscuro" style="background: url({{ asset(route('inicio.frontend') .'/images/upload/'.\App\Models\Setting::find(1)->logo_oscuro)}}) center center no-repeat" href="{{ route('index.eventos') }}"></a>
             @elsedesktop
-                <a class="navbar-brand" style="background: url({{ asset(route('inicio.frontend') .'/storage/public/'.\App\Models\Setting::find(1)->favicon)}}) center center no-repeat  " href="{{ route('index.eventos') }}"></a>
+                <a class="navbar-brand" style="background: url({{ asset(route('inicio.frontend') .'/images/upload/'.\App\Models\Setting::find(1)->favicon)}}) center center no-repeat  " href="{{ route('index.eventos') }}"></a>
             @enddesktop
            
         </div>
         <div class="" id="headerNav">
             <ul class="navbar-nav">
-           
+               <li class="nav-item">
+                    <a class="nav-link" href="#">{{ __('Modo de uso') }}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">{{ __('Procesos de seguridad') }}</a>
+                </li>
             <li class="nav-item dropdown">
                 <a class="nav-link notifications-dropdown" href="#" id="notificationsDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">1</a>
                 <div class="dropdown-menu dropdown-menu-end notif-drop-menu" aria-labelledby="notificationsDropDown">

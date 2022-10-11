@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Event;
+use App\Models\DireccionesEventoPalcos;
 use Firebase\JWT\JWT;
 use App\Models\Ticket;
 use Livewire\Component;
@@ -60,7 +61,6 @@ class EntradasEventoLivewire extends Component
     }
 
     public function descargarexcel(){
-
         try{
             if($this->descargartodoexcel = true){
                 $this->reset('entradas_descargar');
@@ -81,7 +81,6 @@ class EntradasEventoLivewire extends Component
            
             $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
         }
-        
     }
 
     public function loadDatos()
@@ -171,7 +170,6 @@ class EntradasEventoLivewire extends Component
                                     $url_organizador = DireccionesUsuarios::where('usuario_id', $this->Evento->organizador_id)->first();
                                     if(empty($url_organizador)){
                                         $url_organizador = $this->createDirUser();
-                                        //$url_organizador = DireccionesUsuarios::where('usuario_id', $this->Evento->organizador_id)->first();
                                     }
                                     $url_entrada = DireccionesEvento::where([
                                         ['direccion_usuario', $url_organizador['id']]
@@ -180,8 +178,18 @@ class EntradasEventoLivewire extends Component
                                     if(empty($url_entrada)){
                                         $url_entrada = $this->createDirEvent($url_organizador);
                                     }
-
                                     $url =  $url_entrada['path'];
+                                    if($this->Entrada->forma_generar == 2){
+                                        $palcco = DireccionesEventoPalcos::where([
+                                            ['direccion_evento_id', $url_entrada->id], ['palco', (int)$ent->mesas]
+                                        ])->first();
+                                        
+                                        if(empty($palcco)){
+                                            $palcco = $this->createDirPalco($url_entrada, (int)$ent->mesas);
+                                              $url =  $palcco['path'];
+                                        }
+                                    }
+                                  
                                     $i->storeAs($url, $nombre, 'google');
                                     Storage::disk("google")->putFileAs($url, $i, $nombre);
                                     $dir = '/'.$url_entrada['path'];
@@ -217,11 +225,39 @@ class EntradasEventoLivewire extends Component
                                 $rr1->provider = 'local';
 
                             }elseif($this->lugar_almacenamiento == 2){
-                                $url =  env('GOOGLE_DRIVE_FOLDER_ID');
-                                //$i->storeAs($url, $nombre, 'google');
-                                $path = Storage::disk("google")->putFileAs($url, $i, $nombre);
-                                $this->obtenerarchivo($nombre);
-                                $rr1->url = '';
+                                $url_organizador = DireccionesUsuarios::where('usuario_id', $this->Evento->organizador_id)->first();
+                                if(empty($url_organizador)){
+                                    $url_organizador = $this->createDirUser();
+                                }
+                                $url_entrada = DireccionesEvento::where([
+                                    ['direccion_usuario', $url_organizador['id']]
+                                ])->first();
+
+                                if(empty($url_entrada)){
+                                    $url_entrada = $this->createDirEvent($url_organizador);
+                                }
+                                $url =  $url_entrada['path'];
+                                if($this->Entrada->forma_generar == 2){
+                                    $palcco = DireccionesEventoPalcos::where([
+                                        ['direccion_evento_id', $url_entrada->id], ['palco', (int)$ent->mesas]
+                                    ])->first();
+                                    
+                                    if(empty($palcco)){
+                                        $palcco = $this->createDirPalco($url_entrada, (int)$ent->mesas);
+                                          $url =  $palcco['path'];
+                                    }
+                                }
+                                Storage::disk("google")->delete($rr1['url']);
+                                Storage::disk("google")->putFileAs($url, $i, $nombre);
+                                $dir = '/'.$url_entrada['path'];
+                                $recursive = false; // Get subdirectories also?
+                                $file = collect(Storage::disk('google')->listContents($dir, $recursive))
+                                    ->where('type', '=', 'file')
+                                    ->where('filename', '=', pathinfo($nombre, PATHINFO_FILENAME))
+                                    ->where('extension', '=', pathinfo($nombre, PATHINFO_EXTENSION))
+                                    ->sortBy('timestamp')
+                                    ->last();
+                                $rr1->url = $file['path'];
                                 $rr1->provider = 'drive';
                             }
                             $rr1->update();
@@ -332,8 +368,30 @@ class EntradasEventoLivewire extends Component
        
     }
 
-   
+    private function createDirPalco($data, $palco){
+        $nombre_folder = 'Palco '. $palco;
+        Storage::disk('google')->makeDirectory($data['path'].'/'.$nombre_folder);
 
+        $dirEvent = '/'.$data['path'];
+        $recursive = false; // Get subdirectories also?
+        $contents = collect(Storage::disk('google')->listContents($dirEvent, $recursive));
+
+        $dirEvent = $contents->where('type', '=', 'dir')
+            ->where('filename', '=', $nombre_folder)
+            ->first(); // There could be duplicate directory names!
+
+        if (!$dirEvent) {
+            return 'Directory does not exist!';
+        }
+
+       $direc = new DireccionesEventoPalcos();
+            $direc->direccion_evento_id = $data->id;
+            $direc->palco = $palco;
+            $direc->path = $dirEvent['path'];
+       $direc->save();
+
+       return $direc;
+    }
 
     private function obtenerarchivo($name_file){
         $filename = $name_file;

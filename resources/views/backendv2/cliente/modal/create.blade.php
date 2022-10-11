@@ -56,15 +56,26 @@
                             <div class="invalid-feedback ">{{ $message }}  </div>
                         @enderror
                     </div>
-                    <div class="col-md-6 col-12 mb-2">
+                    <div class="col-md-5 col-12 mb-2">
                         <span>{{ __('Contraseña') }}</span>
                         <input type="text" class="form-control @error('contraseña_cliente') is-invalid @enderror" wire:model.defer="contraseña_cliente" wire:target="storecliente" wire:loading.attr="disabled">
                         @error('contraseña_cliente')
                             <div class="invalid-feedback ">{{ $message }}  </div>
                         @enderror
                     </div>
-                    <div class="col-md-6 col-12 mb-2">
-                        <span>¿{{ __('Desea notificar al cliente') }}?</span>
+                    <div class="col-md-1 col-12 mb-2" style="padding-left: 0px">
+                        <br>
+                        <button type="button" class="btn btn-primary" wire:click="generarpass()" ><i class="fas fa-dice"></i></button>
+                    </div>
+                    <div class="col-md-3 col-12 mb-2">
+                        <span>{{ __('Cedula') }}</span>
+                        <input type="text" class="form-control @error('cedula_cliente') is-invalid @enderror" wire:model.defer="cedula_cliente" wire:target="storecliente" wire:loading.attr="disabled">
+                        @error('cedula_cliente')
+                            <div class="invalid-feedback ">{{ $message }}  </div>
+                        @enderror
+                    </div>
+                    <div class="col-md-3 col-12 mb-2">
+                        <span>¿{{ __('Notificar cliente') }}?</span>
                         <select class="form-control @error('notificar_nuevo') is-invalid @enderror" wire:model.defer="notificar_nuevo" wire:target="storecliente" wire:loading.attr="disabled">
                             <option value="false">No</option>
                             <option value="true">Si</option>
@@ -75,7 +86,7 @@
                     </div>
                    
                     <div wire:loading wire:target="storecliente">
-                        <div class="progress">
+                        <div class="progress my-2">
                             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                 {{ __('Cargando...') }}
                             </div>

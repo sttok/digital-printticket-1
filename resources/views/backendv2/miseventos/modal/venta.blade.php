@@ -1,32 +1,67 @@
 <div class="modal fade" id="ventas" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" wire:ignore.self>
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" >{{ __('Enviar entradas') }}</h5>
+                <h5 class="modal-title" >{{ __('Venta de entradas') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-6 col-6 mb-2 {{ $encontrado ? 'was-validated' : '' }}">
-                        <span>{{ __('Telefono cliente') }}</span>
-                        <input type="tel" class="form-control mb-1 @error('search_telefono') is-invalid @enderror" wire:model.defer="search_telefono" wire:keydown.enter="buscarcliente" wire:target="enviarentradas" wire:loading.attr="disabled">
+                    <div class="col-md-6 col-12 mb-3 {{ $encontrado ? 'was-validated' : '' }}">
+                        <span>{{ __('La busqueda es solo clientes del empresario') }}</span>
+                        <input type="tel" class="form-control mb-1 @error('search_telefono') is-invalid @enderror" placeholder="{{ __('No Celular o cedula') }}" wire:model.defer="search_telefono" wire:keydown.enter="buscarcliente" wire:target="enviarentradas" wire:loading.attr="disabled">
                         <button class="btn btn-primary btn-block my-2" wire:click="buscarcliente" wire:target="enviarentradas" wire:loading.attr="disabled" ><i class="fas fa-search"></i></button>
                         @error('search_telefono')
                             <div class="invalid-feedback ">{{ $message }}  </div>
                         @enderror
                     </div>
-                    @if ($search_telefono != '' && $encontrado == false)
-                        <div class="col-md-6 col-6 mb-2 text-center justify-content-center">
-                            <span>¿{{ __('Desea crear el cliente') }}?</span> <br>
-                            <button class="btn btn-success btn-block mt-2" wire:click="createcliente()"><i class="fas fa-user-plus"></i></button>
+                    <div class="col-md-6 col-12 mb-3 text-center justify-content-center">
+                        <span>¿{{ __('Desea crear el cliente') }}?</span> <br>
+                        <button class="btn btn-success btn-block mt-2" wire:click="createcliente()"><i class="fas fa-user-plus"></i></button>
+                    </div>
+                    <div class="col-md-6 col-12 mb-3 row">
+                        <div class="col-md-6 col-6 mb-3">
+                            <div class="dropdown">
+                                  <button class="btn btn-secondary dropdown-toggle" type="button" id="metodosdepagoss" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Metodo de pago
+                                  </button>
+                                  <div class="dropdown-menu" aria-labelledby="metodosdepagoss" style="box-shadow: 0 0 1.25rem rgba(31, 45, 61, 0.29);">
+                                    <button type="button" class="dropdown-item" wire:click="$set('metodo_de_pago', '1')" style="border-bottom: solid 1px #00000014;"> <img class="img-fluid p-2" src="{{ asset('images/logo-nequi.png') }}" style="max-width:100px"> </button>
+                                    <button type="button" class="dropdown-item"  wire:click="$set('metodo_de_pago', '2')" style="border-bottom: solid 1px #00000014;"> <img class="img-fluid p-2" src="{{ asset('images/logo-bancolombia.png') }}"style="max-width:100px"> </button>
+                                    <button type="button" class="dropdown-item" wire:click="$set('metodo_de_pago', '3')"><span class="badge bg-success w-100" style="font-size:24px" ><i class="far fa-money-bill-alt" style="max-width:150px"></i> Efectivo</span></button>
+                                  </div>
+                            </div>
+                            @if($metodo_de_pago == 1)
+                                 <img class="img-fluid my-2 p-2" src="{{ asset('images/logo-nequi.png') }}" style="max-width:150px" >
+                            @elseif($metodo_de_pago == 2)
+                                 <img class="img-fluid my-2 p-2" src="{{ asset('images/logo-bancolombia.png') }}"style="max-width:150px" >
+                            @elseif($metodo_de_pago == 3)
+                                <div class="my-2 p-2"><span class="badge bg-success w-100" style="font-size:24px" ><i class="far fa-money-bill-alt" style="max-width:150px"></i> Efectivo</span> </div>
+                            @endif
                         </div>
-                    @elseif($search_telefono != '' && $encontrado == true)
-                        <div class="col-md-6 col-6 mb-2">
-                            <span>{{ __('Datos del cliente') }}</span>
+                        <div class="col-md-6 col-6 mb-3">
+                            <div class="form-group row mb-3">
+                                <label for="abonado" class="col-sm-3 col-form-label" style="padding-left: 0px">{{__('Abonado')}}</label>
+                                <div class="col-sm-9">
+                                  <input type="number" class="form-control" wire:model.lazy="abonado">
+                                </div>
+                            </div>
+                            <div class="form-group row mb-3">
+                                <label for="total" class="col-sm-3 col-form-label">{{ __('Total') }}</label>
+                                <div class="col-sm-9">
+                                  <input type="number" class="form-control" wire:model.lazy="total">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if($search_telefono != '' && $encontrado == true)
+                        <div class="col-md-6 col-12 mb-3">
+                            <span>{{ __('Cliente encontrado') }}</span>
                             <h6 class="mt-1"><span class="badge bg-success" style="font-size: 13px;">{{ $cliente->name . ' ' . $cliente->last_name . ' - ' . $cliente->email }}</span></h6>
                         </div>
                     @endif
-
+                    
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -84,18 +119,24 @@
             <div class="modal-footer">
                 <div class="col-auto" style="margin-right: 25px">
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="exampleCheck1" style="margin-top: 0px;  margin-left: -40px !important;" wire:model="envio_correo">
-                        <label class="form-check-label" for="exampleCheck1">¿{{ __('Enviar por correo') }}?</label>
+                        <input type="radio" class="form-check-input" value="1" id="exampleCheck1"  wire:model.lazy="estado_venta">
+                        <label class="form-check-label" for="exampleCheck1">{{ __('Separado') }}</label>
                     </div>
                 </div>
                 <div class="col-auto" style="margin-right: 25px">
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="exampleCheck2" style="margin-top: 0px; margin-left: -40px !important;" wire:model="envio_sms">
-                        <label class="form-check-label" for="exampleCheck2">¿{{ __('Enviar por sms') }}?</label>
+                        <input type="radio" class="form-check-input" value="2" id="exampleCheck2"  wire:model.lazy="estado_venta">
+                        <label class="form-check-label" for="exampleCheck2">{{ __('Abonado') }}</label>
+                    </div>
+                </div>
+                <div class="col-auto" style="margin-right: 25px">
+                    <div class="mb-3 form-check">
+                        <input type="radio" class="form-check-input" value="3" id="exampleCheck3" wire:model.lazy="estado_venta">
+                        <label class="form-check-label" for="exampleCheck3">{{ __('Pago total') }}</label>
                     </div>
                 </div>
                 <button type="button" class="btn btn-secondary"  wire:target="enviarentradas" wire:loading.attr="disabled" data-bs-dismiss="modal">{{ __('Cerrar') }}</button>
-                <button type="button" class="btn btn-primary"  wire:target="enviarentradas" wire:loading.attr="disabled" wire:click="enviarentradas()">{{ __('Enviar') }}</button>
+                <button type="button" class="btn btn-primary"  wire:target="enviarentradas" wire:loading.attr="disabled" wire:click="enviarentradas()">{{ __('Vender') }}</button>
             </div>
         </div>
     </div>
