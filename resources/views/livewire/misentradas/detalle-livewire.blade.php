@@ -94,6 +94,7 @@
                                 <select class="form-control @error('organizar') is-invalid @enderror"  wire:model="organizar">
                                     <option value="1">{{ __('Icono grande') }}</option>
                                     <option value="2">{{ __('Listar') }}</option>
+                                    <option value="3">{{ __('Icono mediano') }}</option>
                                 </select>
                                 @error('organizar')
                                     <div class="invalid-feedback ">{{ $message }}  </div>
@@ -216,7 +217,7 @@
                                                 <span class="badge bg-success" style="margin-left: 5px"><i class="fas fa-user-tag"></i></span>
                                             @endif
                                         </h6>
-                                        <p class="card-text {{ $acep == true ? 'text-white' : '' }}">{{ Str::afterLast($entrada->url, '/')  }}</p>
+                                        <p class="card-text {{ $acep == true ? 'text-white' : '' }}">{{ $entrada->created_at->diffForHumans() }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -255,7 +256,7 @@
                                                {{ $entrada->zona->name}}
                                             </td>
                                             <td>
-                                                {{ Str::afterLast($entrada->url, '/')  }}
+                                               {{ $entrada->created_at->diffForHumans() }}
                                             </td>
                                             <td>
                                                 <button class="btn btn-primary"  type="button" wire:click="veruploads('{{ $entrada->id }}')">
@@ -307,6 +308,7 @@
         @endif
        
     @endif
+    @livewire('misentradas.compartir-venta-digital-livewire')
     <script>
         window.addEventListener('errores', event => {
             Swal.fire(

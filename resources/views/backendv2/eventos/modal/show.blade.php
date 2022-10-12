@@ -47,7 +47,12 @@
                                             {{ route('ver.archivo', $key); }}
                                         </td>
                                         <td>
-                                            <a class="btn btn-info" target="_blank" href="{{ $dig->url }}">{{ __('Ver') }}</a>
+                                            @if($dig->provider == 'local')
+                                                <a class="btn btn-info" target="_blank" href="{{ $dig->url }}">{{ __('Ver') }}</a>
+                                            @else
+                                                <a class="btn btn-info" target="_blank" href="{{ route('ver.archivo', $key); }}">{{ __('Ver') }}</a>
+                                            @endif
+                                            
                                         </td>
                                     </tr>
                                 @empty

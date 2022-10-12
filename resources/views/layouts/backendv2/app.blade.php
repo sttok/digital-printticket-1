@@ -10,7 +10,7 @@
         <meta name="author" content="Sttok Publicidad">
 
         <!-- Title -->
-        <title>{{\App\Models\Setting::find(1)->app_name}} | {{ __('Escanear') }}</title>
+        <title>{{\App\Models\Setting::find(1)->app_name}} | {{ __('Digital') }}</title>
 
         <!-- Styles -->
         <link href="https://fonts.googleapis.com/css?family=Poppins:400,500,700,800&display=swap" rel="stylesheet">

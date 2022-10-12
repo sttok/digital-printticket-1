@@ -20,7 +20,7 @@
                             <div class="card stat-widget bg-primary" >
                                 <a class="btn btn-primary" href="{{ $this->Digital->url_1 }}" target="_blank" >
                                     <div class="card-body text-center justify-content-center" style="line-height: 35px; vertical-align: middle; height: 100%; display: inline;">
-                                        <h3 style="color: rgba(225,235,245,.87);" >{{ __('Descargar') }}<br>
+                                        <h3>{{ __('Descargar') }}<br>
                                             <i class="fas fa-cloud-download-alt"></i>
                                         </h3>
                                     </div>

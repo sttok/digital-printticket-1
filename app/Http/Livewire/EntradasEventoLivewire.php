@@ -4,26 +4,27 @@ namespace App\Http\Livewire;
 
 use Exception;
 use Carbon\Carbon;
+use Google\Client;
 use App\Models\Event;
-use App\Models\DireccionesEventoPalcos;
 use Firebase\JWT\JWT;
 use App\Models\Ticket;
 use Livewire\Component;
+use Google\Service\Drive;
 use App\Models\OrderChild;
 use Illuminate\Support\Str;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
+use App\Jobs\GuardarEntradasJobs;
+use App\Models\DireccionesEvento;
 use App\Models\OrderChildsDigital;
 use Illuminate\Support\Facades\DB;
-use App\Exports\EntradasExcelExport;
-use App\Models\DireccionesEvento;
 use App\Models\DireccionesUsuarios;
+use App\Exports\EntradasExcelExport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\DireccionesEventoPalcos;
 use Illuminate\Support\Facades\Storage;
-use Google\Client;
-use Google\Service\Drive;
 
 class EntradasEventoLivewire extends Component
 {
@@ -39,6 +40,7 @@ class EntradasEventoLivewire extends Component
     public $zona_digital_id, $buscar_identificador;
     public $lugar_almacenamiento = 1, $permitir_descarga = false;
 
+    public $url_carpeta, $entrada_carpeta, $archivos_subidos = [];
 
     public function mount($id){
         $this->evento_id = $id;
@@ -47,6 +49,54 @@ class EntradasEventoLivewire extends Component
     public function render()
     {
         return view('livewire.eventos.entradas-evento-livewire');
+    }
+    
+    public function crearcarpetas($id){
+        $this->entrada_id = $id;
+        $this->dispatchBrowserEvent('abrircarpetas');
+        $usuario = DireccionesUsuarios::where('usuario_id', $this->Evento->organizador_id)->first();
+
+        if(empty($usuario)){
+            $usuario = $this->createDirUser();
+        }
+        $entrada = DireccionesEvento::where([
+           ['evento_id', $this->evento_id], ['entrada_id', $id]
+        ])->first();
+
+        if(empty($entrada)){
+            $entrada = $this->createDirEvent($usuario);
+        }
+
+        $this->entrada_carpeta = $entrada;
+        $this->url_carpeta = Storage::disk("google")->url($entrada['path']);
+    }
+
+    public function buscardocumentos(){
+        $dir = '/'.$this->entrada_carpeta['path'];
+        $recursive = false; // Get subdirectories also?
+        $this->archivos_subidos = collect(Storage::disk('google')->listContents($dir, $recursive));
+    }
+
+    public function guardarentradas(){
+        if(count($this->archivos_subidos) > 0 ){
+            foreach($this->archivos_subidos as $as){
+                $data = array(
+                    'evento_id' => $this->evento_id,
+                    'entrada_id' => $this->entrada_id,
+                    'name' => $as['name'],
+                    'path' => $as['path'],
+                );
+                GuardarEntradasJobs::dispatch($data)->onQueue('normal');
+            }
+            $this->dispatchBrowserEvent('archivossubidos');
+            $this->reset(['entrada_carpeta', 'archivos_subidos', 'url_carpeta', 'entrada_id']);
+        }else{
+            $this->dispatchBrowserEvent('noarchivos');
+        }
+    }
+
+    public function limpiarcarpetas(){
+        $this->reset(['entrada_carpeta', 'archivos_subidos', 'url_carpeta', 'entrada_id']);
     }
 
     public function descargarentrada($id){
@@ -61,6 +111,7 @@ class EntradasEventoLivewire extends Component
     }
 
     public function descargarexcel(){
+
         try{
             if($this->descargartodoexcel = true){
                 $this->reset('entradas_descargar');
@@ -132,6 +183,20 @@ class EntradasEventoLivewire extends Component
         ]);        
         $errores = [];
         $exitos = [];
+        
+        if($this->lugar_almacenamiento == 2){
+            $url_organizador = DireccionesUsuarios::where('usuario_id', $this->Evento->organizador_id)->first();
+            if(empty($url_organizador)){
+                $url_organizador = $this->createDirUser();
+            }
+            $url_entrada = DireccionesEvento::where([
+                ['direccion_usuario', $url_organizador['id']]
+            ])->first();
+
+            if(empty($url_entrada)){
+                $url_entrada = $this->createDirEvent($url_organizador);
+            }
+        }
 
         foreach ($this->uploads as $i) {
             $nombre = $i->getClientOriginalName();
@@ -167,19 +232,9 @@ class EntradasEventoLivewire extends Component
                                     $r->provider = 'local';
 
                                 }elseif($this->lugar_almacenamiento == 2){
-                                    $url_organizador = DireccionesUsuarios::where('usuario_id', $this->Evento->organizador_id)->first();
-                                    if(empty($url_organizador)){
-                                        $url_organizador = $this->createDirUser();
-                                    }
-                                    $url_entrada = DireccionesEvento::where([
-                                        ['direccion_usuario', $url_organizador['id']]
-                                    ])->first();
-
-                                    if(empty($url_entrada)){
-                                        $url_entrada = $this->createDirEvent($url_organizador);
-                                    }
+                                   
                                     $url =  $url_entrada['path'];
-                                    if($this->Entrada->forma_generar == 2){
+                                    /*if($this->Entrada->forma_generar == 2){
                                         $palcco = DireccionesEventoPalcos::where([
                                             ['direccion_evento_id', $url_entrada->id], ['palco', (int)$ent->mesas]
                                         ])->first();
@@ -188,7 +243,7 @@ class EntradasEventoLivewire extends Component
                                             $palcco = $this->createDirPalco($url_entrada, (int)$ent->mesas);
                                               $url =  $palcco['path'];
                                         }
-                                    }
+                                    }*/
                                   
                                     $i->storeAs($url, $nombre, 'google');
                                     Storage::disk("google")->putFileAs($url, $i, $nombre);
@@ -325,7 +380,7 @@ class EntradasEventoLivewire extends Component
     }
 
     private function createDirEvent($dirUser){
-
+        
         $nombre_folder = $this->Evento->id . ' - ' .$this->Evento->name;
         Storage::disk('google')->makeDirectory($dirUser['path'].'/'.$nombre_folder);
 

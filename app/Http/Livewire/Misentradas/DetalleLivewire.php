@@ -190,8 +190,7 @@ class DetalleLivewire extends Component
                             $ent->endosado_id = $es->cliente_id;
                         }
                         $ent->update();
-                        $key = base64_encode('@kf#'.$es->id);
-                        $es->url_1 = route('ver.archivo', $key);
+                       
                         $es->endosado = 1;
                         $es->update();
                         $array[] = array(
@@ -199,6 +198,8 @@ class DetalleLivewire extends Component
                             'endosado_id' => $es->cliente_id != null ? $es->cliente_id : null,
                             'digital_id' => $es['id'],
                         );
+                         $key = base64_encode('@kf#'.$es->id);
+                        $es->url_1 = route('ver.archivo', $key);
                     }
 
                     $ordencompra = new DigitalOrdenCompra();
@@ -227,7 +228,7 @@ class DetalleLivewire extends Component
             }
         }else{
             $this->dispatchBrowserEvent('errores', ['error' => __('Debe seleccionar el estado de la venta')]);
-        }        
+        }
     }
 
     public function seleccionartodos(){
@@ -489,5 +490,9 @@ class DetalleLivewire extends Component
         }
     }
 
+    public function enviarcompartir($ent){
+        $ent['cliente'] = $this->cliente;
+        $this->emit('mostrarCompartir', $ent);
+    }
    
 }

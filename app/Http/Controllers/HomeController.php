@@ -131,11 +131,16 @@ class HomeController extends Controller
     }
 
     public function verarchivo($base64){
-        $id = base64_decode($base64);
-        $id = Str::after($id, '@kf#');
-        $entrada = OrderChildsDigital::findorfail($id);
         
-        if($entrada->permiso_descargar == 1){
+        $id = base64_decode($base64);
+        
+        $id = Str::after($id, '@kf#');
+        
+       
+        $entrada = OrderChildsDigital::findorfail($id);
+       
+        
+        //if($entrada->permiso_descargar == 1)
             if($entrada->provider == "local"){
                     $r = 'storage/ticket-digital/';
                     $url = Str::after($entrada->url, $r) ;
@@ -173,8 +178,11 @@ class HomeController extends Controller
                         ->header('ContentType', Storage::disk("google")->mimetype($entrada['url']))
                         ->header('Content-Disposition', "attachment; filename=$filename");*/
             }
-        }else{
+        /*}else{
             abort(403);
-        }
+        }*/
+
     }
+
+
 }

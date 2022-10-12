@@ -73,7 +73,7 @@
                                         <td> 
                                             <img  class="b-lazy"
                                             src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" 
-                                            data-src="{{ asset(route('inicio.frontend') .'/storage/eventos/'.$evento->image) }}" alt="imagen-evento" style="max-width: 50px; border-radius:50%">
+                                            data-src="{{ asset(route('inicio.frontend') .'/images/upload/'.$evento->image) }}" alt="imagen-evento" style="max-width: 50px; border-radius:50%">
                                             @if ($evento->event_destacado == 1)
                                                 <i class="fas fa-star text-warning"></i>
                                             @endif

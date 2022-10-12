@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::domain('printticket.test')->group(function () {
+Route::domain('printticket.com.co')->group(function () {
     Route::get('/login')->name('panel.administrador');
     Route::get('/')->name('inicio.frontend');
     Route::get('/evento/{id}/{titulo}')->name('ver.evento.frontend');

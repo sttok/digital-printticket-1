@@ -44,7 +44,7 @@ return [
 
         'custom' => [
             'driver' => 'local',
-            'root'   => '../../printticket/public/storage',
+            'root'   => '../../temporalv2/public/storage',
             'visibility' => 'public',
         ],
 
@@ -57,7 +57,6 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
         ],
-
         'google' => [
             'driver' => 'google',
             'clientId' => env('GOOGLE_DRIVE_CLIENT_ID'),
@@ -81,7 +80,7 @@ return [
 
     'links' => [
         // public_path('storage') => storage_path('app/public'),
-        public_path('storage') => storage_path('../../printticket/public/storage'),
+        public_path('storage') => storage_path('../../temporalv2/public/storage'),
     ],
 
 ];

@@ -32,8 +32,7 @@
                                     <th scope="col">{{ __('Identificador') }}</th>
                                     <th scope="col">{{ __('Entrada') }}</th>
                                     <th scope="col">{{ __('Endosado') }}</th>
-                                    <th scope="col">{{ __('Url') }}</th>
-                                    <th scope="col">{{ __('Acci贸n') }}</th>
+                                    <th scope="col">{{ __('Accion') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -49,19 +48,16 @@
                                             @endif
                                         </td>
                                         <td>
-                                            {{ $ent->url_1 }}
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-primary" type="button"> <i class="fas fa-share-square"></i></button>
+                                            <button class="btn btn-primary" type="button" wire:click="enviarcompartir({{ $ent }})"> <i class="fas fa-share-square"></i></button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center justify-content-center" >
-                                            隆{{ __('No hay entradas seleccionadas') }}!
+                                        <td colspan="5" class="text-center justify-content-center" >
+                                            ¡{{ __('No hay entradas seleccionadas') }}!
                                         </td>
                                     </tr> 
-                                @endforelse                               
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

@@ -63,7 +63,6 @@
                                 <th scope="col">{{ __('Precio') }}</th>
                                 <th scope="col">{{ __('Tipo') }}</th>
                                 <th scope="col">{{ __('Estado') }}</th>
-                                <th scope="col">{{ __('Privacidad') }}</th>
                                 <th scope="col">{{ __('Acción') }}</th>
                             </thead>
                             <tbody>
@@ -92,28 +91,23 @@
                                                 <span class="badge bg-secondary">{{ __('No disponbile') }}</span>
                                             @endif
                                         </td>
-                                        <td>
-                                            @if ($entrada->privacidad == 1)
-                                                <span class="badge bg-success">{{ __('Publico') }}</span>
-                                            @elseif($entrada->privacidad == 2)
-                                                <span class="badge bg-secondary">{{ __('Privado') }}</span>
-                                            @endif
-                                        </td>
+                                        
                                         <td>
                                             <div class="dropdown dropstart">
                                                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <div wire:loading.inline wire:target="descargarentrada({{ $entrada->id }})">
-                                                        <div class="spinner-grow spinner-grow-sm" role="status" >
-                                                            
+                                                    <div wire:loading.inline wire:target="descargarentrada, crearcarpetas">
+                                                        <div class="spinner-grow spinner-grow-sm" role="status" style="margin-top: -10px" >
                                                         </div>
                                                     </div>
-                                                    <div wire:loading.remove wire:target="descargarentrada({{ $entrada->id }})" style="display: inline;">
+                                                    <div wire:loading.remove wire:target="descargarentrada, crearcarpetas" style="display: inline;">
                                                         <i class="fas fa-ellipsis-v"></i>
                                                     </div>
-                                                  
                                                 </button>
                                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="">
                                                     <li>
+                                                        <button class="dropdown-item" type="button" wire:click="crearcarpetas({{ $entrada->id }})">
+                                                            <i class="fas fa-folder-plus"></i> {{ __('Crear carpetas drive') }}
+                                                        </button>
                                                         <button class="dropdown-item" type="button" wire:click="subirpdfs({{ $entrada->id }})">
                                                             <i class="fas fa-file-upload"></i> {{ __('Subir entrada') }}
                                                         </button>
@@ -123,6 +117,7 @@
                                                         <button class="dropdown-item" type="button" wire:click="veruploads({{ $entrada->id }})">
                                                             <i class="fas fa-search"></i> {{ __('Ver archivos subidos') }}
                                                         </button>
+                                                        
                                                     </li>
                                                     
                                                 </ul>
@@ -131,7 +126,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-center justify-content-center" >
+                                        <td colspan="8" class="text-center justify-content-center" >
                                             ¡{{ __('No hay entradas disponibles') }}!
                                         </td>
                                     </tr> 
@@ -154,7 +149,7 @@
         @include('backendv2.eventos.modal.descargar')
         @include('backendv2.eventos.modal.subir')
         @include('backendv2.eventos.modal.show')
-
+        @include('backendv2.eventos.modal.carpeta')
     @endif
 
     <script>        
@@ -165,6 +160,9 @@
                 'error'
             )
         })
+        window.addEventListener('abrircarpetas', event => {
+            $('#carpetas').modal('show');
+        });
         window.addEventListener('opendigitals', event => {
             $('#showdigitals').modal('show');
         });
@@ -206,6 +204,41 @@
                 icon :'success',
                 title: '¡Exito! ',
                 text: 'Todas las entradas han subidas correctamentes',
+                timer: 1500,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading()
+                },
+                willClose: () => {
+                    clearInterval(timerInterval)
+                }
+            })
+        });
+
+        window.addEventListener('archivossubidos', event => {
+             $('#carpetas').modal('hide');
+            let timerInterval
+            Swal.fire({
+                icon :'success',
+                title: '¡Exito! ',
+                text: 'Las entradas se han subido a la cola, en breves estara disponibles',
+                timer: 1500,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading()
+                },
+                willClose: () => {
+                    clearInterval(timerInterval)
+                }
+            })
+        });
+
+        window.addEventListener('noarchivos', event => {
+            let timerInterval
+            Swal.fire({
+                icon :'error',
+                title: '¡Error! ',
+                text: 'No se han encontrado archivos',
                 timer: 1500,
                 timerProgressBar: true,
                 didOpen: () => {
