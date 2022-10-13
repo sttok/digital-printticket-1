@@ -76,22 +76,22 @@
                             <tbody>
                                 @forelse ($entradas_seleccionadas as $ent)
                                     <tr>
-                                        <td><button class="btn btn-outline-danger" wire:click="quitar('{{ $ent->id }}')"><i class="fas fa-times"></i></button></td>
-                                        <th scope="row">#{{ $ent->identificador }}</th>
+                                        <td><button class="btn btn-outline-danger" wire:click="quitar('{{ $ent['id'] }}')"><i class="fas fa-times"></i></button></td>
+                                        <th scope="row">#{{ $ent['identificador'] }}</th>
                                         <td>{{ $ent->zona->name }}</td>
                                         <td>
                                             @if ($ent->endosado == false && $ent->entrada->endosado_id > 0)
                                                 <span class="badge bg-success">{{ $ent->entrada->endosado->name . ' ' . $ent->entrada->endosado->last_name }}</span>  
                                             @elseif($ent->endosado == true)
-                                                <span class="badge bg-success">{{ $ent->cliente_name }}</span>
+                                                <span class="badge bg-success">{{ $ent['cliente_name'] }}</span>
                                             @else
                                                 {{ __('No') }}
                                             @endif
                                         </td>
                                         <td>
-                                            <button class="btn btn-primary" wire:click="buscarendosar('{{ $ent->id }}', '{{ $ent->identificador }}')"><i class="fas fa-user-tag"></i> {{ __('Endosar') }}</button>
+                                            <button class="btn btn-primary" wire:click="buscarendosar('{{ $ent['id'] }}', '{{ $ent['identificador'] }}')"><i class="fas fa-user-tag"></i> {{ __('Endosar') }}</button>
                                             @if ($ent->endosado == true)
-                                                <button class="btn btn-danger" wire:click="eliminarendosado('{{ $ent->id }}')"><i class="fas fa-user-times"></i> {{ __('Eliminar endosado') }}</button>
+                                                <button class="btn btn-danger" wire:click="eliminarendosado('{{ $ent['id'] }}')"><i class="fas fa-user-times"></i> {{ __('Eliminar endosado') }}</button>
                                             @endif
                                         </td>
                                     </tr>

@@ -9,20 +9,20 @@
                 <div class="row">
                     <div class="col-auto mb 2">
                         <h5>{{ __('Nombre') }}</h5>
-                        <h6>{{ $cliente->name . ' ' . $cliente->last_name }}</h6>
+                        <h6>{{ $cliente['name'] . ' ' . $cliente['last_name'] }}</h6>
                     </div>
                     <div class="col-auto mb 2">
                         <h5>{{ __('Correo') }}</h5>
-                        <h6>{{ $cliente->email}}</h6>
+                        <h6>{{ $cliente['email']}}</h6>
                     </div>
                     <div class="col-auto mb 2">
                         <h5>{{ __('Telefono') }}</h5>
-                        <h6>{{ $cliente->phone}}</h6>
+                        <h6>{{ $cliente['phone']}}</h6>
                     </div>
                     
                     <div class="col-auto mb 2">
                         <h5>{{ __('Cedula') }}</h5>
-                        <h6>{{ $cliente->cedula}}</h6>
+                        <h6>{{ $cliente['cedula']}}</h6>
                     </div>
 
                     <div class="table-responsive">
@@ -38,23 +38,23 @@
                             <tbody>
                                 @forelse ($entradas_seleccionadas as $ent)
                                     <tr>
-                                        <th scope="row">#{{ $ent->identificador }}</th>
+                                        <th scope="row">#{{ $ent['identificador'] }}</th>
                                         <td>{{ $ent->zona->name }}</td>
                                         <td>
-                                            @if($ent->endosado == true)
-                                                <span class="badge bg-success">{{ $cliente->name }}</span>
+                                            @if($ent['endosado'] == true)
+                                                <span class="badge bg-success">{{ $cliente['name'] }}</span>
                                             @else
                                                <span class="badge bg-secondary"> {{ __('No') }}</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <button class="btn btn-primary" type="button" wire:click="enviarcompartir({{ $ent }})"> <i class="fas fa-share-square"></i></button>
+                                            <button class="btn btn-primary" type="button" wire:click="enviarcompartir({{$ent->id}})"> <i class="fas fa-share-square"></i></button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center justify-content-center" >
-                                            ¡{{ __('No hay entradas seleccionadas') }}!
+                                        <td colspan="4" class="text-center justify-content-center" >
+                                            隆{{ __('No hay entradas seleccionadas') }}!
                                         </td>
                                     </tr> 
                                 @endforelse

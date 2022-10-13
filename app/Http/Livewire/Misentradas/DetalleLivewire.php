@@ -33,7 +33,7 @@ class DetalleLivewire extends Component
         'search' => ['except' => '', 'as' => 's'],
         'search_estado' => ['except' => '', 'as' => 'zona'],
         'page' => ['except' => 1, 'as' => 'p'],
-        'organizar' => ['except' => '1', 'as' => 'org'],
+        'organizar' => ['except' => '', 'as' => 'org'],
         'filtrar_por' => ['except' => 0, 'as' => 'vendidos'],
     ];
     public $entradas_array = [];
@@ -65,7 +65,77 @@ class DetalleLivewire extends Component
         $hoy = Carbon::now();
         $final = Carbon::parse(Event::findorfail($this->evento_id)->end_time);
         $this->dias_restantes = $hoy->diffInDays($final);
-        $this->calcularendosados();        
+        $this->calcularendosados();
+    }
+
+    public function endosar($id){
+        $this->emit('endosarentrada', $id);
+    }
+
+    public function ventarapida($id){
+        DB::beginTransaction();
+        try {
+            $this->reset(['entradas_seleccionadas', 'cliente', 'entradas']);
+            $r = $this->Entradas->where('id',$id)->first();
+            $ent = OrderChild::findorfail($r->order_child_id);
+            $ent->customer_id = Auth::user()->id;
+            $ent->vendedor_id = Auth::user()->id;
+            $ent->update();
+            $r->endosado = 1;
+            $r->update();
+
+            //$array = array();
+            $array[] = array(
+                'order_child_id' => $ent->id,
+                'endosado_id' => null,
+                'digital_id' => $id,
+            );
+            
+            $this->entradas_seleccionadas[] = $r;
+
+            $this->cliente = AppUser::where([
+                ['phone', 'LIKE',  Auth::user()->phone]
+            ])->orWhere([
+                 ['email', 'LIKE',  Auth::user()->email]
+            ])->first();
+
+            if(empty($this->cliente)){
+                $cl = new AppUser();
+                    $cl->name = 'Cliente ' . Auth::user()->first_name;
+                    $cl->last_name = Auth::user()->last_name;
+                    $cl->email = Auth::user()->email;
+                    $cl->password = Hash::make(Auth::user()->phone);
+                    $cl->image = Auth::user()->image;
+                    $cl->phone = Auth::user()->phone;
+                    $cl->cedula = '';
+                    $cl->provider = 'LOCAL';
+                    $cl->status = 1;
+                    $cl->borrado = 0;
+                $cl->save();
+                $this->cliente = $cl;
+            }
+
+            $ordencompra = new DigitalOrdenCompra();
+                $ordencompra->identificador = Str::upper(Str::random(7));
+                $ordencompra->evento_id = $this->evento_id;
+                $ordencompra->vendedor_id = Auth::user()->id;
+                $ordencompra->cliente_id = $this->cliente->id;
+                $ordencompra->cantidad_entradas = 1;
+                $ordencompra->metodo_pago = 1;
+                $ordencompra->abonado = 0;
+                $ordencompra->total = 0;
+                $ordencompra->array_entradas = json_encode($array, JSON_INVALID_UTF8_SUBSTITUTE);
+                $ordencompra->estado_venta = 1;
+            $ordencompra->save();
+            DB::commit();
+            $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
+                'porcentaje_venta', 'dias_restantes', 'estado_evento']);
+            $this->enviado = true;
+            $this->enviarcompartir($id);
+        } catch (Exception $e) {
+            DB::rollBack();
+            $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
+        }
     }
 
     public function buscarendosar($id, $ident){
@@ -131,7 +201,6 @@ class DetalleLivewire extends Component
             }
         }
 
-        // dd($this->entradas_seleccionadas);
         $this->reset(['search_telefono_endosado', 'endosado_id', 'encontrado_endosado', 'cliente_endosado', 'endosado_identificador']);
         $this->dispatchBrowserEvent('regresarcliente1');
     }
@@ -216,7 +285,8 @@ class DetalleLivewire extends Component
                     $ordencompra->save();
                     
                     DB::commit();
-                    $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente','entradas']);
+                    $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
+                'porcentaje_venta', 'dias_restantes', 'estado_evento']);
                     $this->enviado = true;
                     $this->dispatchBrowserEvent('verenviadas');
                 } catch (Exception $e) {
@@ -261,7 +331,8 @@ class DetalleLivewire extends Component
 
     public function cerrarshow(){
         $this->dispatchBrowserEvent('cerrarshow1');
-        $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas']);
+        $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
+                'porcentaje_venta', 'dias_restantes', 'estado_evento']);
     }
 
     public function createcliente(){
@@ -402,19 +473,7 @@ class DetalleLivewire extends Component
         foreach ($this->entradas_seleccionadas as $rr) {
             $rr->endosado = false;
         }
-    }
-
-    public function getEntradasProperty(){
-    
-        return OrderChildsDigital::where([
-            ['evento_id', $this->evento_id], ['identificador', 'LIKE', '%'.$this->search.'%'], ['zona_id', 'LIKE', '%'. $this->search_estado], ['endosado', $this->filtrar_por]
-        ])->paginate(24); 
-        
-    }
-
-    public function getSettingProperty(){
-        return Setting::findorfail(1)->app_name;
-    } 
+    }   
 
     public function enviarsms2($telefono, $mensaje){
         $data = array(
@@ -432,6 +491,16 @@ class DetalleLivewire extends Component
     public function getDigitalProperty(){
         return OrderChildsDigital::findorfail($this->digital_id);
     }
+
+    public function getEntradasProperty(){
+        return OrderChildsDigital::where([
+            ['evento_id', $this->evento_id], ['identificador', 'LIKE', '%'.$this->search.'%'], ['zona_id', 'LIKE', '%'. $this->search_estado], ['endosado', $this->filtrar_por]
+        ])->paginate(24);
+    }
+
+    public function getSettingProperty(){
+        return Setting::findorfail(1)->app_name;
+    } 
 
     public function descargarmasivo(){
         if(count($this->entradas_array) > 0){
@@ -490,9 +559,11 @@ class DetalleLivewire extends Component
         }
     }
 
-    public function enviarcompartir($ent){
+    public function enviarcompartir($id){
+        $ent = OrderChildsDigital::findorfail($id);
         $ent['cliente'] = $this->cliente;
+        $ent['evento'] = $ent->evento->name;
+        $ent['zona'] = $ent->zona;
         $this->emit('mostrarCompartir', $ent);
-    }
-   
+    }   
 }

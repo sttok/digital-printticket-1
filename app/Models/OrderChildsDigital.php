@@ -16,4 +16,8 @@ class OrderChildsDigital extends Model
     public function zona(){
         return $this->hasOne(Ticket::class, 'id', 'zona_id');
     }
+
+    public function evento(){
+        return $this->hasOne(Event::class, 'id', 'evento_id');
+    }
 }

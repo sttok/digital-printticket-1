@@ -1,35 +1,23 @@
-<div class="row" wire:init="loadDatos">
-    @if ($organizar == 1)
-        <style>
-            .form-check-input[type="checkbox"]{
-                margin-left: -60px !important;
-                width: 30px !important;
-                height: 30px !important;   
-                margin-top: -35px;
-                border-radius: 8px !important;
-            }
-            
-            .float-right{
-                float: right !important;
-            }
-            .card-dropdown{
-                padding-right: 10px;
-                padding-top: 10px;
-                position: unset !important;
-            }
-            
-        </style>
-    @else
-        <style>
-            .form-check-input[type="checkbox"]{
-                width: 30px !important;
-                height: 30px !important;
-                  border-radius: 8px !important;
-            }
-            
-        </style>
-    @endif  
+<div class="row" wire:init="loadDatos">    
     <style>
+        .dropdown-menu.show{
+            z-index: 999;
+        }
+        table .form-check-input{
+            border: 1px solid rgba(0,0,0,.25) !important;
+        }
+        table .form-check{
+            padding-left: 0px !important;
+            padding-top: 0px !important;
+        }
+        .float-right{
+            float: right !important;
+        }
+        .form-check-input[type="checkbox"]{
+            width: 30px !important;
+            height: 30px !important;
+            border-radius: 8px !important;
+        }
         .nav-link-1{
             color: #fefefe !important;
             border-top-right-radius: 0px !important;
@@ -56,6 +44,15 @@
         }
         .zoom:hover {
           transform: scale(1.03); 
+        }
+        .card-dropdown{
+            padding-right: 10px;
+            padding-top: 10px;
+            position: unset !important;
+        }
+        .form-check{
+            padding-left: 25px;
+            padding-top: 10px;
         }
     </style> 
     <div class="col-sm-12 col-md-3">
@@ -93,8 +90,8 @@
                                 <span>{{ __('Organizar') }}</span>
                                 <select class="form-control @error('organizar') is-invalid @enderror"  wire:model="organizar">
                                     <option value="1">{{ __('Icono grande') }}</option>
-                                    <option value="2">{{ __('Listar') }}</option>
                                     <option value="3">{{ __('Icono mediano') }}</option>
+                                    <option value="2">{{ __('Listar') }}</option>
                                 </select>
                                 @error('organizar')
                                     <div class="invalid-feedback ">{{ $message }}  </div>
@@ -134,16 +131,18 @@
             <div class="card">
                 <div class="card-header">
                     <nav class="nav nav-pills nav-justified">
-                        <a class="nav-item nav-link nav-link-1 {{ $filtrar_por == 0 ? 'active' : 'desactive' }}" href="#" wire:click="cambiarfiltrar()">{{ __('Sin vender') . ' ( ' .  number_format($total_sin_endosar, 0 ,',','.') . ' )' }}</a>
-                        <a class="nav-item nav-link nav-link-2 {{ $filtrar_por == 1 ? 'active' : 'desactive' }}" href="#" wire:click="cambiarfiltrar()">{{ __('Vendido') . ' ( ' .  number_format($total_endosadas, 0 ,',','.') . ' )' }}</a>
+                        <a class="nav-item nav-link nav-link-1 {{ $filtrar_por == 0 ? 'active' : 'desactive' }}" href="#entrads" wire:click="$set('filtrar_por', 0)">{{ __('Sin vender') . ' ( ' .  number_format($total_sin_endosar, 0 ,',','.') . ' )' }}</a>
+                        <a class="nav-item nav-link nav-link-2 {{ $filtrar_por == 1 ? 'active' : 'desactive' }}" href="#entrads" wire:click="$set('filtrar_por', 1)">{{ __('Vendido') . ' ( ' .  number_format($total_endosadas, 0 ,',','.') . ' )' }}</a>
                     </nav>
                 </div>
                 
-                <div class="card-body row">
-                    <div wire:loading.inline wire:target="organizar,cambiarfiltrar">
+                <div class="card-body row" id="entrads">
+                    <div wire:loading.inline wire:target="organizar,filtrar_por">
                         <div class="col-12 my-2 text-center justify-content-center row">
                             <div class="spinner-grow my-2" role="status" >
-                            </div>
+                            </div>17898357410043
+
+
                         </div>
                     </div>
                     @if (count($this->Entradas) > 0)
@@ -160,7 +159,7 @@
                                         <div class="spinner-grow my-2" role="status" >
                                         </div>
                                     </div>
-                                    <div wire:loading.remove wire:target="descargarmasivo">
+                                    <div wire:loading.remove>
                                         <i class="fas fa-download"></i> {{ __('Descargar reporte global') }}
                                     </div>
                                 </button>
@@ -168,47 +167,58 @@
                         </div>
                     @endif
                     
-                    @if ($organizar == 1)
+                    @if ($organizar == 1 || $organizar == 3)
                         @forelse ($this->Entradas as $entrada)
                             @php
                                 $acep = in_array($entrada->id, $this->entradas_array) !== false ? true : false;
                                 
                             @endphp
-                            <div class="col-lg-3 col-md-6 col-12">
+                            <div class="col-lg-{{ $organizar == 1 ? 3 : 2 }} col-md-{{ $organizar == 1 ? 6 : 3 }} col-{{ $organizar == 1 ? 12 : 6 }}">
                                 <div class="card card-file-manager zoom {{ $acep == true ? 'bg-primary' : '' }}"  >
-                                    <div class="dropdown card-dropdown">
-                                        <button class="btn btn-primary dropdown-toggle float-right" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <div wire:loading.inline wire:target="descargarentrada({{ $entrada->id }})">
-                                                <div class="spinner-grow spinner-grow-sm" role="status" >
-                                                </div>
+                                   
+                                    <div class="d-flex">
+                                        <div class="col-md-6 col-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="{{ $entrada->id }}" id="flexCheckChecked" wire:model="entradas_array">
                                             </div>
-                                            <div wire:loading.remove wire:target="descargarentrada({{ $entrada->id }})" style="display: inline;">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </div>
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="">
-                                            <li>
-                                                <button class="dropdown-item" type="button" wire:click="veruploads('{{ $entrada->id }}')">
-                                                    <i class="fas fa-tag"></i> {{ __('Venta') }}
-                                                </button>
-                                                <button class="dropdown-item" type="button" >
-                                                    <i class="fas fa-shipping-fast"></i> {{ __('Venta rapida') }}
-                                                </button>
-                                                <button class="dropdown-item" type="button">
-                                                    <i class="fas fa-user-check" ></i> {{ __('Endosar') }}
-                                                </button>
-                                                @if ($entrada->permiso_descargar == 1)
-                                                    <button class="dropdown-item" type="button" wire:click="descargar('{{ $entrada->id }}')">
-                                                        <i class="fas fa-cloud-download-alt"></i> {{ __('Descargar') }}
-                                                    </button>
-                                                @endif
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="card-file-header {{ $acep == true ? 'text-white' : '' }}" style="background: transparent;">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="{{ $entrada->id }}" id="flexCheckChecked" wire:model="entradas_array">
                                         </div>
+                                        <div class="col-md-6 col-6 mb-2">
+                                            <div class="dropdown card-dropdown dropstart" style="float: right;">
+                                                <button class="btn btn-primary dropstart dropdown-toggle float-right" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <div wire:loading.inline wire:target="descargarentrada({{ $entrada->id }})">
+                                                        <div class="spinner-grow spinner-grow-sm" role="status" >
+                                                        </div>
+                                                    </div>
+                                                    <div wire:loading.remove wire:target="descargarentrada({{ $entrada->id }})" style="display: inline;">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </div>
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="">
+                                                    <li>
+                                                        @if ($entrada->endosado == 0)
+                                                            <button class="dropdown-item" type="button" wire:click="veruploads('{{ $entrada->id }}')">
+                                                                <i class="fas fa-tag"></i> {{ __('Venta') }}
+                                                            </button>
+                                                            <button class="dropdown-item" type="button" wire:click="ventarapida('{{ $entrada->id }}')" >
+                                                                <i class="fas fa-shipping-fast"></i> {{ __('Venta rapida') }}
+                                                            </button>
+                                                        @endif
+                                                        <button class="dropdown-item" type="button" wire:click="endosar('{{ $entrada->id }}')">
+                                                            <i class="fas fa-user-check" ></i> {{ __('Endosar') }}
+                                                        </button>
+                                                        @if ($entrada->permiso_descargar == 1)
+                                                            <button class="dropdown-item" type="button" wire:click="descargar('{{ $entrada->id }}')">
+                                                                <i class="fas fa-cloud-download-alt"></i> {{ __('Descargar') }}
+                                                            </button>
+                                                        @endif
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-file-header {{ $acep == true ? 'text-white' : '' }}" style="background: transparent;">
+                                        
                                         <i class="fas fa-file-pdf" ></i>
                                     </div>
                                     <div class="card-body">
@@ -259,11 +269,20 @@
                                                {{ $entrada->created_at->diffForHumans() }}
                                             </td>
                                             <td>
-                                                <button class="btn btn-primary"  type="button" wire:click="veruploads('{{ $entrada->id }}')">
-                                                    <i class="fas fa-tag"></i> {{ __('Vender') }}
+                                                @if ($entrada->endosado == 0)
+                                                    <button class="btn btn-primary mb-2"  type="button" wire:click="veruploads('{{ $entrada->id }}')">
+                                                        <i class="fas fa-tag"></i> {{ __('Vender') }}
+                                                    </button>
+                                                    <button class="btn btn-primary mb-2" type="button" wire:click="ventarapida('{{ $entrada->id }}')" >
+                                                        <i class="fas fa-shipping-fast"></i> {{ __('Venta rapida') }}
+                                                    </button>  
+                                                @endif
+                                                
+                                                <button class="btn btn-primary mb-2" type="button" wire:click="endosar('{{ $entrada->id }}')">
+                                                    <i class="fas fa-user-check" ></i> {{ __('Endosar') }}
                                                 </button>
                                                 @if ($entrada->permiso_descargar == 1)
-                                                    <button class="btn btn-success" type="button" wire:click="descargar('{{ $entrada->id }}')">
+                                                    <button class="btn btn-success mb-2" type="button" wire:click="descargar('{{ $entrada->id }}')">
                                                         <i class="fas fa-cloud-download-alt"></i> {{ __('Descargar') }}
                                                     </button>
                                                 @endif
@@ -309,6 +328,7 @@
        
     @endif
     @livewire('misentradas.compartir-venta-digital-livewire')
+    @livewire('misentradas.endosar-venta-digital-livewire')
     <script>
         window.addEventListener('errores', event => {
             Swal.fire(

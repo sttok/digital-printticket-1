@@ -46,7 +46,7 @@ class UserController extends Controller
             $config = Setting::find(1);
             $data = array(
                 'titulo' => $config->app_name,
-                'logo' => $config->logo_oscuro,
+                'logo' => $config->logo,
                 'icono' => $config->favicon,
                 'fondo' => $config->fondo_digital
             );
