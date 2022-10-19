@@ -3,3 +3,4 @@
 @section('contenido')
     @livewire('entradas-evento-livewire', ['id' => $id])
 @endsection
+

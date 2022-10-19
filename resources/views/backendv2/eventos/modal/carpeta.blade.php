@@ -28,29 +28,61 @@
                 <div class="row" style="max-height: 500px; overflow: auto;">
                     <div class="table-responsive">
                         <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">{{ __('Identificador') }}</th>
-                                    <th scope="col">{{ __('Nombre') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($archivos_subidos as $ar)
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ Str::before($ar['name'], '-'); }}</td>
-                                        <td>{{ $ar['name']}}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="text-center justify-content-center" >
-                                            ¡{{ __('No hay archivos disponibles') }}!
-                                        </td>
-                                    </tr> 
-                                @endforelse
-                               
-                            </tbody>
+                            @if (!empty($this->Entrada))
+                                @if ($this->Entrada->forma_generar == 1)
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">{{ __('Identificador') }}</th>
+                                            <th scope="col">{{ __('Nombre') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($archivos_subidos as $ar)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ Str::before($ar['name'], '-'); }}</td>
+                                                <td>{{ $ar['name']}}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center justify-content-center" >
+                                                    ¡{{ __('No hay archivos disponibles') }}!
+                                                </td>
+                                            </tr> 
+                                        @endforelse
+                                    
+                                    </tbody>
+                                @else
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">{{ __('Palco') }}</th>
+                                            <th scope="col">{{ __('Identificador') }}</th>
+                                            <th scope="col">{{ __('Nombre') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($archivos_subidos as $ar)
+                                            @foreach ($ar['items'] as $it)
+                                                <tr>
+                                                    <td>{{ $loop->iteration }}</td>
+                                                    <td>{{ $ar['name'] }}</td>
+                                                    <td>{{ Str::before($it['name'], '-'); }}</td>
+                                                    <td>{{ $it['name']}}</td>
+                                                </tr>
+                                            @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center justify-content-center" >
+                                                    ¡{{ __('No hay archivos disponibles') }}!
+                                                </td>
+                                            </tr> 
+                                        @endforelse
+                                    
+                                    </tbody>
+                                @endif
+                            @endif                            
                         </table>
                     </div>
                 </div>

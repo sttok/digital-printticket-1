@@ -12,12 +12,12 @@
 
                 <li class="nav-item ml-2" style="padding: 5px 0;">
                     <button class="darkModeSwitch" id="switch">
-                        <span><i class="fas fa-sun"></i></span>   
+                        <span><i class="fas fa-sun"></i></span>
                         <span><i class="fas fa-moon"></i></span>
                     </button>
                 </li>
-                <li>
-                    <a class="nav-link" href="#" >
+                <li>                    
+                    <a class="nav-link" href="https://play.google.com/store/apps/details?id=co.printticket.readerticket&hl=es_CO&gl=US" >
                         <img class="img-fluid" src="{{ asset('images/googleplay.png') }}" style="width: 120px;margin-top: -10px;" >
                     </a>
                 </li>
@@ -35,10 +35,10 @@
         <div class="" id="headerNav">
             <ul class="navbar-nav">
                <li class="nav-item">
-                    <a class="nav-link" href="#">{{ __('Modo de uso') }}</a>
+                    <a class="nav-link" href="{{ asset(route('inicio.frontend') .'/storage/public/'.\App\Models\Setting::find(1)->modo_uso_digital)}}" target="_blank" rel="noopener noreferrer">{{ __('Modo de uso') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">{{ __('Procesos de seguridad') }}</a>
+                    <a class="nav-link" href="{{ asset(route('inicio.frontend') .'/storage/public/'.\App\Models\Setting::find(1)->modo_uso_digital)}}" target="_blank" rel="noopener noreferrer">{{ __('Procesos de seguridad') }}</a>
                 </li>
             <li class="nav-item dropdown">
                 <a class="nav-link notifications-dropdown" href="#" id="notificationsDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">1</a>

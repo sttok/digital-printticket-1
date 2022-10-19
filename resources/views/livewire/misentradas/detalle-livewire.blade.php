@@ -1,5 +1,11 @@
 <div class="row" wire:init="loadDatos">    
     <style>
+        .card-custom{
+            height: 150px;
+        }
+        .card-header{
+            border-bottom: none;                
+        }
         .dropdown-menu.show{
             z-index: 999;
         }
@@ -102,28 +108,44 @@
                                 <br>
                                 <button type="button" class="btn btn-info btn-block" wire:click="limpiar()" >{{ __('Limpiar') }}</button>
                             </div>
-                        </div>
-                        <div class="col-lg-6 col-md-12 col-12 mb-3">
-                            <div class="card stat-widget bg-info" >
-                                <div class="card-header text-center justify-content-center" style="padding-bottom: 5px;">
-                                    <h3>{{ __('Estadisticas de tu evento') }}</h3>
-                                </div>
-                                <div class="card-body text-center justify-content-center" style="padding-top: 5px">
-                                    <div class="row p-2" style="border-top: 1px solid #fefefe6b; border-bottom: 1px solid #fefefe6b">
-                                        <div class="col-md-6 col-12 mb-2">
-                                            <h3 style="color: rgba(225,235,245,.87);"> {{ __('Vendido ') }} <br>
-                                               {{ $porcentaje_venta.'%' }}
-                                            </h3>
+                            <div class="col-12 mb-2 p-4">
+                                <div class="text-center justify-content-center row" style="padding-top: 5px">
+                                    <div class="col-lg-4 col-md-6 col-12 mb-3">
+                                        <div class="card card-custom text-white bg-primary">
+                                            <div class="card-header text-center justify-content-center" style="padding-bottom: 5px;">
+                                                <h6>{{ __('Vendido ') }}</h6>
+                                            </div>
+                                            <div class="card-body text-center justify-content-center">
+                                                <h2>{{ $porcentaje_venta.'%' }}</h2>
+                                            </div>
                                         </div>
-                                        <div class="col-md-6 col-12 mb-2">
-                                            <h3 style="color: rgba(225,235,245,.87);"> {{ __('Dias restantes') }} <br>
-                                                {{ $dias_restantes }}
-                                            </h3>
+                                    </div>
+                                    <div class="col-lg-4 col-md-6 col-12 mb-3">
+                                        <div class="card card-custom bg-info text-white">
+                                            <div class="card-header text-center justify-content-center" style="padding-bottom: 5px;">
+                                                <h6>{{ __('Dias restantes ') }}</h6>
+                                            </div>
+                                            <div class="card-body text-center justify-content-center">
+                                                <h2>{{ $dias_restantes }}</h2>
+                                            </div>
                                         </div>
-                                        <h3 style="color: rgba(225,235,245,.87);"> {{ __('Estado') . ': '}} <b>{{ $estado_evento }}</b> </h3>
+                                    </div>
+                                    <div class="col-lg-4 col-md-6 col-12 mb-3">
+                                        <div class="card card-custom bg-secondary text-white" style="min-height: 153px">
+                                            <div class="card-header text-center justify-content-center" style="padding-bottom: 5px;">
+                                                <h6>{{ __('Estado') }}</h6>
+                                            </div>
+                                            <div class="card-body text-center justify-content-center" style="padding: 23px;">
+                                                <h3>{{ $estado_evento }}</h3>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-lg-6 col-md-12 col-12 mb-3">
+                            <h3>{{ __('Estadisticas de tu evento') }}</h3>
+                            <div id="apex2" wire:ignore></div>
                         </div>
                     </div>
                 </div>
@@ -159,7 +181,7 @@
                                         <div class="spinner-grow my-2" role="status" >
                                         </div>
                                     </div>
-                                    <div wire:loading.remove>
+                                    <div wire:loading.remove wire:target="descargarmasivo">
                                         <i class="fas fa-download"></i> {{ __('Descargar reporte global') }}
                                     </div>
                                 </button>
@@ -349,6 +371,8 @@
             $('#crearcliente').modal('hide');
             $('#ventas').modal('hide');
             $('#verventa').modal('hide');
+            $('#verenlace').modal('hide');
+            $('#compartir').modal('hide');
         })
         window.addEventListener('abrirmodalventa', event => {
             $('#buscarclient').modal('hide');
@@ -420,6 +444,58 @@
                     }
                 })
         })
+    </script>
+    <script>
+        var options2 = {
+                chart: {
+                    height: 300,
+                    type: 'area',
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth'
+                },
+                series: [{
+                    name: 'Apartadas',
+                    data: [{{$estadisticas['0']['Apartadas']}}, {{$estadisticas['1']['Apartadas']}}, {{$estadisticas['3']['Apartadas']}}, {{$estadisticas['4']['Apartadas']}}, {{$estadisticas['5']['Apartadas']}}, 
+                        {{$estadisticas['6']['Apartadas']}}, {{$estadisticas['7']['Apartadas']}}, {{$estadisticas['8']['Apartadas']}}, {{$estadisticas['9']['Apartadas']}}, {{$estadisticas['10']['Apartadas']}}, {{$estadisticas['11']['Apartadas']}}]
+                }, {
+                    name: 'Abonadas',
+                    data: [{{$estadisticas['0']['Abonadas']}}, {{$estadisticas['1']['Abonadas']}}, {{$estadisticas['3']['Abonadas']}}, {{$estadisticas['4']['Abonadas']}}, {{$estadisticas['5']['Abonadas']}}, 
+                        {{$estadisticas['6']['Abonadas']}}, {{$estadisticas['7']['Abonadas']}}, {{$estadisticas['8']['Abonadas']}}, {{$estadisticas['9']['Abonadas']}}, {{$estadisticas['10']['Abonadas']}}, {{$estadisticas['11']['Abonadas']}}]
+                }, {
+                    name: 'Pagadas',
+                    data: [{{$estadisticas['0']['Total']}}, {{$estadisticas['1']['Total']}}, {{$estadisticas['3']['Total']}}, {{$estadisticas['4']['Total']}}, {{$estadisticas['5']['Total']}}, 
+                        {{$estadisticas['6']['Total']}}, {{$estadisticas['7']['Total']}}, {{$estadisticas['8']['Total']}}, {{$estadisticas['9']['Total']}}, {{$estadisticas['10']['Total']}}, {{$estadisticas['11']['Total']}}]
+                }],        
+                xaxis: {
+                    categories: ["{{$estadisticas['0']['Nombre']}}", "{{$estadisticas['1']['Nombre']}}", "{{$estadisticas['3']['Nombre']}}", "{{$estadisticas['4']['Nombre']}}", "{{$estadisticas['5']['Nombre']}}", 
+                        "{{$estadisticas['6']['Nombre']}}", "{{$estadisticas['7']['Nombre']}}", "{{$estadisticas['8']['Nombre']}}", "{{$estadisticas['9']['Nombre']}}", "{{$estadisticas['10']['Nombre']}}", "{{$estadisticas['11']['Nombre']}}"],
+                    labels: {
+                        style: {
+                            colors: 'rgba(94, 96, 110, .5)'
+                        }
+                    }
+                },
+                tooltip: {
+                    x: {
+                        format: 'dd/MM/yy HH:mm'
+                    },
+                },
+                grid: {
+                    borderColor: 'rgba(94, 96, 110, .5)',
+                    strokeDashArray: 4
+                }
+            };
+        $("#apex2").children().remove();
+        var chart2 = new ApexCharts(
+            document.querySelector("#apex2"),
+            options2
+        );
+    
+        chart2.render();
     </script>
 </div>
 

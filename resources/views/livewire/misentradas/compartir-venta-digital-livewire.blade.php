@@ -8,7 +8,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 col-12 mb-3">
+                        <div class="col-md-4 col-12 mb-3">
                             <div class="card stat-widget" >
                                 <a class="btn btn-success" href="https://api.whatsapp.com/send?phone={{ urlencode( $telefono_cliente )}}&text={{ $url_whatsapp }}" target="_blank" >
                                     <div class="card-body text-center justify-content-center" style="line-height: 35px; vertical-align: middle; height: 100%; display: inline;">
@@ -20,12 +20,24 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-6 col-12 mb-3">
+                        <div class="col-md-4 col-12 mb-3">
                             <div class="card stat-widget" >
                                 <a class="btn btn-secondary" href="mailto:{{$correo_cliente}}?Subject={{ urlencode('Url para descargar entrada') }}&body={{ $url_whatsapp }}" target="_blank" >
                                     <div class="card-body text-center justify-content-center" style="line-height: 35px; vertical-align: middle; height: 100%; display: inline;">
                                         <h3>{{ __('Correo') }}<br>
                                             <i class="far fa-envelope"></i>
+                                        </h3>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-12 mb-3">
+                            <div class="card stat-widget" >
+                                <a class="btn btn-primary" href="#" wire:click="enviarsms()" >
+                                    <div class="card-body text-center justify-content-center" style="line-height: 35px; vertical-align: middle; height: 100%; display: inline;">
+                                        <h3>{{ __('Enviar sms') }}<br>
+                                            <i class="far fa-comment-dots"></i>
                                         </h3>
                                     </div>
                                 </a>
@@ -49,7 +61,15 @@
         window.addEventListener('abrirventa', event => {
             $('#compartir').modal('hide');
             $('#verventa').modal('show');
-            
-        })        
+        })
+        window.addEventListener('enviadosms', event => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Enviado!',
+                text: 'Mensaje enviado correctamente',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        })
     </script>
 </div>

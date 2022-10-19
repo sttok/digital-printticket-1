@@ -16,6 +16,7 @@ class CreateDireccionesEventoPalcosTable extends Migration
         Schema::create('direcciones_evento_palcos', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('direccion_evento_id')->unsigned();
+            $table->bigInteger('direccion_entrada_id')->unsigned();
             $table->integer('palco');
             $table->string('path');
             $table->timestamps();

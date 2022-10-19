@@ -2,8 +2,9 @@
 
 namespace App\Http\Livewire\Misentradas;
 
-use Livewire\Component;
 use App\Models\Setting;
+use Livewire\Component;
+use App\Http\Controllers\ApiController;
 
 class CompartirVentaDigitalLivewire extends Component
 {
@@ -25,6 +26,15 @@ class CompartirVentaDigitalLivewire extends Component
             urlencode('Descarga tu entrada: ') . $data['url_1'];
         $this->telefono_cliente = $data['cliente']['phone'];
         $this->correo_cliente = $data['cliente']['email'];
+    }
+
+    public function enviarsms(){
+        $data = array(
+            'telefono' => $this->telefono_cliente,
+            'mensaje' => $this->url_whatsapp,
+        );
+        $data = (new ApiController)->sendsms3($data);
+        $this->dispatchBrowserEvent('enviadosms');
     }
     
     public function limpiar(){

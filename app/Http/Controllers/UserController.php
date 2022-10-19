@@ -73,11 +73,15 @@ class UserController extends Controller
             );
             $remember = $request->get('remember');
             if (Auth::attempt($userdata, $remember)) {
+                $request->session()->regenerate();
                 if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') ) {
                     return redirect()->route('index.eventos');
-                }elseif(Auth::user()->hasRole('organization')){
+                }elseif(Auth::user()->hasRole('organization') || Auth::user()->hasRole('punto venta')){
                        return redirect()->route('mis.eventos');
                 } else {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
                     return Redirect::back()->with('error', __('Solo la persona autorizada puede iniciar sesion.'));
                 }
             } else {

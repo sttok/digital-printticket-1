@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" >{{ __('Ver ventra realizada') }}</h5>
-                <button type="button" class="btn-close" wire:click="cerrarshow()" aria-label="Close" ></button>
+                <button type="button" class="btn-close" wire:click="cerrarshow()" data-bs-dismiss="modal" aria-label="Close" ></button>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -67,7 +67,7 @@
             </div>
             <div class="modal-footer">
                 
-                <button type="button" class="btn btn-secondary"  wire:loading.attr="disabled" wire:click="cerrarshow()">{{ __('Cerrar') }}</button>
+                <button type="button" class="btn btn-secondary"  wire:loading.attr="disabled" wire:click="cerrarshow()" data-bs-dismiss="modal">{{ __('Cerrar') }}</button>
             </div>
         </div>
     </div>

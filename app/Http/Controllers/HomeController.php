@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\EventPuntoVenta;
 use App\Models\OrderChildsDigital;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
@@ -107,7 +108,7 @@ class HomeController extends Controller
     }
 
     public function showevento($id){
-        if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') || Auth::user()->hasRole('organization')) {
+        if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') || Auth::user()->hasRole('organization') || Auth::user()->hasRole('punto venta')) {
              return view('backendv2.eventos.show', compact('id'));
         }else{
             abort(403);
@@ -117,7 +118,7 @@ class HomeController extends Controller
 
     public function miseventos(){
         //abort_if(Gate::denies('asignar_ticket'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') || Auth::user()->hasRole('organization')) {
+        if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') || Auth::user()->hasRole('organization') || Auth::user()->hasRole('punto venta')) {
              return view('backendv2.miseventos.index');
         }else{
             abort(403);
@@ -126,21 +127,28 @@ class HomeController extends Controller
     }
 
     public function miseventosshow($id){
-        abort_if(Gate::denies('asignar_ticket'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-         return view('backendv2.miseventos.detalle', compact('id'));
+        //abort_if(Gate::denies('asignar_ticket'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if ( Auth::user()->hasRole('punto venta')) {
+            $event_punto_ventas = EventPuntoVenta::where([
+                ['punto_id', Auth::user()->id], ['event_id', $id]
+            ])->first();
+            if(!empty($event_punto_ventas)){
+                return view('backendv2.miseventos.detalle', compact('id'));
+            }else{
+                abort(403);
+            }
+        }else{
+            return view('backendv2.miseventos.detalle', compact('id'));
+        }
+         
     }
 
     public function verarchivo($base64){
-        
         $id = base64_decode($base64);
-        
         $id = Str::after($id, '@kf#');
-        
-       
         $entrada = OrderChildsDigital::findorfail($id);
-       
         
-        //if($entrada->permiso_descargar == 1)
+        if($entrada->permiso_descargar == 1){
             if($entrada->provider == "local"){
                     $r = 'storage/ticket-digital/';
                     $url = Str::after($entrada->url, $r) ;
@@ -153,36 +161,10 @@ class HomeController extends Controller
                     return Storage::disk('custom')->download('ticket-digital/'.$url);
         
             }elseif($entrada->provider == 'drive'){
-                    $filename = Storage::disk("google")->url($entrada['url']);
-                    if($entrada->descargas == null){
-                        $entrada->descargas = 1;
-                    }else{
-                        $entrada->descargas++;
-                    }
-                    $entrada->update();
-                    return redirect()->to($filename);
-                    //$dir = Storage::disk("google")->get($entrada['url']);
-                   /* return $dir->size();
-                    $recursive = false;
-                    $contents = collect(Storage::disk("google")->ListContents($dir, $recursive));
-                    $file = $contents
-                            ->where('type', '=', 'file')
-                            //->where('path', '=', $entrada['url'])
-                            /*->where('filename', '=', pathinfo($filename, PATHINFO_FILENAME))
-                            ->where('extension', '=', pathinfo($filename, PATHINFO_EXTENSION))
-                            ->first();
-                
-                    return $file;
-                    $rawData = Storage::disk("google")->get($entrada['url']);
-                    return response($rawData, 200)
-                        ->header('ContentType', Storage::disk("google")->mimetype($entrada['url']))
-                        ->header('Content-Disposition', "attachment; filename=$filename");*/
+                return view('backendv2.descargararchivodrive', compact('base64'));
             }
-        /*}else{
+        }else{
             abort(403);
-        }*/
-
+        }
     }
-
-
 }

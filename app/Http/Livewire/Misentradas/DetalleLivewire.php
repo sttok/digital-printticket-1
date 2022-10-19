@@ -44,8 +44,8 @@ class DetalleLivewire extends Component
     public $search_telefono_endosado, $endosado_id, $endosado_identificador, $encontrado_endosado = false, $cliente_endosado;
     public $enviado = false;
     public $entradas = [], $digital_id;
-    public $total_endosadas = 0, $total_sin_endosar = 0, $porcentaje_venta = 0, $dias_restantes = 0, $estado_evento;
-    public $seleccionar_todos = false;
+    public $total_endosadas = 0, $total_sin_endosar = 0, $porcentaje_venta, $dias_restantes,  $estado_evento;
+    public $seleccionar_todos = false, $estadisticas = array();
 
     public function mount($id){
         $this->evento_id = $id;
@@ -53,12 +53,12 @@ class DetalleLivewire extends Component
     
     public function render()
     {
+        $this->estadisticas();
         return view('livewire.misentradas.detalle-livewire');
     }
 
     public function loadDatos(){
         $this->readytoload = true;
-        $this->organizar = '1';
         $this->entradas = Ticket::where([
             ['event_id', $this->evento_id], ['is_deleted', 0]
         ])->get();
@@ -66,6 +66,63 @@ class DetalleLivewire extends Component
         $final = Carbon::parse(Event::findorfail($this->evento_id)->end_time);
         $this->dias_restantes = $hoy->diffInDays($final);
         $this->calcularendosados();
+    }
+
+    private function estadisticas()
+    {
+        $year = Carbon::now()->format('Y');
+        for ($i = 1; $i <= 12; $i++) {
+            switch ($i) {
+                case 1:
+                    $nombre = 'Ene';
+                    break;
+                case 2:
+                    $nombre = 'Feb';
+                    break;
+                case 3:
+                    $nombre = 'Mar';
+                    break;
+                case 4:
+                    $nombre = 'Abr';
+                    break;
+                case 5:
+                    $nombre = 'May';
+                    break;
+                case 6:
+                    $nombre = 'Jun';
+                    break;
+                case 7:
+                    $nombre = 'Jul';
+                    break;
+                case 8:
+                    $nombre = 'Ago';
+                    break;
+                case 9:
+                    $nombre = 'Sep';
+                    break;
+                case 10:
+                    $nombre = 'Oct';
+                    break;
+                case 11:
+                    $nombre = 'Nov';
+                    break;
+                case 12:
+                    $nombre = 'Dic';
+                    break;
+            }
+            $apartadas = DigitalOrdenCompra::where('evento_id', $this->evento_id)->whereYear('created_at', $year)->whereMonth('created_at', $i)->where('estado_venta', 1)->sum('cantidad_entradas');
+            $abonadas = DigitalOrdenCompra::where('evento_id', $this->evento_id)->whereYear('created_at', $year)->whereMonth('created_at', $i)->where('estado_venta', 2)->sum('cantidad_entradas');
+            $total = DigitalOrdenCompra::where('evento_id', $this->evento_id)->whereYear('created_at', $year)->whereMonth('created_at', $i)->where('estado_venta', 3)->sum('cantidad_entradas');
+
+            $array[$i - 1] = array(
+                'Nombre' => $nombre,
+                'Apartadas' => (int)$apartadas,
+                'Abonadas' => (int)$abonadas,
+                'Total' => (int)$total
+            );
+        }
+
+        $this->estadisticas = $array;
     }
 
     public function endosar($id){
@@ -132,6 +189,7 @@ class DetalleLivewire extends Component
                 'porcentaje_venta', 'dias_restantes', 'estado_evento']);
             $this->enviado = true;
             $this->enviarcompartir($id);
+            $this->estadisticas();
         } catch (Exception $e) {
             DB::rollBack();
             $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
@@ -289,6 +347,7 @@ class DetalleLivewire extends Component
                 'porcentaje_venta', 'dias_restantes', 'estado_evento']);
                     $this->enviado = true;
                     $this->dispatchBrowserEvent('verenviadas');
+                    $this->estadisticas();
                 } catch (Exception $e) {
                     DB::rollBack();
                     $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
@@ -331,8 +390,9 @@ class DetalleLivewire extends Component
 
     public function cerrarshow(){
         $this->dispatchBrowserEvent('cerrarshow1');
-        $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
+        $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
                 'porcentaje_venta', 'dias_restantes', 'estado_evento']);
+        $this->calcularendosados();
     }
 
     public function createcliente(){
@@ -424,8 +484,12 @@ class DetalleLivewire extends Component
     }
 
     private function calcularestadisticas($total, $endosadas){
-        $this->porcentaje_venta = round( ($endosadas / $total) * 100 );
-
+        if($total > 0){
+            $this->porcentaje_venta = round( ($endosadas / $total) * 100 );
+        }else{
+            $this->porcentaje_venta = 0;
+        }
+      
         if($this->dias_restantes > 15){
             if ($this->porcentaje_venta > 75) {
                 $this->estado_evento = __('Execelente');

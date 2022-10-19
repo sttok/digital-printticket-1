@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDireccionesEventosTable extends Migration
+class CreateDireccionesEventosEntradasTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,11 @@ class CreateDireccionesEventosTable extends Migration
      */
     public function up()
     {
-        Schema::create('direcciones_eventos', function (Blueprint $table) {
+        Schema::create('direcciones_eventos_entradas', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('evento_id');
-            $table->bigInteger('usuario_id');
-            $table->bigInteger('direccion_usuario')->unsigned();
-            $table->string('path');
+            $table->bigInteger('direccion_evento_id')->unsigned();
+            $table->bigInteger('entrada_id')->unsigned();
+            $table->text('path');
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ class CreateDireccionesEventosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('direcciones_eventos');
+        Schema::dropIfExists('direcciones_eventos_entradas');
     }
 }

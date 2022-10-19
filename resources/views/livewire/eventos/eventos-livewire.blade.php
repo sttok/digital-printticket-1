@@ -14,28 +14,28 @@
                     <div class="row col-12 mb-4">
                         <div class="col-lg-3 col-md-4 col-12 mb-2">
                             <span>{{ __('Buscar evento') }}</span>
-                            <input type="search" class="form-control @error('search') is-invalid @enderror" placeholder="{{ __('Buscar evento por nombre') }}" wire:model="search">
+                            <input type="search" class="form-control @error('search') is-invalid @enderror" placeholder="{{ __('Buscar evento por nombre') }}" wire:model.lazy="search">
                             @error('search')
                                 <div class="invalid-feedback ">{{ $message }}  </div>
                             @enderror
                         </div>
                         <div class="col-lg-2 col-md-4 col-12 mb-2">
                             <span>{{ __('Buscar desde') }}</span>
-                            <input type="date" class="form-control @error('search_desde') is-invalid @enderror" wire:model="search_desde">
+                            <input type="date" class="form-control @error('search_desde') is-invalid @enderror" wire:model.lazy="search_desde">
                             @error('search_desde')
                                 <div class="invalid-feedback ">{{ $message }}  </div>
                             @enderror
                         </div>
                         <div class="col-lg-2 col-md-4 col-12 mb-2">
                             <span>{{ __('Buscar hasta') }}</span>
-                            <input type="date" class="form-control @error('search_hasta') is-invalid @enderror" wire:model="search_hasta">
+                            <input type="date" class="form-control @error('search_hasta') is-invalid @enderror" wire:model.lazy="search_hasta">
                             @error('search_hasta')
                                 <div class="invalid-feedback ">{{ $message }}  </div>
                             @enderror
                         </div>
                         <div class="col-lg-3 col-md-4 col-12 mb-2">
                             <span>{{ __('Buscar estado') }}</span>
-                           <select class="form-control @error('search_estado') is-invalid @enderror" name="" id=""  wire:model="search_estado">
+                           <select class="form-control @error('search_estado') is-invalid @enderror" wire:model.lazy="search_estado">
                                 <option value="" selected>{{ __('Seleccione una opción') }}</option>
                                <option value="1">{{ __('Disponible') }}</option>
                                <option value="2">{{ __('Finalizado') }}</option>
@@ -54,7 +54,11 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive">
+                    {{-- <div class="col-12 mb-3 justify-content-center text-center" wire:loading>
+                        <div class="spinner-grow  my-3" role="status">
+                        </div>
+                    </div> --}}
+                    <div class="table-responsive" >
                         <table class="table table-hover">
                             <thead>
                                 <tr>
@@ -66,7 +70,15 @@
                                     <th scope="col">{{ __('Acción') }}</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody wire:loading>
+                                <tr>
+                                    <td colspan="6" class="text-center justify-content-center" >
+                                        <div class="spinner-grow  my-3" role="status">
+                                        </div>
+                                    </td>
+                                </tr> 
+                            </tbody>
+                            <tbody wire:loading.remove>
                                 @forelse ($this->Eventos as $evento)
                                     <tr>
                                         <th scope="row">#{{ $evento->id }}</th>

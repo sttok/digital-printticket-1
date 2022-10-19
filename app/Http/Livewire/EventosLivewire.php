@@ -91,16 +91,26 @@ class EventosLivewire extends Component
 
     public function getEventosProperty(){
         if($this->search_hasta != ''){
-            $this->eventos = Event::where([
+            return Event::where(function ($query){
+                $query->select('tipo')
+                    ->from('tickets')
+                    ->whereColumn('tickets.event_id', 'events.id')
+                    ->where('tickets.categoria', 2)
+                    ->limit(1);
+            }, '1')->where([
                 ['name', 'LIKE', '%'.$this->search.'%'], ['is_deleted', 0], ['status', 'LIKE', '%'.$this->search_estado], ['start_time', '>=', $this->search_desde], ['end_time', '<=', $this->search_hasta]
              ])->orderBy('id', 'desc')->paginate(12);
         }else{
-            $eventos = Event::where([
+            return Event::where(function ($query){
+                $query->select('tipo')
+                    ->from('tickets')
+                    ->whereColumn('tickets.event_id', 'events.id')
+                    ->where('tickets.categoria', 2)
+                    ->limit(1);
+            }, '1')->where([
                 ['name', 'LIKE', '%'.$this->search.'%'], ['is_deleted', 0], ['status', 'LIKE', '%'.$this->search_estado], ['start_time', '>=', $this->search_desde]
-             ])->orderBy('id', 'desc')->paginate(12);
+            ])->orderBy('id', 'desc')->paginate(12);
         }
-       
-        return $eventos;
     }
 
     public function getEventoProperty(){
