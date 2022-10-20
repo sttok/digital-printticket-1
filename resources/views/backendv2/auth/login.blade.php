@@ -70,12 +70,12 @@
       
             <section class="section">
                 <div class="d-flex flex-wrap">
-                     <div class="col-lg-8 d-none d-md-block col-12 order-lg-1 order-1 min-vh-100 background-walk-y position-relative overlay-gradient-bottom background-custom" 
+                     <div class="col-lg-8 d-none d-md-none d-lg-block col-12 order-lg-1 order-1 min-vh-100 background-walk-y position-relative overlay-gradient-bottom background-custom" 
                      style="background-repeat: no-repeat;background-size: contain;background-image: url({{ asset(route('inicio.frontend') .'/images/upload/'. $data['fondo']) }});">
                         <div class="absolute-bottom-left index-2">
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-6 col-12 order-lg-1 min-vh-100 order-2">
+                    <div class="col-lg-4 col-md-12 col-12 order-lg-1 min-vh-100 order-2">
                       <div class="p-5 justify-content-center div-login-custom">
                             <img src="{{ asset(route('inicio.frontend') .'/images/upload/'.$data['logo']) }}" alt="logo" width="120" class="login-logo my-4 justify-content-center"  style=" border-radius: 0.5rem">
                             <h4 class=" font-weight-normal mb-4">Bienvenidos a <span class="font-weight-bold">{{\App\Models\Setting::find(1)->app_name}}</span></h4>

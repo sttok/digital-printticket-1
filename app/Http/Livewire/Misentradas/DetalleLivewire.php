@@ -209,7 +209,7 @@ class DetalleLivewire extends Component
         ]);
 
         $cl = AppUser::where([
-            ['phone', 'LIKE',  $this->search_telefono]
+            ['phone', 'LIKE', '%' . $this->search_telefono]
         ])->orWhere([
              ['cedula', 'LIKE',  $this->search_telefono]
         ])->first();
@@ -229,7 +229,7 @@ class DetalleLivewire extends Component
             'search_telefono_endosado' => 'required'
         ]);
         $cl = AppUser::where([
-            ['phone', 'LIKE',  $this->search_telefono_endosado]
+            ['phone', 'LIKE', '%' . $this->search_telefono_endosado]
         ])->orWhere([
               ['cedula', 'LIKE',  $this->search_telefono_endosado]
         ])->first();

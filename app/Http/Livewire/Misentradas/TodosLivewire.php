@@ -35,7 +35,8 @@ class TodosLivewire extends Component
             $eventos = Event::where([
                 ['organizador_id', Auth::user()->id], ['is_deleted', 0], ['status', ['1', '2']]
             ])->get();
-        }       
+        }
+        
 
         $evenn = [];
         foreach ($eventos as $event) {
@@ -58,6 +59,6 @@ class TodosLivewire extends Component
                 );
             }
         }
-        return $evenn;
+        return collect($evenn)->sortByDesc('estado');
     }
 }

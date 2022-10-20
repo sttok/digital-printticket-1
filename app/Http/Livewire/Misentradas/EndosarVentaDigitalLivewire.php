@@ -31,7 +31,7 @@ class EndosarVentaDigitalLivewire extends Component
         ]);
 
         $cl = AppUser::where([
-            ['phone', 'LIKE',  $this->search_telefono]
+            ['phone', 'LIKE', '%' . $this->search_telefono]
         ])->orWhere([
              ['cedula', 'LIKE',  $this->search_telefono]
         ])->first();
