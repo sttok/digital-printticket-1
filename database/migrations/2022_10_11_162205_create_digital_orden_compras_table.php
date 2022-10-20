@@ -19,7 +19,6 @@ class CreateDigitalOrdenComprasTable extends Migration
             $table->bigInteger('evento_id')->unsigned()->nullable();
             $table->bigInteger('vendedor_id')->unsigned()->nullable();
             $table->bigInteger('cliente_id')->unsigned()->nullable();
-            $table->text('array_entradas')->nullable();
             $table->integer('cantidad_entradas')->nullable();
             $table->boolean('metodo_pago')->nullable();
             $table->bigInteger('abonado')->nullable();

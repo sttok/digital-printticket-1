@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Query\Builder;
 use App\Http\Controllers\ApiController;
 use App\Models\DigitalOrdenCompra;
+use App\Models\DigitalOrdenCompraDetalle;
 use Illuminate\Support\Facades\Storage;
 
 class DetalleLivewire extends Component
@@ -28,7 +29,7 @@ class DetalleLivewire extends Component
     protected $paginationTheme = 'bootstrap';
     public $readytoload = false;
     public $evento_id;
-    public $search = '', $search_estado = '', $organizar = 1, $filtrar_por = 0;
+    public $search = '', $search_estado = '', $organizar = 1, $filtrar_por = 0, $agrupar_palcos = false, $cantidad_palcos = 0, $cantidad_asientos = 0;
     protected $queryString = [
         'search' => ['except' => '', 'as' => 's'],
         'search_estado' => ['except' => '', 'as' => 'zona'],
@@ -43,7 +44,7 @@ class DetalleLivewire extends Component
     public $nombre_cliente, $apellido_cliente, $correo_cliente, $imagen, $telefono, $prefijo_telefono = '+57', $phone, $contraseña_cliente, $notificar_nuevo = false, $cedula_cliente;
     public $search_telefono_endosado, $endosado_id, $endosado_identificador, $encontrado_endosado = false, $cliente_endosado;
     public $enviado = false;
-    public $entradas = [], $digital_id;
+    public $digital_id;
     public $total_endosadas = 0, $total_sin_endosar = 0, $porcentaje_venta, $dias_restantes,  $estado_evento;
     public $seleccionar_todos = false, $estadisticas = array();
 
@@ -59,13 +60,53 @@ class DetalleLivewire extends Component
 
     public function loadDatos(){
         $this->readytoload = true;
-        $this->entradas = Ticket::where([
-            ['event_id', $this->evento_id], ['is_deleted', 0]
-        ])->get();
         $hoy = Carbon::now();
         $final = Carbon::parse(Event::findorfail($this->evento_id)->end_time);
         $this->dias_restantes = $hoy->diffInDays($final);
         $this->calcularendosados();
+        if($this->search_estado != ''){
+            $z = $this->Zonas->where('id', $this->search_estado)->first();
+            if($z->forma_generar == 2){
+                $this->agrupar_palcos = true;
+                $this->cantidad_palcos = $z->palcos;
+                $this->cantidad_asientos = $z->puestos;
+            }else{
+                $this->reset(['cantidad_palcos', 'agrupar_palcos', 'cantidad_asientos']);
+            }
+        }else{
+            $this->reset(['cantidad_palcos', 'agrupar_palcos', 'cantidad_asientos']);
+        }
+    }   
+    
+    public function updatedEntradasArray(){
+        if($this->seleccionar_todos){
+            $this->seleccionar_todos == false;
+        }
+    }
+    
+    public function detalle($id){
+        $r = DigitalOrdenCompraDetalle::where('digital_id', $id)->first();
+        
+        if(!empty($r)){
+            $this->reset(['cliente', 'entradas_seleccionadas']);
+            $orden = DigitalOrdenCompra::where('id',$r->digital_orden_compra_id)->first();
+                if(!empty($orden)){
+                     $this->enviado = true;
+                    $this->cliente = $orden->cliente;
+                    $detalle = DigitalOrdenCompraDetalle::where('digital_orden_compra_id', $orden->id)->get();
+                    foreach ($detalle as $ent) {
+                        $digital = $ent->digital;
+                        $nombre = $digital->zona->name;
+                        $digial['entrada'] = $nombre;                       
+                        $this->entradas_seleccionadas[] = $digital;
+                    }
+                    $this->dispatchBrowserEvent('verventaa');
+                }else{
+                    $this->dispatchBrowserEvent('errores', ['error' => __('Ha ocurrido un error, contacta al administrador')]);
+                }
+        }else{
+            $this->dispatchBrowserEvent('errores', ['error' => __('El detalle de la venta no se ha encontrado en la base de datos, contacta al administrador')]);
+        }
     }
 
     private function estadisticas()
@@ -140,13 +181,6 @@ class DetalleLivewire extends Component
             $ent->update();
             $r->endosado = 1;
             $r->update();
-
-            //$array = array();
-            $array[] = array(
-                'order_child_id' => $ent->id,
-                'endosado_id' => null,
-                'digital_id' => $id,
-            );
             
             $this->entradas_seleccionadas[] = $r;
 
@@ -181,9 +215,15 @@ class DetalleLivewire extends Component
                 $ordencompra->metodo_pago = 1;
                 $ordencompra->abonado = 0;
                 $ordencompra->total = 0;
-                $ordencompra->array_entradas = json_encode($array, JSON_INVALID_UTF8_SUBSTITUTE);
                 $ordencompra->estado_venta = 1;
             $ordencompra->save();
+
+            $detalle = new DigitalOrdenCompraDetalle();
+                $detalle->digital_orden_compra_id = $ordencompra->id;
+                $detalle->order_child_id = $ent->id;
+                $detalle->endosado_id = null;
+                $detalle->digital_id = $id;
+            $detalle->save();
             DB::commit();
             $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
                 'porcentaje_venta', 'dias_restantes', 'estado_evento']);
@@ -307,28 +347,8 @@ class DetalleLivewire extends Component
         if ($this->estado_venta != null ) {
             if ($this->encontrado == true && $this->cliente != '') {
                 DB::beginTransaction();
-                $array = [];
+              
                 try {
-                    foreach ($this->entradas_seleccionadas as $es) {
-                        $ent = OrderChild::findorfail($es->order_child_id);
-                        $ent->customer_id = $this->cliente->id;
-                        $ent->vendedor_id = Auth::user()->id;
-                        if($ent->endosado == true){
-                            $ent->endosado_id = $es->cliente_id;
-                        }
-                        $ent->update();
-                       
-                        $es->endosado = 1;
-                        $es->update();
-                        $array[] = array(
-                            'order_child_id' => $es->order_child_id,
-                            'endosado_id' => $es->cliente_id != null ? $es->cliente_id : null,
-                            'digital_id' => $es['id'],
-                        );
-                         $key = base64_encode('@kf#'.$es->id);
-                        $es->url_1 = route('ver.archivo', $key);
-                    }
-
                     $ordencompra = new DigitalOrdenCompra();
                         $ordencompra->identificador = Str::upper(Str::random(7));
                         $ordencompra->evento_id = $this->evento_id;
@@ -338,13 +358,32 @@ class DetalleLivewire extends Component
                         $ordencompra->metodo_pago = $this->metodo_de_pago;
                         $ordencompra->abonado = $this->abonado;
                         $ordencompra->total = $this->total;
-                        $ordencompra->array_entradas = json_encode($array);
                         $ordencompra->estado_venta = $this->estado_venta;
                     $ordencompra->save();
+
+                    foreach ($this->entradas_seleccionadas as $es) {
+                        $ent = OrderChild::findorfail($es->order_child_id);
+                        $ent->customer_id = $this->cliente->id;
+                        $ent->vendedor_id = Auth::user()->id;
+                        if($ent->endosado == true){
+                            $ent->endosado_id = $es->cliente_id;
+                        }
+                        $ent->update();
+                        $es->endosado = 1;
+                        $es->update();
+                        $key = base64_encode('@kf#'.$es->id);
+                        $es->url_1 = route('ver.archivo', $key);
+                        $detalle = new DigitalOrdenCompraDetalle();
+                            $detalle->digital_orden_compra_id = $ordencompra->id;
+                            $detalle->order_child_id =$es->order_child_id;
+                            $detalle->endosado_id = $es->cliente_id != null ? $es->cliente_id : null;
+                            $detalle->digital_id = $es['id'];
+                        $detalle->save();
+                    }
                     
                     DB::commit();
                     $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
-                'porcentaje_venta', 'dias_restantes', 'estado_evento']);
+                        'porcentaje_venta', 'dias_restantes', 'estado_evento']);
                     $this->enviado = true;
                     $this->dispatchBrowserEvent('verenviadas');
                     $this->estadisticas();
@@ -360,8 +399,7 @@ class DetalleLivewire extends Component
         }
     }
 
-    public function seleccionartodos(){
-        
+    public function seleccionartodos(){        
         if($this->seleccionar_todos == false){
             $e = OrderChildsDigital::where([
                 ['evento_id', $this->evento_id], ['identificador', 'LIKE', '%'.$this->search.'%'], ['zona_id', 'LIKE', '%'. $this->search_estado], ['endosado', $this->filtrar_por]
@@ -369,7 +407,7 @@ class DetalleLivewire extends Component
     
             $this->reset('entradas_array');
             foreach ($e as $i) {
-               $this->entradas_array[] = $i->id;
+               $this->entradas_array[$i->id] = true;
             }
             $this->seleccionar_todos = true;
         }else{
@@ -391,8 +429,8 @@ class DetalleLivewire extends Component
     public function cerrarshow(){
         $this->dispatchBrowserEvent('cerrarshow1');
         $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
-                'porcentaje_venta', 'dias_restantes', 'estado_evento']);
-        $this->calcularendosados();
+                'porcentaje_venta', 'dias_restantes', 'estado_evento', 'filtrar_por', 'organizar']);
+        //$this->calcularendosados();
     }
 
     public function createcliente(){
@@ -528,7 +566,19 @@ class DetalleLivewire extends Component
 
     public function updatedSearchEstado(){
         $this->resetPage();
-        $this->reset('seleccionar_todos');
+        $this->reset(['seleccionar_todos', 'entradas_array']);
+        if($this->search_estado != ''){
+            $z = $this->Zonas->where('id', $this->search_estado)->first();
+            if($z->forma_generar == 2){
+                $this->agrupar_palcos = true;
+                $this->cantidad_palcos = $z->palcos;
+                $this->cantidad_asientos = $z->puestos;
+            }else{
+                $this->reset(['cantidad_palcos', 'agrupar_palcos', 'cantidad_asientos']);
+            }
+        }else{
+            $this->reset(['cantidad_palcos', 'agrupar_palcos', 'cantidad_asientos']);
+        }
     }
 
     private function cargarentradas(){
@@ -561,73 +611,25 @@ class DetalleLivewire extends Component
             ['evento_id', $this->evento_id], ['identificador', 'LIKE', '%'.$this->search.'%'], ['zona_id', 'LIKE', '%'. $this->search_estado], ['endosado', $this->filtrar_por]
         ])->paginate(24);
     }
+    
+    public function getZonasProperty(){
+        return Ticket::where([
+            ['event_id', $this->evento_id], ['is_deleted', 0]
+        ])->get();
+    }
 
     public function getSettingProperty(){
         return Setting::findorfail(1)->app_name;
     } 
 
-    public function descargarmasivo(){
-        if(count($this->entradas_array) > 0){
-            $zipFileName = 'EntradasDigitales-' . Str::lower(Str::random(4)) . '.zip';
-            $public_dir = str_replace('\\', '/', public_path());
-            $zip = new ZipArchive;
-            $this->cargarentradas();
-            
-            $c = count($this->entradas_seleccionadas);
-            $c1 = 0;
-            if ($zip->open($public_dir . '/zip/' . $zipFileName, ZipArchive::CREATE) === TRUE) {
-            
-                foreach ($this->entradas_seleccionadas as $ent) {
-                    if($ent->permiso_descargar == 1){
-                        $url = Str::after($ent->url, 'ticket-digital/');
-                        if($ent->provider == "local"){
-                             $zip->addFile($public_dir . '/storage/ticket-digital/' . $url, $url);
-                        }elseif($ent->provider == "drive"){
-                            //$url_evento = $ent->;
-                            //$url = Storage::disk("google")->url($ent['url']);
-                            //dd(Storage::disk("google")->files($ent['url']));
-                            //$zip->addFile(Storage::disk("google")->files($url));
-                        }
-                       
-                        if($ent->descargas == null){
-                            $ent->descargas = 1;
-                        }else{
-                            $ent->descargas++;
-                        }
-                        $ent->update(); 
-                        $c1 = $c1 + 1;
-                    }
-                }
-                $zip->close();
-            }
-            $headers = array('Content-Type' => 'application/octet-stream');
-            $filetopath = $public_dir.'/zip/'.$zipFileName;
-            if(file_exists($filetopath)){
-                if($c1 > 0){
-                    if($c1 < $c){
-                        $this->dispatchBrowserEvent('errores', ['error' => __('Algunas entradas no se pudieron descargar ya que no cuentas con el permiso, contacta al administrador para más información')]);
-                    }
-                    return response()->download($filetopath,$zipFileName,$headers);
-                    // $this->descargararchivo($filetopath,$zipFileName,$headers);
-                    // unlink($public_dir . '/zip/' . $zipFileName);
-                    
-                }else{
-                    $this->dispatchBrowserEvent('errores', ['error' => __('No hay nada que descargar o no tienes permiso para descargar las entradas, contacta al administrador para más información')]);
-                    unlink($public_dir . '/zip/' . $zipFileName);
-                }
-            }else{
-                $this->dispatchBrowserEvent('errores', ['error' => __('Ha ocurrido un error, intentalo nuevamente')]);
-            }
-        }else{
-            $this->dispatchBrowserEvent('errores', ['error' => __('Debe seleccionar al menos 1 entrada')]);
-        }
-    }
-
     public function enviarcompartir($id){
         $ent = OrderChildsDigital::findorfail($id);
-        $ent['cliente'] = $this->cliente;
-        $ent['evento'] = $ent->evento->name;
-        $ent['zona'] = $ent->zona;
+        $ent->cliente = !empty($this->cliente) ? $this->cliente : $ent->entrada->cliente;
+        $ent->evento = $this->Evento;
+        $ent->entrada = $ent->zona['name'];
         $this->emit('mostrarCompartir', $ent);
-    }   
+    } 
+
+   
+     
 }

@@ -39,16 +39,16 @@
                                 @forelse ($entradas_seleccionadas as $ent)
                                     <tr>
                                         <th scope="row">#{{ $ent['identificador'] }}</th>
-                                        <td>{{ $ent->zona->name }}</td>
+                                        <td>{{ $ent['zona']['name'] }}</td>
                                         <td>
-                                            @if($ent['endosado'] == true)
-                                                <span class="badge bg-success">{{ $cliente['name'] }}</span>
+                                           @if($ent['entrada']['endosado_id'] != 0)
+                                                <span class="badge bg-success">{{ $cliente->entrada->endosado->first_name . ' ' . $cliente->entrada->endosado->last_name}}</span>
                                             @else
-                                               <span class="badge bg-secondary"> {{ __('No') }}</span>
+                                               <span class="badge bg-secondary"> No endosado</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <button class="btn btn-primary" type="button" wire:click="enviarcompartir({{$ent->id}})"> <i class="fas fa-share-square"></i></button>
+                                            <button class="btn btn-primary" type="button" wire:click="enviarcompartir({{$ent['id']}})"> <i class="fas fa-share-square"></i></button>
                                         </td>
                                     </tr>
                                 @empty

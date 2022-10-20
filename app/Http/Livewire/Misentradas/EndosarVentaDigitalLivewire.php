@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Misentradas;
 
 use Exception;
 use App\Models\AppUser;
+use App\Models\DigitalOrdenCompraDetalle;
 use App\Models\OrderChild;
 use App\Models\OrderChildsDigital;
 use Livewire\Component;
@@ -58,6 +59,9 @@ class EndosarVentaDigitalLivewire extends Component
                 $order_child = OrderChild::findorfail($ent->order_child_id);
                 $order_child->endosado_id = $this->cliente->id;
                 $order_child->update();
+                $detalle = DigitalOrdenCompraDetalle::where('digital_id', $ent->id)->first();
+                $detalle->endosado_id = $this->cliente->id;
+                $detalle->update();
                 DB::commit();
                 $this->dispatchBrowserEvent('cerrarendosar');
                 $this->reset(['encontrado', 'search_telefono', 'cliente', 'entrada_id']);

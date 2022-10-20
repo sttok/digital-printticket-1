@@ -55,31 +55,5 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-    protected $appends = ['Smsrestantes'];
-
-    /*public function getFollowersAttribute()
-    {
-        $appuser = AppUser::get();
-        $followers = array();
-        foreach ($appuser as $user) {
-            if (in_array($this->attributes['id'], array_filter(explode(',', $user->following)))) {
-                array_push($followers, $user->id);
-            }
-        }
-        return $followers;
-    }*/  
-
-    /*public function getImagePathAttribute()
-    {
-        return url('images/upload') . '/' . $this->attributes['image'];
-    }*/
-
-    public function getSmsrestantesAttribute(){
-        $cont = ContadorSms::where('user_id', $this->attributes['id'])->first();
-        if(!empty($cont)){
-            return $cont->limite_sms;
-        }else{
-            return 0;
-        }
-    }
+    
 }

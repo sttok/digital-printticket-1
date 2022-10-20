@@ -48,6 +48,7 @@
         <script src="{{ asset('backendv2/js/custom.js') }}"></script>
         @livewireScripts
         @yield('js')
+        @yield('jss')
         <script>
             ;(function() {
                 // Initialize

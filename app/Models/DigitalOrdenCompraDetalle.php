@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DigitalOrdenCompra extends Model
+class DigitalOrdenCompraDetalle extends Model
 {
     use HasFactory;
 
-    public function cliente(){
-        return $this->hasOne(User::class, 'id', 'cliente_id');
+    public function digital(){
+        return $this->hasOne(OrderChildsDigital::class, 'id', 'digital_id');
     }
 }
