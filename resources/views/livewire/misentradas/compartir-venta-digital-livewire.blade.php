@@ -47,7 +47,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:target="store" wire:loading.attr="disabled" data-bs-dismiss="modal" wire:click="limpiar()">{{ __('Cerrar') }}</button>
+                    <button type="button" class="btn btn-secondary" wire:target="store" wire:loading.attr="disabled" data-bs-dismiss="modal" wire:click="limpiar()">{{ __('Regresar') }}</button>
                 </div>
             </div>
         </div>

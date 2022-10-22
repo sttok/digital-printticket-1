@@ -17,7 +17,7 @@
                     </div>
                     @if ($search_telefono_endosado != '' && $encontrado_endosado == true)
                         <div class="col-md-12 col-12 mb-2 row text-center justify-content-center" wire.ignore.self>
-                            <div class="card" style="width: 18rem;">
+                            <div class="card w-100" >
                               <img src="{{ asset(route('inicio.frontend') . '/storage/usuarios/' . $cliente_endosado->image)  }}" class="card-img-top" alt="imagen-cliente">
                               <div class="card-body">
                                 <div class="col-md-auto col-12 mb-2">

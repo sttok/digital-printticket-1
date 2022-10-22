@@ -39,8 +39,7 @@ class Event extends Model
     ];
 
     protected $table = 'events';
-    protected $dates = ['start_time', 'end_time'];
-    protected $appends = ['imagePath', 'totalTickets', 'soldTickets'];
+    protected $dates = ['start_time', 'end_time'];  
 
     public function user()
     {
@@ -51,12 +50,7 @@ class Event extends Model
     {
         return $this->hasOne(Category::class, 'id', 'category_id');
     }
-
-    public function getImagePathAttribute()
-    {
-        return url('images/upload') . '/';
-    }
-
+    
     public function Ciudad()
     {
         return $this->hasOne(ciudades::class, 'id', 'ciudad');
@@ -71,70 +65,24 @@ class Event extends Model
     {
         return $this->hasOne(User::class, 'id', 'organizador_id');
     }
+
     public function ticket()
     {
         return $this->hasMany(Ticket::class, 'event_id', 'id');
     }
 
-    public function scanner()
+    public function ticket_digital()
     {
-        return $this->hasMany(EventScanner::class, 'event_id', 'id');
+        return $this->hasMany(Ticket::class, 'event_id', 'id')->where([
+            ['tipo', 1], ['categoria', 2], ['status', 1], ['is_deleted', 0]
+        ]);
     }
-
-    public function contador()
-    {
-        return $this->belongsTo(EventContadorLikes::class, 'id', 'event_id');
-    }
+   
+   
 
     public function appuser1()
     {
         return $this->hasMany(EventAppuserLikes::class, 'event_id', 'id');
-    }
-
-    public function getTotalTicketsAttribute()
-    {
-        $timezone = Setting::find(1)->timezone;
-        $date = Carbon::now($timezone);
-        return Ticket::where([['event_id', $this->attributes['id']], ['is_deleted', 0], ['status', 1], ['end_time', '>=', $date->format('Y-m-d H:i:s')], ['start_time', '<=', $date->format('Y-m-d H:i:s')]])->sum('quantity');
-    }
-
-    public function getSoldTicketsAttribute()
-    {
-        return  Order::where('event_id', $this->attributes['id'])->sum('quantity');
-    }
-
-   
-
-    public function scopeDurationData($query, $start, $end)
-    {
-        $data =  $query->whereBetween('start_time', [$start,  $end]);
-        return $data;
-    }
-
-    public function asignadoscanner($user)
-    {
-        if ($this->eventscanner()->where('scanner_id', $user->id)->first()) {
-            return true;
-        }
-        return false;
-    }
-
-    public function eventscanner()
-    {
-        return $this->hasMany(EventScanner::class);
-    }
-
-    public function contadorscanner()
-    {
-        return $this->hasMany(EventScanner::class, 'event_id');
-    }
-
-    public function asignadopuntoventa($user)
-    {
-        if ($this->eventpuntoventa()->where('punto_id', $user->id)->get()) {
-            return true;
-        }
-        return false;
     }
 
     public function eventpuntoventa()
@@ -147,7 +95,5 @@ class Event extends Model
         return $this->hasMany(User::class, 'id');
     }
 
-    public function Contadorestadisticas(){
-        return $this->hasOne(ContadorVisitaEventoDetalle::class, 'evento_id');
-    }
+   
 }

@@ -1,5 +1,5 @@
 <div class="modal fade" id="ventas" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" wire:ignore.self>
-    <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" >{{ __('Venta de entradas') }}</h5>
@@ -22,9 +22,7 @@
                     <div class="col-md-6 col-12 mb-3 row">
                         <div class="col-md-6 col-6 mb-3">
                             <div class="dropdown">
-                                  <button class="btn btn-secondary dropdown-toggle" type="button" id="metodosdepagoss" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Metodo de pago
-                                  </button>
+                                  <button class="btn btn-secondary dropdown-toggle" type="button" id="metodosdepagoss" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ __('Metodo de pago') }}</button>
                                   <div class="dropdown-menu" aria-labelledby="metodosdepagoss" style="box-shadow: 0 0 1.25rem rgba(31, 45, 61, 0.29);">
                                     <button type="button" class="dropdown-item" wire:click="$set('metodo_de_pago', '1')" style="border-bottom: solid 1px #00000014;"> <img class="img-fluid p-2" src="{{ asset('images/logo-nequi.png') }}" style="max-width:100px"> </button>
                                     <button type="button" class="dropdown-item"  wire:click="$set('metodo_de_pago', '2')" style="border-bottom: solid 1px #00000014;"> <img class="img-fluid p-2" src="{{ asset('images/logo-bancolombia.png') }}"style="max-width:100px"> </button>
@@ -66,7 +64,9 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th scope="col">#</th>
+                                    @if ($agrupar_palcos == false)
+                                        <th scope="col">#</th>
+                                    @endif
                                     <th scope="col">{{ __('Identificador') }}</th>
                                     <th scope="col">{{ __('Entrada') }}</th>
                                     <th scope="col">{{ __('Endosado') }}</th>
@@ -76,28 +76,28 @@
                             <tbody>
                                 @forelse ($entradas_seleccionadas as $ent)
                                     <tr>
-                                        <td><button class="btn btn-outline-danger" wire:click="quitar('{{ $ent['id'] }}')"><i class="fas fa-times"></i></button></td>
+                                        @if ($agrupar_palcos == false)
+                                            <td><button class="btn btn-outline-danger" wire:click="quitar('{{ $ent['id'] }}')"><i class="fas fa-times"></i></button></td>                                        
+                                        @endif
                                         <th scope="row">#{{ $ent['identificador'] }}</th>
                                         <td>{{ $ent->zona->name }}</td>
                                         <td>
-                                            @if ($ent->endosado == false && $ent->entrada->endosado_id > 0)
-                                                <span class="badge bg-success">{{ $ent->entrada->endosado->name . ' ' . $ent->entrada->endosado->last_name }}</span>  
-                                            @elseif($ent->endosado == true)
-                                                <span class="badge bg-success">{{ $ent['cliente_name'] }}</span>
+                                            @if (array_key_exists($ent['id'],$entradas_seleccionadas_endosado))
+                                                <span class="badge bg-success">{{ $entradas_seleccionadas_endosado[$ent['id']]['cliente_name'] }}</span>
                                             @else
                                                 {{ __('No') }}
                                             @endif
                                         </td>
                                         <td>
                                             <button class="btn btn-primary" wire:click="buscarendosar('{{ $ent['id'] }}', '{{ $ent['identificador'] }}')"><i class="fas fa-user-tag"></i> {{ __('Endosar') }}</button>
-                                            @if ($ent->endosado == true)
+                                            @if (array_key_exists($ent['id'],$entradas_seleccionadas_endosado))
                                                 <button class="btn btn-danger" wire:click="eliminarendosado('{{ $ent['id'] }}')"><i class="fas fa-user-times"></i> {{ __('Eliminar endosado') }}</button>
                                             @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center justify-content-center" >
+                                        <td colspan="{{ $agrupar_palcos == false ? 5 : 4 }}" class="text-center justify-content-center" >
                                             ¡{{ __('No hay entradas seleccionadas') }}!
                                         </td>
                                     </tr> 

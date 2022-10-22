@@ -46,7 +46,7 @@ class TodosLivewire extends Component
                     'id' => $event->id,
                     'nombre' => $event->name,
                     'contador' => count($digital),
-                    'total' => $event->people,
+                    'total' => $event->ticket_digital->sum('quantity'),
                     'estado' => 1
                 );
             }else{
@@ -54,7 +54,7 @@ class TodosLivewire extends Component
                     'id' => $event->id,
                     'nombre' => $event->name,
                     'contador' => count($digital),
-                    'total' => $event->people,
+                    'total' => $event->ticket_digital->sum('quantity'),
                     'estado' => 0
                 );
             }

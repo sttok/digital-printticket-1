@@ -10,7 +10,7 @@
             </li>
         @endif
 
-        @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') ||  Auth::user()->hasRole('organization'))
+        @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') || Auth::user()->hasRole('organization'))
             <li class="{{ (request()->is('mis-eventos*')) ? 'active-page' : '' }}" >
                 <a href="{{ route('mis.eventos') }}" class=""><i data-feather="folder"></i>{{ __('Mis entradas') }}</a>
             </li>

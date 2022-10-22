@@ -42,9 +42,9 @@
                                         <td>{{ $ent['zona']['name'] }}</td>
                                         <td>
                                            @if($ent['entrada']['endosado_id'] != 0)
-                                                <span class="badge bg-success">{{ $cliente->entrada->endosado->first_name . ' ' . $cliente->entrada->endosado->last_name}}</span>
+                                                <span class="badge bg-success">{{ __('Si') }}</span>
                                             @else
-                                               <span class="badge bg-secondary"> No endosado</span>
+                                               <span class="badge bg-secondary">{{ __('No') }}</span>
                                             @endif
                                         </td>
                                         <td>
@@ -67,7 +67,7 @@
             </div>
             <div class="modal-footer">
                 
-                <button type="button" class="btn btn-secondary"  wire:loading.attr="disabled" wire:click="cerrarshow()" data-bs-dismiss="modal">{{ __('Cerrar') }}</button>
+                <button type="button" class="btn btn-secondary"  wire:loading.attr="disabled" wire:click="cerrarshow()">{{ __('Cerrar') }}</button>
             </div>
         </div>
     </div>

@@ -17,7 +17,6 @@ use App\Models\OrderChildsDigital;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Query\Builder;
 use App\Http\Controllers\ApiController;
 use App\Models\DigitalOrdenCompra;
 use App\Models\DigitalOrdenCompraDetalle;
@@ -26,6 +25,7 @@ use Illuminate\Support\Facades\Storage;
 class DetalleLivewire extends Component
 {
     use WithPagination;
+    protected $listeners = ['ventarapidapalco1', 'abrirventas2', 'retornarnota'];
     protected $paginationTheme = 'bootstrap';
     public $readytoload = false;
     public $evento_id;
@@ -39,8 +39,8 @@ class DetalleLivewire extends Component
     ];
     public $entradas_array = [];
     public $organizar_por = 1;
-    public $entradas_seleccionadas = [];
-    public $search_telefono, $encontrado = false, $cliente, $estado_venta = 1, $abonado = 0, $total = 0, $metodo_de_pago = 1;
+    public $entradas_seleccionadas = [], $entradas_seleccionadas_endosado = [];
+    public $search_telefono, $encontrado = false, $cliente, $estado_venta = 1, $abonado = 0, $total = 0, $metodo_de_pago = 1, $nota_venta;
     public $nombre_cliente, $apellido_cliente, $correo_cliente, $imagen, $telefono, $prefijo_telefono = '+57', $phone, $contraseña_cliente, $notificar_nuevo = false, $cedula_cliente;
     public $search_telefono_endosado, $endosado_id, $endosado_identificador, $encontrado_endosado = false, $cliente_endosado;
     public $enviado = false;
@@ -68,19 +68,23 @@ class DetalleLivewire extends Component
             $z = $this->Zonas->where('id', $this->search_estado)->first();
             if($z->forma_generar == 2){
                 $this->agrupar_palcos = true;
-                $this->cantidad_palcos = $z->palcos;
-                $this->cantidad_asientos = $z->puestos;
-            }else{
-                $this->reset(['cantidad_palcos', 'agrupar_palcos', 'cantidad_asientos']);
+                $this->emit('cambiarpalco',  $z);
             }
-        }else{
-            $this->reset(['cantidad_palcos', 'agrupar_palcos', 'cantidad_asientos']);
         }
-    }   
+    }
+    
+    public function ventarapidapalco1($data) {
+        $this->cliente = $data['cliente'];
+        $this->entradas_seleccionadas = $data['array'];
+        $this->enviado = true;
+        $this->dispatchBrowserEvent('verenviadas');
+        $this->reset('nota_venta');
+    }
     
     public function updatedEntradasArray(){
+        
         if($this->seleccionar_todos){
-            $this->seleccionar_todos == false;
+            $this->seleccionar_todos = false;
         }
     }
     
@@ -170,9 +174,19 @@ class DetalleLivewire extends Component
         $this->emit('endosarentrada', $id);
     }
 
-    public function ventarapida($id){
+    public function abrirventarapida1($id){
+        $this->dispatchBrowserEvent('abrirventa33');
+        $this->digital_id = $id;
+        $this->reset('nota_venta');
+    }
+
+    public function ventarapida(){
+        $this->validate([
+            'nota_venta' => 'required|min:1|max:550'
+        ]);
         DB::beginTransaction();
         try {
+            $id = $this->digital_id;
             $this->reset(['entradas_seleccionadas', 'cliente', 'entradas']);
             $r = $this->Entradas->where('id',$id)->first();
             $ent = OrderChild::findorfail($r->order_child_id);
@@ -216,6 +230,7 @@ class DetalleLivewire extends Component
                 $ordencompra->abonado = 0;
                 $ordencompra->total = 0;
                 $ordencompra->estado_venta = 1;
+                $ordencompra->nota = $this->nota_venta;
             $ordencompra->save();
 
             $detalle = new DigitalOrdenCompraDetalle();
@@ -283,20 +298,27 @@ class DetalleLivewire extends Component
         }
     }
 
-    public function asignarentrada(){
-       
+    public function asignarentrada(){       
         $this->validate([
             'cliente_endosado' => 'required',
             'endosado_id' => 'required',
             'encontrado_endosado' => 'required|accepted'
         ]);
 
-        foreach ($this->entradas_seleccionadas as $rr) {
-            if($rr->id == $this->endosado_id){
-                $rr->endosado = true;
-                $rr->cliente_id = $this->cliente_endosado->id;
-                $rr->cliente_name = $this->cliente_endosado->name . ' ' . $this->cliente_endosado->last_name;
-            }
+        if(!in_array($this->endosado_id, $this->entradas_seleccionadas_endosado)){
+            $this->entradas_seleccionadas_endosado[$this->endosado_id] = array(
+                'entrada_digital_id' => $this->endosado_id,
+                'cliente_id' => $this->cliente_endosado->id,
+                'cliente_name' => $this->cliente_endosado->name . ' ' . $this->cliente_endosado->last_name
+            );
+        }else{
+            $key = array_search($this->endosado_id,array_column($this->entradas_seleccionadas_endosado, 'entrada_digital_id'));
+            $r = array(
+                'entrada_digital_id' => $this->endosado_id,
+                'cliente_id' => $this->cliente_endosado->id,
+                'cliente_name' => $this->cliente_endosado->name . ' ' . $this->cliente_endosado->last_name
+            );
+            array_replace($this->entradas_seleccionadas_endosado[$key], $r);
         }
 
         $this->reset(['search_telefono_endosado', 'endosado_id', 'encontrado_endosado', 'cliente_endosado', 'endosado_identificador']);
@@ -312,14 +334,21 @@ class DetalleLivewire extends Component
         }
     }
 
-    public function eliminarendosado($id){
-        foreach ($this->entradas_seleccionadas as $rr) {
-            if($rr->id == $id){
-                $rr->endosado = false;
-                $rr->cliente_id = '';
-                $rr->cliente_name = '';
-            }
+    public function abrirventas2($array){
+        $this->entradas_array = $array;
+        if (count($this->entradas_array) > 0) {
+            $this->dispatchBrowserEvent('abrirmodalventa');
+            $this->cargarentradas();
+        }else{
+            $this->dispatchBrowserEvent('errores', ['error' => __('Debe seleccionar al menos 1 entrada')]);
         }
+    }
+
+    public function eliminarendosado($id){
+        
+        unset($this->entradas_seleccionadas_endosado[$id]);
+
+        
         $this->dispatchBrowserEvent('quitarendosado');
     }
 
@@ -347,7 +376,6 @@ class DetalleLivewire extends Component
         if ($this->estado_venta != null ) {
             if ($this->encontrado == true && $this->cliente != '') {
                 DB::beginTransaction();
-              
                 try {
                     $ordencompra = new DigitalOrdenCompra();
                         $ordencompra->identificador = Str::upper(Str::random(7));
@@ -365,8 +393,8 @@ class DetalleLivewire extends Component
                         $ent = OrderChild::findorfail($es->order_child_id);
                         $ent->customer_id = $this->cliente->id;
                         $ent->vendedor_id = Auth::user()->id;
-                        if($ent->endosado == true){
-                            $ent->endosado_id = $es->cliente_id;
+                        if (array_key_exists($es['id'],$this->entradas_seleccionadas_endosado)){
+                            $ent->endosado_id = $this->entradas_seleccionadas_endosado[$es['id']]['cliente_id'];
                         }
                         $ent->update();
                         $es->endosado = 1;
@@ -376,7 +404,11 @@ class DetalleLivewire extends Component
                         $detalle = new DigitalOrdenCompraDetalle();
                             $detalle->digital_orden_compra_id = $ordencompra->id;
                             $detalle->order_child_id =$es->order_child_id;
-                            $detalle->endosado_id = $es->cliente_id != null ? $es->cliente_id : null;
+                            if (array_key_exists($es['id'],$this->entradas_seleccionadas_endosado)){
+                                $detalle->endosado_id = $this->entradas_seleccionadas_endosado[$es['id']]['cliente_id'];
+                            }else{
+                                $detalle->endosado_id = null;
+                            }
                             $detalle->digital_id = $es['id'];
                         $detalle->save();
                     }
@@ -450,7 +482,7 @@ class DetalleLivewire extends Component
         $this->validate([
             'nombre_cliente' => 'required|min:2|max:120',
             'apellido_cliente' => 'required|min:2|max:120',
-            'correo_cliente' => 'nullable|email|unique:app_user,email',
+            'correo_cliente' => 'required|email|unique:app_user,email',
             'prefijo_telefono' => 'required',
             'telefono' => 'required|integer',
             'phone' => 'required|phone:CO,AUTO|unique:app_user,phone',
@@ -571,13 +603,8 @@ class DetalleLivewire extends Component
             $z = $this->Zonas->where('id', $this->search_estado)->first();
             if($z->forma_generar == 2){
                 $this->agrupar_palcos = true;
-                $this->cantidad_palcos = $z->palcos;
-                $this->cantidad_asientos = $z->puestos;
-            }else{
-                $this->reset(['cantidad_palcos', 'agrupar_palcos', 'cantidad_asientos']);
+                $this->emit('cambiarpalco',  $z);
             }
-        }else{
-            $this->reset(['cantidad_palcos', 'agrupar_palcos', 'cantidad_asientos']);
         }
     }
 
@@ -609,12 +636,12 @@ class DetalleLivewire extends Component
     public function getEntradasProperty(){
         return OrderChildsDigital::where([
             ['evento_id', $this->evento_id], ['identificador', 'LIKE', '%'.$this->search.'%'], ['zona_id', 'LIKE', '%'. $this->search_estado], ['endosado', $this->filtrar_por]
-        ])->paginate(24);
+        ])->paginate(18);
     }
     
     public function getZonasProperty(){
         return Ticket::where([
-            ['event_id', $this->evento_id], ['is_deleted', 0]
+            ['event_id', $this->evento_id], ['is_deleted', 0], ['tipo', 1], ['categoria', 2], ['status', 1], ['is_deleted', 0]
         ])->get();
     }
 
@@ -623,13 +650,20 @@ class DetalleLivewire extends Component
     } 
 
     public function enviarcompartir($id){
+        $this->dispatchBrowserEvent('cerrarshow1');
         $ent = OrderChildsDigital::findorfail($id);
         $ent->cliente = !empty($this->cliente) ? $this->cliente : $ent->entrada->cliente;
         $ent->evento = $this->Evento;
         $ent->entrada = $ent->zona['name'];
         $this->emit('mostrarCompartir', $ent);
-    } 
+    }
 
+    public function ventarapida2(){
+        $this->validate([
+            'nota_venta' => 'required|min:1|max:550'
+        ]);
+       $this->emit('ventarapidapalco', $this->nota_venta);
+    }
    
      
 }

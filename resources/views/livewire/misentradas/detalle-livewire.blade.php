@@ -162,35 +162,33 @@
                 </div>
                 
                 <div class="card-body row" id="entrads">
-                    <div wire:loading.delay.long >
+                    <div wire:loading.delay.long wire:target="(['filtrar_por', 'organizar', 'search_estado', 'search'])">
                         <div class="col-12 my-2 text-center justify-content-center row">
                             <div class="spinner-grow my-2" role="status" >
                             </div>
                         </div>
                     </div>
-                    @if (count($this->Entradas) > 0)
-                        <div class="row col-12">
-                            <div class="col-md-6 col-12 mb-2 float-left">
-                                <div class="mb-4 form-check ml-1" >
-                                    <input type="checkbox" class="form-check-input" style="margin-left: 0px !important; margin-top: 0px; margin-right: 10px;" wire:click.lazy="seleccionartodos()" {{ $seleccionar_todos == true ? 'checked' : '' }}>
-                                    <label class="form-check-label" wire:click.lazy="seleccionartodos()">{{ __('Seleccionar todos') }}</label>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
                     
                     @if ($agrupar_palcos == false)
+                        @if (count($this->Entradas) > 0)
+                            <div class="row col-12">
+                                <div class="col-md-6 col-12 mb-2 float-left">
+                                    <div class="mb-4 form-check ml-1" >
+                                        <input type="checkbox" class="form-check-input" style="margin-left: 0px !important; margin-top: 0px; margin-right: 10px;" wire:click.lazy="seleccionartodos()" {{ $seleccionar_todos == true ? 'checked' : '' }}>
+                                        <label class="form-check-label" wire:click.lazy="seleccionartodos()">{{ __('Seleccionar todos') }}</label>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                         @if ($organizar == 1 || $organizar == 3)
                             @forelse ($this->Entradas as $entrada)
-                                @php
-                                    $acep = in_array($entrada->id, $this->entradas_array) !== false ? true : false;
-                                @endphp
+                                
                                 <div class="col-lg-{{ $organizar == 1 ? 3 : 2 }} col-md-{{ $organizar == 1 ? 6 : 3 }} col-{{ $organizar == 1 ? 12 : 6 }}" >
-                                    <div class="card card-file-manager zoom {{ $acep == true ? 'bg-primary' : '' }}" >
+                                    <div class="card card-file-manager zoom" >
                                         <div class="d-flex">
                                             <div class="col-md-6 col-6 mb-2">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="{{ $entrada->id }}" id="entrada-{{$entrada->id}}" wire:model="entradas_array">
+                                                    <input class="form-check-input" type="checkbox" value="{{ $entrada->id }}"  wire:model.lazy="entradas_array.{{$entrada->id}}">
                                                 </div>
                                             </div>
                                             <div class="col-md-6 col-6 mb-2">
@@ -210,7 +208,7 @@
                                                                 <button class="dropdown-item" type="button" wire:click="veruploads('{{ $entrada->id }}')">
                                                                     <i class="fas fa-tag"></i> {{ __('Venta') }}
                                                                 </button>
-                                                                <button class="dropdown-item" type="button" wire:click="ventarapida('{{ $entrada->id }}')" >
+                                                                <button class="dropdown-item" type="button" wire:click="abrirventarapida1('{{ $entrada->id }}')" >
                                                                     <i class="fas fa-shipping-fast"></i> {{ __('Venta rapida') }}
                                                                 </button>
                                                             @else
@@ -235,16 +233,16 @@
                                             </div>
                                         </div>
                                         
-                                        <div class="card-file-header {{ $acep == true ? 'text-white' : '' }}" style="background: transparent;">
+                                        <div class="card-file-header " style="background: transparent;">
                                             <i class="fas fa-file-pdf" ></i>
                                         </div>
                                         <div class="card-body">
-                                            <h6 class="card-subtitle mb-2 {{ $acep == true ? 'text-white' : 'text-muted' }} ">{{ $entrada->zona->name. ' - ' . $entrada->identificador }} 
+                                            <h6 class="card-subtitle mb-2 ">{{ $entrada->zona->name. ' - ' . $entrada->identificador }} 
                                                 @if ($entrada->endosado > 0)
                                                     <span class="badge bg-success" style="margin-left: 5px"><i class="fas fa-user-tag"></i></span>
                                                 @endif
                                             </h6>
-                                            <p class="card-text {{ $acep == true ? 'text-white' : '' }}">{{ $entrada->created_at->diffForHumans() }}</p>
+                                            <p class="card-text">{{ $entrada->created_at->diffForHumans() }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -261,7 +259,7 @@
                                             <th scope="col">#</th>
                                             <th scope="col">{{ __('Identificador') }}</th>
                                             <th scope="col">{{ __('Zona') }}</th>
-                                            <th scope="col">{{ __('Archivos') }}</th>
+                                            <th scope="col">{{ __('Fecha') }}</th>
                                             <th scope="col">{{ __('Acción') }}</th>
                                         </tr>
                                     </thead>
@@ -270,7 +268,7 @@
                                             <tr>
                                                 <th scope="row">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" value="{{ $entrada->id }}" id="flexCheckChecked" wire:model="entradas_array">
+                                                        <input class="form-check-input" type="checkbox" value="{{ $entrada->id }}" id="flexCheckChecked" wire:model.lazy="entradas_array.{{$entrada->id}}">
                                                     </div>
                                                 </th>
                                                 <td> 
@@ -280,17 +278,17 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                {{ $entrada->zona->name}}
+                                                    {{ $entrada->zona->name}}
                                                 </td>
                                                 <td>
-                                                {{ $entrada->created_at->diffForHumans() }}
+                                                    {{ $entrada->created_at->diffForHumans() }}
                                                 </td>
                                                 <td>
                                                     @if ($entrada->endosado == 0)
                                                         <button class="btn btn-primary mb-2"  type="button" wire:click="veruploads('{{ $entrada->id }}')">
                                                             <i class="fas fa-tag"></i> {{ __('Vender') }}
                                                         </button>
-                                                        <button class="btn btn-primary mb-2" type="button" wire:click="ventarapida('{{ $entrada->id }}')" >
+                                                        <button class="btn btn-primary mb-2" type="button" wire:click="abrirventarapida1('{{ $entrada->id }}')" >
                                                             <i class="fas fa-shipping-fast"></i> {{ __('Venta rapida') }}
                                                         </button>
                                                     @else
@@ -333,59 +331,20 @@
                             </div>
                         @endif
                     @else
-                        @for ($i = 1; $i <= $cantidad_palcos; $i++)
-                            <div class="col-md-2 col-4 mb-3">
-                                <div class="card card-file-manager zoom " >
-                                    <div class="d-flex">
-                                        <div class="col-md-6 col-6 mb-2">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="{{ $i }}"  wire:model="entradas_array">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 col-6 mb-2">
-                                            <div class="dropdown card-dropdown dropstart" style="float: right;">
-                                                <button class="btn btn-primary dropstart dropdown-toggle float-right" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <div style="display: inline;">
-                                                        <i class="fas fa-ellipsis-v"></i>
-                                                    </div>
-                                                </button>
-                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="">
-                                                    <li>
-                                                        <button class="dropdown-item" type="button" wire:click="veruploads('{{ $i }}')">
-                                                            <i class="fas fa-tag"></i> {{ __('Venta') }}
-                                                        </button>
-                                                        <button class="dropdown-item" type="button" wire:click="ventarapida('{{ $i }}')" >
-                                                            <i class="fas fa-shipping-fast"></i> {{ __('Venta rapida') }}
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="card-file-header" style="background: transparent;">
-                                        <i class="fas fa-ticket-alt"></i>
-                                    </div>
-                                    <div class="card-body">
-                                        <h6 class="card-subtitle mb-2">{{ __('Palco: ') . $i }}</h6>
-                                        <p class="card-text ">{{ __('Asientos: ') . $cantidad_asientos }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        @endfor
+                        @livewire('misentradas.palcos-digital-livewire', ['evento_id' => $evento_id])
                     @endif
                     
                    
                 </div>
                 @if (count($entradas_array) > 0)
-                    <a href="#" class="btn-flotante" wire:click="abrirventas()"><i class="fas fa-check"></i> {{ count($entradas_array) . ' Seleccionados' }} </a>
+                    <a href="#" class="btn-flotante" wire:click="abrirventas()"><i class="fas fa-check"></i> {{ count(array_filter($entradas_array, function($k) { return $k != null;} )) . ' Seleccionados' }} </a>
                 @else
                     <a href="#" class="btn-flotante btn-secondary" wire:click="abrirventas()"><i class="fas fa-times"></i></a>
                 @endif
             </div>
         </div>
     </div>
-    @if ($readytoload)
-       
+    @if ($readytoload)       
         @include('backendv2.cliente.modal.create')
         @include('backendv2.miseventos.modal.buscaruser')
         @include('backendv2.miseventos.modal.ver')
@@ -394,6 +353,7 @@
         @else
             @include('backendv2.miseventos.modal.venta')
         @endif
+        @include('backendv2.miseventos.modal.ventarapida')
         @livewire('misentradas.compartir-venta-digital-livewire')
         @livewire('misentradas.endosar-venta-digital-livewire')
     @endif   
@@ -420,6 +380,7 @@
             $('#verventa').modal('hide');
             $('#verenlace').modal('hide');
             $('#compartir').modal('hide');
+            $('#ventarapidamodal').modal('hide');
         })
         window.addEventListener('abrirmodalventa', event => {
             $('#buscarclient').modal('hide');
@@ -475,7 +436,7 @@
             Swal.fire({
                 icon :'success',
                 title: '¡Exito! ',
-                text: '¡La entrada se han enviado correctamente!',
+                text: '¡La entrada se han vendidos correctamente!',
                 timer: 2000,
                 timerProgressBar: true,
                 didOpen: () => {
@@ -493,6 +454,9 @@
         })
         window.addEventListener('verventaa', event => {
             $('#verventa').modal('show');
+        })
+        window.addEventListener('abrirventa33', event => {
+            $('#ventarapidamodal').modal('show');
         })
     </script>
     <script>
@@ -543,8 +507,7 @@
         var chart2 = new ApexCharts(
             document.querySelector("#apex2"),
             options2
-        );
-    
+        );    
         chart2.render();
     </script>
     
