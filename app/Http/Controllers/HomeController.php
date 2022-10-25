@@ -141,7 +141,7 @@ class HomeController extends Controller
             return view('backendv2.miseventos.detalle', compact('id'));
         }
          
-    }
+    }    
 
     public function verarchivo($base64){
         $id = base64_decode($base64);
@@ -163,6 +163,14 @@ class HomeController extends Controller
             }elseif($entrada->provider == 'drive'){
                 return view('backendv2.descargararchivodrive', compact('base64'));
             }
+        }else{
+            abort(403);
+        }
+    }
+
+    public function createevento(){
+        if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin')){
+            return view('backendv2.eventos.create');
         }else{
             abort(403);
         }

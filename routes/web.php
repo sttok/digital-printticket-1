@@ -35,6 +35,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/eventos', [HomeController::class, 'indexeventos'])->name('index.eventos');
     Route::prefix('eventos')->group(function () {
         Route::get('entradas/{id}', [HomeController::class, 'showevento'])->name('show.eventos');
+        Route::get('crear', [HomeController::class, 'createevento'] )->name('create.evento');
     });
 
     Route::get('/mis-eventos', [HomeController::class, 'miseventos'])->name('mis.eventos');

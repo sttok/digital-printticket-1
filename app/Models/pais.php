@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DigitalOrdenCompra extends Model
+class pais extends Model
 {
     use HasFactory;
+    protected $table = 'paises';
 
-    public function cliente(){
-        return $this->hasOne(AppUser::class, 'id', 'cliente_id');
-    }
+    protected $fillable = [
+        'Codigo',
+        'Pais'
+    ];
 }

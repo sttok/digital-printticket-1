@@ -11,8 +11,8 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{ __('Todos los eventos') }}  </h5>
-                    <div class="row col-12 mb-4">
-                        <div class="col-lg-3 col-md-4 col-12 mb-2">
+                   <div class="row col-12 mb-4">
+                        <div class="col-lg-2 col-md-4 col-12 mb-2">
                             <span>{{ __('Buscar evento') }}</span>
                             <input type="search" class="form-control @error('search') is-invalid @enderror" placeholder="{{ __('Buscar evento por nombre') }}" wire:model.lazy="search">
                             @error('search')
@@ -33,7 +33,7 @@
                                 <div class="invalid-feedback ">{{ $message }}  </div>
                             @enderror
                         </div>
-                        <div class="col-lg-3 col-md-4 col-12 mb-2">
+                        <div class="col-lg-2 col-md-4 col-12 mb-2">
                             <span>{{ __('Buscar estado') }}</span>
                            <select class="form-control @error('search_estado') is-invalid @enderror" wire:model.lazy="search_estado">
                                 <option value="" selected>{{ __('Seleccione una opción') }}</option>
@@ -42,22 +42,25 @@
                                <option value="3">{{ __('Cancelado') }}</option>
                            </select>
                            @error('search_estado')
-                            <div class="invalid-feedback ">{{ $message }}  </div>
-                        @enderror
+                                <div class="invalid-feedback ">{{ $message }}  </div>
+                            @enderror
                         </div>
                         <div class="col-md-2 col-6 mb-2">
                             <br>
-                            <button type="button" class="btn btn-info" wire:click="limpiar()" >{{ __('Limpiar') }}</button>
+                            <div class="d-flex">
+                                <div class="col-auto mx-2 p-1">
+                                    <button type="button" class="btn btn-info" wire:click="limpiar()" >{{ __('Limpiar') }}</button>
+                                </div>
+                                <div class="col-auto mx-2 p-1">
+                                    <a href="{{ route('create.evento') }}" class="btn btn-success">{{ __('Crear evento') }}</a>
+                                </div>
+                            </div>                            
                         </div>
                     </div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body">
-                    {{-- <div class="col-12 mb-3 justify-content-center text-center" wire:loading>
-                        <div class="spinner-grow  my-3" role="status">
-                        </div>
-                    </div> --}}
                     <div class="table-responsive" >
                         <table class="table table-hover">
                             <thead>
@@ -73,8 +76,10 @@
                             <tbody wire:loading>
                                 <tr>
                                     <td colspan="6" class="text-center justify-content-center" >
-                                        <div class="spinner-grow  my-3" role="status">
-                                        </div>
+                                        <div class="text-center justify-content-center">
+                                            <div class="spinner-grow  my-3" role="status">
+                                            </div>
+                                        </div>                                        
                                     </td>
                                 </tr> 
                             </tbody>
@@ -105,6 +110,7 @@
                                         </td>
                                         <td>
                                             <a class="btn btn-primary" href="{{ route('show.eventos', $evento->id) }}">{{ __('Seleccionar') }}</a>
+                                            <button class="btn btn-warning" type="button" wire:click="reiniciarentradas({{ $evento->id }})" ><i class="fas fa-redo"></i> &nbsp; {{ __('Reiniciar') }}</button>
                                         </td>
                                     </tr>
                                 @empty
@@ -130,8 +136,7 @@
             </div>
         </div>
     </div>
-    @if ($readytoload)   
-       
+    @if ($readytoload)       
         <script>
             window.addEventListener('cargarimagen', event => {
                ;(function() {
@@ -143,13 +148,17 @@
         </script>
     @endif
     <script>
-        window.addEventListener('cerrardescargarexcel', event => {
-            $('#descargarentradas').modal('hide');
-        });
+        window.addEventListener('errores', event => {
+            Swal.fire(
+                '¡Error!',
+                event.detail.error,
+                'error'
+            )
+        })
         window.addEventListener('reiniciar', event => {
             Swal.fire({
                 title: '¿Esta seguro?',
-                text: 'Se reiniciaran todas las entradas de este evento',
+                text: 'Se reiniciaran todas las ventas de entradas de este evento',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -177,64 +186,8 @@
                     }
                 })
         });
-         window.addEventListener('borrar', event => {           
-            Swal.fire({
-                icon: 'question',
-                title: "¿Esta seguro?",
-                text: "Esta acción no se podra regresar",
-                showCancelButton: true,
-            }).then((result) => {
-                if (result.value) {
-                    window.livewire.emit('borrado')
-                    let timerInterval
-                    Swal.fire({
-                        icon :'success',
-                        title: '¡Procesando! ',
-                        text: 'Espere un momento, en breve estara disponible',
-                        timer: 1500,
-                        timerProgressBar: true,
-                        didOpen: () => {
-                            Swal.showLoading()
-                        },
-                        willClose: () => {
-                            clearInterval(timerInterval)
-                        }
-                    })
-                }
-            });
-        });
-        window.addEventListener('cancelado', event => {
-            Swal.fire({
-                title: '¿Esta seguro?',
-                text: 'Se cambiara el estado del evento',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                cancelButtonText: 'No',
-                confirmButtonText: 'Si'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        let timerInterval
-                        window.livewire.emit('cancelado')
-                            Swal.fire({
-                            title: '¡Listo!',
-                            html: 'Espere un momento..',
-                            icon: 'info',
-                            timer: 1000,
-                            timerProgressBar: true,
-                            didOpen: () => {
-                                Swal.showLoading()
-                            },
-                            willClose: () => {
-                                clearInterval(timerInterval)
-                            }
-                            }).then((result) => {
-                            })
-                    }
-                })
-        });
-        window.addEventListener('recordado', event => {            
+       
+        window.addEventListener('reiniciado', event => {            
             Swal.fire({
                 icon: 'success',
                 title: '¡Exito!',

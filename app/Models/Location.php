@@ -5,17 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Category extends Model
+class Location extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'name',
-        'image',
-        'status',
-        'borrado'
+        'nombre',
+        'direccion',
+        'google_iframe',
+        'estado',
     ];
 
-    protected $table = 'category';
-    
-    
+    protected $table = 'location';
 }

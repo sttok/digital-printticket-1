@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Storage;
 class DetalleLivewire extends Component
 {
     use WithPagination;
-    protected $listeners = ['ventarapidapalco1', 'abrirventas2', 'retornarnota'];
+    protected $listeners = ['ventarapidapalco1', 'abrirventas2', 'retornarnota', 'detalle'];
     protected $paginationTheme = 'bootstrap';
     public $readytoload = false;
     public $evento_id;
@@ -70,6 +70,8 @@ class DetalleLivewire extends Component
                 $this->agrupar_palcos = true;
                 $this->emit('cambiarpalco',  $z);
             }
+        }else{
+            $this->reset('agrupar_palcos');
         }
     }
     
@@ -95,13 +97,13 @@ class DetalleLivewire extends Component
             $this->reset(['cliente', 'entradas_seleccionadas']);
             $orden = DigitalOrdenCompra::where('id',$r->digital_orden_compra_id)->first();
                 if(!empty($orden)){
-                     $this->enviado = true;
+                    $this->enviado = true;
                     $this->cliente = $orden->cliente;
                     $detalle = DigitalOrdenCompraDetalle::where('digital_orden_compra_id', $orden->id)->get();
                     foreach ($detalle as $ent) {
                         $digital = $ent->digital;
                         $nombre = $digital->zona->name;
-                        $digial['entrada'] = $nombre;                       
+                        $digial['entrada'] = $nombre;
                         $this->entradas_seleccionadas[] = $digital;
                     }
                     $this->dispatchBrowserEvent('verventaa');
@@ -461,8 +463,7 @@ class DetalleLivewire extends Component
     public function cerrarshow(){
         $this->dispatchBrowserEvent('cerrarshow1');
         $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
-                'porcentaje_venta', 'dias_restantes', 'estado_evento', 'filtrar_por', 'organizar']);
-        //$this->calcularendosados();
+                'porcentaje_venta', 'dias_restantes', 'estado_evento', 'filtrar_por', 'organizar', 'agrupar_palcos', 'enviado']);
     }
 
     public function createcliente(){
@@ -577,18 +578,12 @@ class DetalleLivewire extends Component
                 $this->estado_evento = __('Mal');
             }
         }
-    }    
-
-    public function cambiarfiltrar(){
-        if ($this->filtrar_por == 0) {
-            $this->filtrar_por = 1;
-        }else{
-            $this->filtrar_por = 0;
-        }
     }
 
+   
     public function UpdatedFiltrarPor(){
         $this->resetpage();
+        $this->calcularendosados();
     }
 
     public function updatedSearch(){
@@ -599,12 +594,17 @@ class DetalleLivewire extends Component
     public function updatedSearchEstado(){
         $this->resetPage();
         $this->reset(['seleccionar_todos', 'entradas_array']);
+       
         if($this->search_estado != ''){
             $z = $this->Zonas->where('id', $this->search_estado)->first();
             if($z->forma_generar == 2){
                 $this->agrupar_palcos = true;
                 $this->emit('cambiarpalco',  $z);
+            }else{
+                $this->reset('agrupar_palcos');
             }
+        }else{
+            $this->reset('agrupar_palcos');
         }
     }
 

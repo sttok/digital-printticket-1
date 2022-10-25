@@ -5,11 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DigitalOrdenCompra extends Model
+class ciudades extends Model
 {
     use HasFactory;
+    
 
-    public function cliente(){
-        return $this->hasOne(AppUser::class, 'id', 'cliente_id');
-    }
+
+    protected $fillable = [
+        'Paises_Codigo',
+        'Ciudad'
+    ];
 }

@@ -17,9 +17,13 @@ use App\Models\DigitalOrdenCompraDetalle;
 class PalcosDigitalLivewire extends Component
 {
     protected $listeners = ['cambiarpalco', 'ventarapidapalco'];
-    public $palco, $cantidad_palcos = 0, $cantidad_asientos = 0;
-
+    public $palco, $filtrar_por = 0;
+    public $total_sin_ventas = 0, $total_ventas = 0;
     public $palco_id, $evento_id, $nota;
+    public $data = [
+        'orden_palcos' => [],
+        'palcos_individuales' => []
+    ];
 
     public function mount($evento_id){
         $this->evento_id = $evento_id;
@@ -32,8 +36,73 @@ class PalcosDigitalLivewire extends Component
 
     public function cambiarpalco($zona){
         $this->palco = collect($zona);
-        $this->cantidad_palcos = $this->palco['palcos'];
-        $this->cantidad_asientos = $this->palco['puestos'];
+        $this->reset('data');
+        $this->loadDaatos();
+    }
+    
+    private function loadDaatos(){
+        $entradas_digitales = OrderChildsDigital::where([
+        ['evento_id', $this->evento_id],  ['zona_id', $this->palco['id']
+        ]])->get();
+
+        $orden_palcos = [];
+        $palcos_individuales = [];
+        foreach ($entradas_digitales as $val) {
+            $entrada = OrderChild::find($val->order_child_id);
+           
+            if(!empty($entrada)){
+                $array = array(
+                    'id_digital' => $val->id,
+                    'palco' => $entrada->mesas,
+                    'asiento' => $entrada->asiento,
+                    'vendido' => $val->endosado
+                );
+                $palcos_individuales[] = $array;
+
+                $r = array_search($entrada->mesas, array_column($orden_palcos, 'palco'));
+                if($r === false){
+                    $r = array(
+                        'palco' => $entrada->mesas,
+                        'asientos' => 1,
+                        'vendido' => $val->endosado == 1 ? 1 : 0
+                    );
+                    $orden_palcos[] = $r;
+                }else{
+                    $orden_palcos[$r]['asientos'] = $orden_palcos[$r]['asientos'] + 1;
+                    if ($orden_palcos[$r]['vendido'] == 0 && $val->endosado == 1) {
+                        $orden_palcos[$r]['vendido'] = 1;
+                    }
+                }
+            }
+        }
+        $this->data['orden_palcos'] = collect($orden_palcos)->sortBy([
+            ['palco', 'asc'],
+        ]);
+        $this->data['palcos_individuales'] = collect($palcos_individuales)->sortBy('palco');
+        $this->data = collect($this->data);
+        $this->dehydrate();
+    }
+
+    public function dehydrate(){
+        $this->reset(['total_ventas', 'total_sin_ventas']);
+        foreach ( $this->data['orden_palcos'] as $key) {
+            if ($key['vendido'] == 1) {
+                $this->total_ventas++;
+            }else{
+                $this->total_sin_ventas++;
+            }
+        }
+    }
+
+    public function detallepalco($id){
+        
+        $r = collect($this->data['palcos_individuales'])->where('palco',$id)->all();
+        foreach ($r as $r1) {
+            if ( $r1['vendido'] == 1) {
+                $this->emit('detalle', $r1['id_digital']);                
+                break;
+            }
+        }
     }
 
     public function abrirventarapida2($id){
@@ -80,7 +149,7 @@ class PalcosDigitalLivewire extends Component
                 $ordencompra->evento_id = $this->evento_id;
                 $ordencompra->vendedor_id = Auth::user()->id;
                 $ordencompra->cliente_id = $cliente->id;
-                $ordencompra->cantidad_entradas = $this->cantidad_asientos;
+                $ordencompra->cantidad_entradas = count($ent);
                 $ordencompra->metodo_pago = 1;
                 $ordencompra->abonado = 0;
                 $ordencompra->total = 0;
@@ -113,6 +182,7 @@ class PalcosDigitalLivewire extends Component
             $this->dispatchBrowserEvent('cerrarmodalventarapida');
             $this->reset(['palco_id', 'nota']);
             $this->emit('ventarapidapalco1', $data);
+            $this->loadDaatos();
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
@@ -132,6 +202,7 @@ class PalcosDigitalLivewire extends Component
             $r = OrderChildsDigital::where('order_child_id', $e)->first();
             $array[] =  $r->id;
         }
+        $this->loadDaatos();
         $this->emit('abrirventas2',$array);
     }
 

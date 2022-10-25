@@ -23,17 +23,19 @@ use App\Exports\EntradasExcelExport;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\ApiController;
+use App\Models\DigitalOrdenCompra;
+use App\Models\DigitalOrdenCompraDetalle;
+use App\Models\OrderChildsDigital;
 
 class EventosLivewire extends Component
 {
     use WithPagination;
-    // protected $listeners = ['reiniciarentrada', 'borrado', 'cancelado', 'recordar'];  
+    protected $listeners = ['reiniciarentrada'];
     protected $paginationTheme = 'bootstrap';
     public $readytoload = false;
-    public $eventos = [];
-    public $search = '', $search_estado = '', $search_desde = '', $search_hasta = '';
-    // public $evento_id, $entradas_descargar = [], $descargartodoexcel = false;
-    // public $numeros_notificar, $numeros = [], $recordar_organizador = false, $recordar_punto_venta = false, $recordar_escaner = false;
+    public $eventos = [];    public $search = '', $search_estado = '', $search_desde = '', $search_hasta = '';
+   
+    public $evento_id;
 
     protected $queryString = [
         'search' => ['except' => '', 'as' => 'buscar'],
@@ -56,22 +58,46 @@ class EventosLivewire extends Component
         $this->dispatchBrowserEvent('cargarimagen');
     }
 
-    public function recordardatos($id){
+    public function reiniciarentradas($id){
         $this->evento_id = $id;
-        $this->reset([
-            'numeros_notificar', 'recordar_organizador', 'recordar_punto_venta', 'recordar_escaner'
-        ]);
+        $this->dispatchBrowserEvent('reiniciar');
     }
 
-   
+    public function reiniciarentrada(){
+        DB::beginTransaction();
+        try {
+            $ordenes = DigitalOrdenCompra::where('evento_id', $this->evento_id)->get();
+                foreach($ordenes as $orden){
+                    $detalles = DigitalOrdenCompraDetalle::where('digital_orden_compra_id', $orden->id)->get();
+                    foreach ($detalles as $detalle) {
+                        $entrada = OrderChild::find($detalle->order_child_id);
+                        if($entrada){
+                            $entrada->customer_id = null;
+                            $entrada->endosado_id = null;
+                            $entrada->update();
+                        }
+                        $entrada_digital = OrderChildsDigital::find($detalle->digital_id);
+                        if($entrada){
+                            $entrada_digital->endosado = 0;
+                            $entrada_digital->update();
+                        }
+                        $detalle->delete();
+                    }
+                    $orden->delete();
+                }
+            DB::commit();
+            $this->dispatchBrowserEvent('reiniciado');
+        } catch (Exception $e) {
+            DB::rollBack();
+            $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
+        }
+    }
 
     public function limpiar(){
         $this->reset([
             'search', 'search_estado', 'search_desde', 'search_hasta'
         ]);
     }
-
-    
 
     public function updatedSearch(){
         $this->resetPage();

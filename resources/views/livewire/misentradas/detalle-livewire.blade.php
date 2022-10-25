@@ -153,23 +153,22 @@
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header">
-                    <nav class="nav nav-pills nav-justified">
-                        <a class="nav-item nav-link nav-link-1 {{ $filtrar_por == 0 ? 'active' : 'desactive' }}" href="#entrads" wire:click="$set('filtrar_por', 0)">{{ __('Sin vender') . ' ( ' .  number_format($total_sin_endosar, 0 ,',','.') . ' )' }}</a>
-                        <a class="nav-item nav-link nav-link-2 {{ $filtrar_por == 1 ? 'active' : 'desactive' }}" href="#entrads" wire:click="$set('filtrar_por', 1)">{{ __('Vendido') . ' ( ' .  number_format($total_endosadas, 0 ,',','.') . ' )' }}</a>
-                    </nav>
-                </div>
-                
-                <div class="card-body row" id="entrads">
-                    <div wire:loading.delay.long wire:target="(['filtrar_por', 'organizar', 'search_estado', 'search'])">
-                        <div class="col-12 my-2 text-center justify-content-center row">
-                            <div class="spinner-grow my-2" role="status" >
-                            </div>
-                        </div>
+            @if ($agrupar_palcos == false)
+                <div class="card">
+                    <div class="card-header">
+                        <nav class="nav nav-pills nav-justified">
+                            <a class="nav-item nav-link nav-link-1 {{ $filtrar_por == 0 ? 'active' : 'desactive' }}" href="#entrads" wire:click="$set('filtrar_por', 0)">{{ __('Sin vender') . ' ( ' .  number_format($total_sin_endosar, 0 ,',','.') . ' )' }}</a>
+                            <a class="nav-item nav-link nav-link-2 {{ $filtrar_por == 1 ? 'active' : 'desactive' }}" href="#entrads" wire:click="$set('filtrar_por', 1)">{{ __('Vendido') . ' ( ' .  number_format($total_endosadas, 0 ,',','.') . ' )' }}</a>
+                        </nav>
                     </div>
                     
-                    @if ($agrupar_palcos == false)
+                    <div class="card-body row" id="entrads">
+                        <div wire:loading.delay.long wire:target="(['filtrar_por', 'organizar', 'search_estado', 'search'])">
+                            <div class="col-12 my-2 text-center justify-content-center row">
+                                <div class="spinner-grow my-2" role="status" >
+                                </div>
+                            </div>
+                        </div>
                         @if (count($this->Entradas) > 0)
                             <div class="row col-12">
                                 <div class="col-md-6 col-12 mb-2 float-left">
@@ -321,7 +320,7 @@
                                 </table>
                             </div>
                         @endif
-                         @if (count($this->Entradas) > 0)
+                        @if (count($this->Entradas) > 0)
                             <div class="row text-center justify-content-center mt-2" style="max-width: 99%">
                                 @desktop
                                     {{ $this->Entradas->links() }}
@@ -330,18 +329,17 @@
                                 @enddesktop
                             </div>
                         @endif
+                    </div>
+                    @if (count($entradas_array) > 0)
+                        <a href="#" class="btn-flotante" wire:click="abrirventas()"><i class="fas fa-check"></i> {{ count(array_filter($entradas_array, function($k) { return $k != null;} )) . ' Seleccionados' }} </a>
                     @else
-                        @livewire('misentradas.palcos-digital-livewire', ['evento_id' => $evento_id])
+                        <a href="#" class="btn-flotante btn-secondary" wire:click="abrirventas()"><i class="fas fa-times"></i></a>
                     @endif
-                    
-                   
                 </div>
-                @if (count($entradas_array) > 0)
-                    <a href="#" class="btn-flotante" wire:click="abrirventas()"><i class="fas fa-check"></i> {{ count(array_filter($entradas_array, function($k) { return $k != null;} )) . ' Seleccionados' }} </a>
-                @else
-                    <a href="#" class="btn-flotante btn-secondary" wire:click="abrirventas()"><i class="fas fa-times"></i></a>
-                @endif
-            </div>
+            @else
+                @livewire('misentradas.palcos-digital-livewire', ['evento_id' => $evento_id])
+            @endif
+            
         </div>
     </div>
     @if ($readytoload)       
@@ -457,6 +455,23 @@
         })
         window.addEventListener('abrirventa33', event => {
             $('#ventarapidamodal').modal('show');
+        })
+    </script>
+    <script>
+        window.addEventListener('abrirventa2', event => {
+            $('#ventarapidamodal').modal('show');
+        })
+        window.addEventListener('cerrarmodalventarapida', event => {
+            $('#ventarapidamodal').modal('hide');
+        })
+        window.addEventListener('procesandoventa', event => {
+            Swal.fire({
+                icon: 'info',
+                title: '¡Espere un momento!',
+                text: 'La venta se esta procesando',
+                showConfirmButton: false,
+                timer: 1700
+            })
         })
     </script>
     <script>
