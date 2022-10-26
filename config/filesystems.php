@@ -48,6 +48,12 @@ return [
             'visibility' => 'public',
         ],
 
+        'customEventos' => [
+            'driver' => 'local',
+            'root'   => '../../public',
+            'visibility' => 'public',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

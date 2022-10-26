@@ -429,26 +429,133 @@
                         </div>
                     </div>
                 </div>
+            </div>            
+        </div>
+    </div>  
+    
+    <div class="card">
+        <div class="card-header">
+            <h4>{{ __('Entradas') }}</h4>
+        </div>
+        <div class="card-body row">
+            <div class="col-md-3 col-6 mb-2">
+                <label for="">{{ __('Nombre entrada') }}</label>
+                <input type="text" class="form-control @error('nombre_entrada') is-invalid @enderror" wire:model.defer="nombre_entrada" wire:target="storeEvento" wire:loading.attr="disabled" wire:keydown.enter="temporarlentrada">
+                @error('nombre_entrada')
+                    <div class="invalid-feedback block">{{$message}}</div>
+                @endif
             </div>
-            <div class="col-12 mb-3">
-                <div wire:loading wire:target="storeEvento">
-                    <div class="progress my-3">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                            {{ __('Cargando...') }}
-                        </div>
+            <div class="col-md-2 col-6 mb-2">
+                <label for="">{{ __('Tipo') }}</label>
+                <select class="form-control @error('tipo_entrada') is-invalid @enderror" wire:model="tipo_entrada" wire:target="storeEvento" wire:loading.attr="disabled">
+                    <option value="1">General</option>
+                    <option value="2">Palcos</option>
+                </select>
+                @error('tipo_entrada')
+                    <div class="invalid-feedback block">{{$message}}</div>
+                @endif
+            </div>
+            @if ($tipo_entrada == 1)
+                <div class="col-md-2 col-6 mb-2">
+                    <label for="">{{ __('Cantidad entrada') }}</label>
+                    <input type="number" class="form-control @error('cantidad_entrada') is-invalid @enderror" wire:model.defer="cantidad_entrada" wire:target="storeEvento" wire:loading.attr="disabled">
+                    @error('cantidad_entrada')
+                        <div class="invalid-feedback block">{{$message}}</div>
+                    @endif
+                </div>
+            @else
+                <div class="col-md-2 col-6 mb-2">
+                    <label for="">{{ __('Palcos') }}</label>
+                    <input type="number" class="form-control @error('palcos') is-invalid @enderror" wire:model.defer="palcos" wire:target="storeEvento" min="1" max="99999" wire:loading.attr="disabled">
+                    @error('palcos')
+                        <div class="invalid-feedback block">{{$message}}</div>
+                    @endif
+                </div>
+                <div class="col-md-2 col-6 mb-2">
+                    <label for="">{{ __('Puestos') }}</label>
+                    <input type="number" class="form-control @error('puestos') is-invalid @enderror" wire:model.defer="puestos" wire:target="storeEvento" min="1" max="99999" wire:loading.attr="disabled">
+                    @error('puestos')
+                        <div class="invalid-feedback block">{{$message}}</div>
+                    @endif
+                </div>
+                <div class="col-md-2 col-6 mb-2">
+                    <label for="">{{ __('Adicional') }}</label>
+                    <input type="number" class="form-control @error('adicional') is-invalid @enderror" wire:model.defer="adicional" wire:target="storeEvento" wire:loading.attr="disabled">
+                    @error('adicional')
+                        <div class="invalid-feedback block">{{$message}}</div>
+                    @endif
+                </div>
+            @endif
+            
+            <div class="col-md-1 col-6 mb-2">
+                <br>
+                <button class="btn btn-success" wire:click="temporarlentrada()" ><i class="fas fa-save"></i></button>
+            </div>
+
+            <div class="col-12 mb-2">
+                <div class="table-responsive" >
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">{{ __('Nombre') }}</th>
+                                <th scope="col">{{ __('Cantidad') }}</th>
+                                <th scope="col">{{ __('Tipo') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($entradas_array as $entrada)
+                                <tr>
+                                    <th scope="row"><button class="btn btn-outline-danger" type="button" wire:click="borrarentrada('{{ $entrada['id'] }}')" ><i class="fas fa-times"></i></button></th>
+                                    <td>{{ $entrada['nombre_entrada'] }}</td>
+                                    <td>
+                                        @if ($entrada['tipo'] == 1)
+                                            {{ number_format( $entrada['cantidad_entrada'], 0 ,',','.') }}
+                                        @elseif($entrada['tipo'] == 2)
+                                            {{ __('Palc: ') . number_format( $entrada['palcos'], 0 ,',','.') . ' / Puest: ' . number_format( $entrada['puestos'], 0 ,',','.') . ' / Adic: ' . number_format( $entrada['adicional'], 0 ,',','.') }}
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            @if ($entrada['tipo'] == 1)
+                                                {{ __('General') }}
+                                            @elseif($entrada['tipo'] == 2)
+                                                {{ __('Palcos') }}
+                                            @endif
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center justify-content-center" >
+                                        ¡{{ __('No hay entradas disponibles') }}!
+                                    </td>
+                                </tr> 
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <div wire:loading wire:target="storeEvento">
+                        <div class="progress my-3 w-100">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                {{ __('Cargando...') }}
+                            </div>
+                        </div>                   
                     </div>
                 </div>
-                <button type="button" wire:click="storeEvento" class="btn btn-primary btn-block">{{ __('Crear Evento') }}</button>
+
+                <button type="button" wire:click="storeEvento" class="btn btn-primary btn-block my-2">{{ __('Crear Evento') }}</button>
             </div>
         </div>
-    </div>   
+    </div>
     @if ($readyToLoad)
         @include('backendv2.eventos.modal.createlocalidad')
         @livewire('new-punto-venta',  ['users' => $this->Organizadores])
         @livewire('new-scanner', ['users' => $this->Organizadores])
         @livewire('new-organizador')
     @endif
-   
 
     <script>
         window.addEventListener('errores', event => {
@@ -480,36 +587,15 @@
                 timer: 1500
             })
         })
-        window.addEventListener('borrar', event => {
-            let timerInterval
+        window.addEventListener('successevento', event => {
             Swal.fire({
                 icon: 'success',
-                title: "Exito",
-                text: "El evento ha sido creado con exito",
-                showCancelButton: false,
-                timer: 1500,
-                timerProgressBar: true,
-            }).then((result) => {
-                if (result.value) {                   
-                    let timerInterval
-                    Swal.fire({
-                        icon :'success',
-                        title: '¡Procesando! ',
-                        text: 'Espere un momento, en breve estara disponible',
-                        timer: 1500,
-                        timerProgressBar: true,
-                        didOpen: () => {
-                            Swal.showLoading()
-                        },
-                        willClose: () => {
-                            clearInterval(timerInterval)
-                        }
-                    })
-                }else{
-
-                }
-            });
-        });
+                title: '¡Exito!',
+                text: 'El evento ha sido creado con exito',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        })
     </script>
     <script>
         window.addEventListener('success', event => {
@@ -525,15 +611,5 @@
             })
         });
     </script>
-    <script>
-        $('.selectgroup-input').change(function() {
-            if (this.value == 1) {
-                $('.location-detail').hide(500);
-                $('.online-detail').show(500);
-            } else if (this.value == 0) {
-                $('.location-detail').show(500);
-                $('.online-detail').hide(500);
-            }
-        });
-    </script>
+   
 </div>

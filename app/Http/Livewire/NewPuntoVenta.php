@@ -38,8 +38,8 @@ class NewPuntoVenta extends Component
             'phone' => 'required|unique:users',
             'password' => 'required|min:6',
         ], [
-            'nombre_pventa.required' => 'El nombre del scanner es requerido',
-            'apellido_pventa.required' => 'El apellido del scanner es requerido',
+            'nombre_pventa.required' => 'El nombre del punto de venta es requerido',
+            'apellido_pventa.required' => 'El apellido del punto de venta es requerido',
             'phone.required' => 'El telefono es requerido',
             'phone.unique' => 'El telefono ya existe en la base de datos'
         ]);
