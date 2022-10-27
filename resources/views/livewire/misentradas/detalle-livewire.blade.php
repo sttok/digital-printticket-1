@@ -173,8 +173,8 @@
                             <div class="row col-12">
                                 <div class="col-md-6 col-12 mb-2 float-left">
                                     <div class="mb-4 form-check ml-1" >
-                                        <input type="checkbox" class="form-check-input" style="margin-left: 0px !important; margin-top: 0px; margin-right: 10px;" wire:click.lazy="seleccionartodos()" {{ $seleccionar_todos == true ? 'checked' : '' }}>
-                                        <label class="form-check-label" wire:click.lazy="seleccionartodos()">{{ __('Seleccionar todos') }}</label>
+                                        <input type="checkbox" class="form-check-input" style="margin-left: 0px !important; margin-top: 0px; margin-right: 10px;" wire:click="seleccionartodos()" {{ $seleccionar_todos == true ? 'checked' : '' }}>
+                                        <label class="form-check-label" wire:click="seleccionartodos()">{{ __('Seleccionar todos') }}</label>
                                     </div>
                                 </div>
                             </div>

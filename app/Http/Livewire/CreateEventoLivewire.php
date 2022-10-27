@@ -29,7 +29,7 @@ class CreateEventoLivewire extends Component
     protected $listeners = ['actualizardatos'];
 
     public $imagen_evento, $imagen_banner, $imagen_mapa;
-    public $titulo, $categoria_id, $descripcion, $aforo, $hora_inicio_evento, $hora_final_evento, $etiquetas, $localidad_iframe, $localidad_direccion;
+    public $titulo, $categoria_id, $descripcion, $aforo, $hora_inicio_evento, $hora_final_evento, $etiquetas, $localidad_iframe, $localidad_direccion, $localidad_id;
     public $organizador_id, $scanners = [], $puntos_ventas = [];
     public $tipo_evento = 0, $pais_id = "CO", $ciudad_id = 10222;
     public $plataforma_evento, $url_evento;
@@ -201,6 +201,18 @@ class CreateEventoLivewire extends Component
                         
                     }
                 }
+                $colores = array(
+                    "#fefefe", 
+                    "#f7ff00",
+                    "#b600ff",
+                    "#47ea00",
+                    "#ffb600",
+                    "#ff00d4",
+                    "#00b9ff",
+                    "#ff0000",
+                    "#adadad",
+                    "#FFD700"
+                );
                 foreach (collect($this->entradas_array) as $entrada) {
                     $ticket_number = chr(rand(65, 90)) . chr(rand(65, 90)) . '-' . rand(999, 99900);
                     $ent = new Ticket();
@@ -210,13 +222,19 @@ class CreateEventoLivewire extends Component
                         $ent->name = $entrada['nombre_entrada'];
                         $ent->type = 'paid';
                         $ent->price = 1;
+                        $ent->quantity = $entrada['cantidad_entrada'];
                         $ent->ticket_per_order = 1;
                         $ent->start_time = $this->hora_inicio_evento;
                         $ent->end_time = $this->hora_final_evento;
                         $ent->description = __('Entradas digitales');
-                        $ent->color_localidad  = '#fefefe';
+                        $ent->color_localidad  = $colores[rand(0, 9)];
                         $ent->tipo = 1;
                         $ent->identificador = rand(1000, 99999);
+                        if($entrada['tipo'] == 2){
+                            $ent->palcos = $entrada['palcos'];
+                            $ent->puestos = $entrada['puestos'];
+                            $ent->puestos_adicional = $entrada['adicional'];
+                        }
                         $ent->categoria = 2;
                         $ent->status = 1;
                         $ent->generadas = 1;
@@ -254,8 +272,6 @@ class CreateEventoLivewire extends Component
                                 $ultimo_consecutivo = $child->consecutivo;
                             }
                         } elseif ($entrada['tipo'] == 2) {
-                            $this->calcularpalcos();
-                            
                             $ultimo_identificador = 0;
                             $ultimo_consecutivo = 0;
                             for ($i = 1; $i <= $entrada['palcos']; $i++) {
@@ -350,17 +366,21 @@ class CreateEventoLivewire extends Component
         $this->validate([
             'nombre_localidad' => 'required|max:120|unique:location,nombre',
             'direccion_localidad' => 'required|max:550',
-            'iframe_localidad' => 'required'
+            'iframe_localidad' => 'required',
+            'pais_id' => 'required',
+            'ciudad_id' => 'required'
         ]);
 
         DB::beginTransaction();
         try {
-            $ent = new Location();
-            $ent->nombre = $this->nombre_localidad;
-            $ent->direccion = $this->direccion_localidad;
-            $ent->google_iframe = $this->iframe_localidad;
-            $ent->estado = 1;
-            $ent->save();
+            $localidad = new Location();
+            $localidad->nombre = $this->nombre_localidad;
+            $localidad->direccion = $this->direccion_localidad;
+            $localidad->google_iframe = $this->iframe_localidad;
+            $localidad->pais_id = $this->pais_id;
+            $localidad->ciudad_id = $this->ciudad_id;
+            $localidad->estado = 1;
+            $localidad->save();
             $this->dispatchBrowserEvent('storelocalidadd');
             DB::commit();
             $this->reset(['nombre_localidad', 'direccion_localidad', 'iframe_localidad']);
@@ -387,7 +407,9 @@ class CreateEventoLivewire extends Component
     }
 
     public function getLocalidadesProperty(){
-        return Location::where('estado', 1)->get();
+        return Location::where([
+           ['pais_id', 'LIKE', '%'.$this->pais_id.'%'], ['ciudad_id', 'LIKE', '%'.$this->ciudad_id.'%'], ['estado', 1]
+        ])->get();
     }
 
     public function getCategoriasProperty(){

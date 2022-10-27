@@ -35,6 +35,9 @@ class EventosLivewire extends Component
     public $readytoload = false;
     public $eventos = [];    public $search = '', $search_estado = '', $search_desde = '', $search_hasta = '';
    
+    public $numero_telefono, $array_telefono_notificar = [];
+    public $recordarscanner = true, $recordarpuntoventa = true, $recordarorganizador = true;
+
     public $evento_id;
 
     protected $queryString = [
@@ -42,8 +45,7 @@ class EventosLivewire extends Component
         'search_desde' => ['except' => '', 'as' => 'desde'],
         'search_hasta' => ['except' => '', 'as' => 'hasta'],
         'search_estado' => ['except' => '', 'as' => 'estado'],
-    ];
-    
+    ];    
 
     public function render()
     {        
@@ -51,11 +53,129 @@ class EventosLivewire extends Component
             $this->dispatchBrowserEvent('cargarimagen');
         }
         return view('livewire.eventos.eventos-livewire');
-    }
+    }    
 
     public function loadDatos(){
         $this->readytoload = true;
         $this->dispatchBrowserEvent('cargarimagen');
+    }
+
+    public function abrirdatos($id){
+        $this->evento_id = $id;
+        $this->dispatchBrowserEvent('abrridatos');
+    }
+
+    public function agregartelefonos(){
+        $this->validate([
+            'numero_telefono' => 'required|phone:CO,AUTO'
+        ]);
+
+        $key = array_search($this->numero_telefono, array_column($this->array_telefono_notificar, 'numero'));
+
+        if(empty($key)){
+            $this->array_telefono_notificar[] = array(
+                'id' => Str::random(5),
+                'numero' => $this->numero_telefono
+            ); 
+            $this->reset('numero_telefono');
+        }else{
+            $this->dispatchBrowserEvent('errores', ['error' => __('El numero ya se encuentra agregado')]);
+        }
+       
+    }
+
+    public function borrartelefono($id){
+        $key = array_search($id, array_column($this->array_telefono_notificar, 'id'));
+        unset($this->array_telefono_notificar[$key]);
+    }
+
+    public function recordardatos(){
+        $this->validate([
+            'array_telefono_notificar' => 'required|array|min:1',
+            'recordarscanner' => 'required|boolean',
+            'recordarpuntoventa' => 'required|boolean',
+            'recordarorganizador' => 'required|boolean'
+        ]);
+
+        if($this->recordarscanner == true || $this->recordarpuntoventa == true || $this->recordarorganizador == true && count($this->array_telefono_notificar) > 0){
+            DB::beginTransaction();
+            try {
+                $evento = Event::find($this->evento_id);
+                if ($this->recordarorganizador == true) {
+                    $organizador = $evento->organizador;
+                }
+
+                if($this->recordarpuntoventa == true){
+                    $puntos_ventas = $evento->eventpuntoventa;
+                }
+
+                if($this->recordarscanner == true){
+                    $scanners = EventScanner::where('event_id', $evento->id)->get();
+                }
+
+                foreach ($this->array_telefono_notificar as $telefono) {
+                    if ($this->recordarorganizador == true) {
+                        $new_pass_organizador = Str::upper(Str::random(6));
+                        $organizador->password = Hash::make($new_pass_organizador);
+                        $organizador->update();
+                        $data = array(
+                            'telefono' => $telefono['numero'],
+                            'mensaje' =>urlencode(Str::upper($this->setting->app_name) . ': ') . '%0d%0a' .
+                            urlencode('Usuario: ') . urlencode($organizador->first_name . ' ' . $organizador->last_name) . '%0d%0a' .
+                            urlencode('Telefono de acceso: ') . urlencode($organizador->phone) . '%0d%0a' .
+                            urlencode('Contraseña: ') . urlencode($new_pass_organizador) . '%0d%0a' .
+                            urlencode('¡Su contraseña como organizador ha sido reestablecida!') . '%0d%0a' 
+                        );
+                        $data = (new ApiController)->sendsms($data);
+                    }
+
+                    if($this->recordarpuntoventa == true){
+                        foreach ($puntos_ventas as $punto) {
+                            $user = User::findorfail($punto->punto_id);
+                            $pass = Str::upper(Str::random(6));
+                            $user->password = Hash::make($pass);
+                            $user->update();
+                            $data = array(
+                                'telefono' => $telefono['numero'],
+                                'mensaje' =>urlencode(Str::upper($this->setting->app_name) . ': ') . '%0d%0a' .
+                                urlencode('Usuario: ') . urlencode($user->first_name . ' ' . $user->last_name) . '%0d%0a' .
+                                urlencode('Telefono de acceso: ') . urlencode($user->phone) . '%0d%0a' .
+                                urlencode('Contraseña: ') . urlencode($pass) . '%0d%0a' .
+                                urlencode('¡Su contraseña como punto de venta ha sido reestablecida!') . '%0d%0a' 
+                            );
+                            $data = (new ApiController)->sendsms($data);
+                        }
+                    }
+
+                    if($this->recordarscanner == true){
+                        foreach ($scanners as $item) {
+                            $user = User::findorfail($item->scanner_id);
+                            $pass = Str::upper(Str::random(6));
+                            $user->password = Hash::make($pass);
+                            $user->update();
+                            $data = array(
+                                'telefono' => $telefono['numero'],
+                                'mensaje' =>urlencode(Str::upper($this->setting->app_name) . ': ') . '%0d%0a' .
+                                urlencode('Usuario: ') . urlencode($user->first_name . ' ' . $user->last_name) . '%0d%0a' .
+                                urlencode('Telefono de acceso: ') . urlencode($user->phone) . '%0d%0a' .
+                                urlencode('Contraseña: ') . urlencode($pass) . '%0d%0a' .
+                                urlencode('¡Su contraseña como scanner ha sido reestablecida!') . '%0d%0a' 
+                            );
+                            $data = (new ApiController)->sendsms($data);
+                        }
+                    }
+                }
+                DB::commit();
+                $this->reset(['array_telefono_notificar', 'recordarscanner', 'recordarpuntoventa', 'recordarorganizador']);
+                $this->dispatchBrowserEvent('reiniciado');
+                $this->dispatchBrowserEvent('cerrardatos');
+            } catch (Exception $e) {
+                DB::rollBack();
+                $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
+            }
+        }else{
+            $this->dispatchBrowserEvent('errores', ['error' => __('Debe seleccionar una opcion o ingresar al menos un nuúmero de telefono')]);
+        }
     }
 
     public function reiniciarentradas($id){

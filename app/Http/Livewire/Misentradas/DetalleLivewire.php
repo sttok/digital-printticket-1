@@ -92,18 +92,17 @@ class DetalleLivewire extends Component
     
     public function detalle($id){
         $r = DigitalOrdenCompraDetalle::where('digital_id', $id)->first();
-        
         if(!empty($r)){
             $this->reset(['cliente', 'entradas_seleccionadas']);
             $orden = DigitalOrdenCompra::where('id',$r->digital_orden_compra_id)->first();
                 if(!empty($orden)){
-                    $this->enviado = true;
+                     $this->enviado = true;
                     $this->cliente = $orden->cliente;
                     $detalle = DigitalOrdenCompraDetalle::where('digital_orden_compra_id', $orden->id)->get();
                     foreach ($detalle as $ent) {
                         $digital = $ent->digital;
                         $nombre = $digital->zona->name;
-                        $digial['entrada'] = $nombre;
+                        $digial['entrada'] = $nombre;                       
                         $this->entradas_seleccionadas[] = $digital;
                     }
                     $this->dispatchBrowserEvent('verventaa');
@@ -188,9 +187,10 @@ class DetalleLivewire extends Component
         ]);
         DB::beginTransaction();
         try {
+          
             $id = $this->digital_id;
-            $this->reset(['entradas_seleccionadas', 'cliente', 'entradas']);
-            $r = $this->Entradas->where('id',$id)->first();
+            $this->reset(['entradas_seleccionadas', 'cliente']);
+            $r = $this->Entradas->find($id);
             $ent = OrderChild::findorfail($r->order_child_id);
             $ent->customer_id = Auth::user()->id;
             $ent->vendedor_id = Auth::user()->id;
@@ -242,7 +242,7 @@ class DetalleLivewire extends Component
                 $detalle->digital_id = $id;
             $detalle->save();
             DB::commit();
-            $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
+            $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente', 'total_sin_endosar', 'total_endosadas', 
                 'porcentaje_venta', 'dias_restantes', 'estado_evento']);
             $this->enviado = true;
             $this->enviarcompartir($id);
@@ -327,7 +327,71 @@ class DetalleLivewire extends Component
         $this->dispatchBrowserEvent('regresarcliente1');
     }
 
+    public function asignarentrada2(){
+        $this->phone = $this->prefijo_telefono . $this->telefono;
+        $this->validate([
+            'nombre_cliente' => 'required|min:2|max:120',
+            'apellido_cliente' => 'required|min:2|max:120',
+            'correo_cliente' => 'required|email|unique:app_user,email',
+            'prefijo_telefono' => 'required',
+            'telefono' => 'required|integer',
+            'phone' => 'required|phone:CO,AUTO|unique:app_user,phone',
+            'contraseña_cliente' => 'required|min:3|max:120',
+            'notificar_nuevo' => 'required',
+            'cedula_cliente' => 'required|integer'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $cliente = new AppUser();
+                $cliente->name = $this->nombre_cliente;
+                $cliente->last_name = $this->apellido_cliente;
+                $cliente->email = $this->correo_cliente;
+                $cliente->password = Hash::make($this->contraseña_cliente);
+                $cliente->phone = $this->phone;
+                $cliente->cedula = $this->cedula_cliente;
+                $cliente->provider = 'LOCAL';
+                $cliente->status = 1;
+                $cliente->borrado = 0;
+                $cliente->image = 'defaultuser.png';
+            $cliente->save();
+            DB::commit();
+            if($this->notificar_nuevo == true){
+                $telefono = $this->phone;
+                $mensaje =  urlencode( 'Bienvenido a ' .Str::upper($this->Setting) . ': ') . '%0d%0a' . 
+                urlencode('Nombre: ' . Str::title( $this->nombre_cliente . ' ' . $this->apellido_cliente )) . '%0d%0a' .
+                urlencode('Telefono de acceso: ') . urlencode($this->phone) . '%0d%0a' .
+                urlencode('Contraseña: ') . urlencode($this->contraseña_cliente)  . '%0d%0a' ;
+                $this->enviarsms2($telefono, $mensaje);
+            }
+            $this->dispatchBrowserEvent('storecliente');
+            
+            if(!in_array($this->endosado_id, $this->entradas_seleccionadas_endosado)){
+                $this->entradas_seleccionadas_endosado[$this->endosado_id] = array(
+                    'entrada_digital_id' => $this->endosado_id,
+                    'cliente_id' => $cliente->id,
+                    'cliente_name' => $cliente->name . ' ' . $cliente->last_name
+                );
+            }else{
+                $key = array_search($this->endosado_id,array_column($this->entradas_seleccionadas_endosado, 'entrada_digital_id'));
+                $r = array(
+                    'entrada_digital_id' => $this->endosado_id,
+                    'cliente_id' => $cliente->id,
+                    'cliente_name' => $cliente->name . ' ' . $cliente->last_name
+                );
+                array_replace($this->entradas_seleccionadas_endosado[$key], $r);
+            }
+            $this->limpiarcliente();
+            $this->reset(['search_telefono_endosado', 'endosado_id', 'encontrado_endosado', 'cliente_endosado', 'endosado_identificador']);
+            $this->dispatchBrowserEvent('regresarcliente1');
+        } catch (Exception $e) {
+            DB::rollBack();
+            $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
+        }
+    }
+
     public function abrirventas(){
+        
         if (count($this->entradas_array) > 0) {
             $this->dispatchBrowserEvent('abrirmodalventa');
             $this->cargarentradas();
@@ -416,7 +480,7 @@ class DetalleLivewire extends Component
                     }
                     
                     DB::commit();
-                    $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
+                    $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente', 'total_sin_endosar', 'total_endosadas', 
                         'porcentaje_venta', 'dias_restantes', 'estado_evento']);
                     $this->enviado = true;
                     $this->dispatchBrowserEvent('verenviadas');
@@ -441,7 +505,7 @@ class DetalleLivewire extends Component
     
             $this->reset('entradas_array');
             foreach ($e as $i) {
-               $this->entradas_array[$i->id] = true;
+               $this->entradas_array[$i->id] = $i->id;
             }
             $this->seleccionar_todos = true;
         }else{
@@ -462,7 +526,7 @@ class DetalleLivewire extends Component
 
     public function cerrarshow(){
         $this->dispatchBrowserEvent('cerrarshow1');
-        $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'cliente','entradas','total_sin_endosar', 'total_endosadas', 
+        $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'cliente', 'total_sin_endosar', 'total_endosadas', 
                 'porcentaje_venta', 'dias_restantes', 'estado_evento', 'filtrar_por', 'organizar', 'agrupar_palcos', 'enviado']);
     }
 
@@ -580,10 +644,9 @@ class DetalleLivewire extends Component
         }
     }
 
-   
     public function UpdatedFiltrarPor(){
         $this->resetpage();
-        $this->calcularendosados();
+         $this->calcularendosados();
     }
 
     public function updatedSearch(){
@@ -609,6 +672,7 @@ class DetalleLivewire extends Component
     }
 
     private function cargarentradas(){
+       
         $this->entradas_seleccionadas = OrderChildsDigital::whereIn('id', $this->entradas_array)->get();
         $this->reset(['abonado', 'total']);
         foreach ($this->entradas_seleccionadas as $rr) {

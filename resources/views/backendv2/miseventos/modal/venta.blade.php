@@ -77,7 +77,7 @@
                                 @forelse ($entradas_seleccionadas as $ent)
                                     <tr>
                                         @if ($agrupar_palcos == false)
-                                            <td><button class="btn btn-outline-danger" wire:click="quitar('{{ $ent['id'] }}')"><i class="fas fa-times"></i></button></td>                                        
+                                            <td><button class="btn btn-outline-danger" wire:click="quitar('{{ $ent['id'] }}')"><i class="fas fa-times"></i></button></td>
                                         @endif
                                         <th scope="row">#{{ $ent['identificador'] }}</th>
                                         <td>{{ $ent->zona->name }}</td>

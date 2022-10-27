@@ -1,17 +1,10 @@
-<div wire:init="loadDatos" >
-    <style>
-        .custom-check{
-            padding: 15px;
-            background: #2d3d54;
-            border-radius: 1rem;
-        }
-    </style>
+<div wire:init="loadDatos" > 
     <div class="row">
         <div class="col">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{{ __('Todos los eventos') }}  </h5>
-                   <div class="row col-12 mb-4">
+                    <h5 class="card-title">{{ __('Todos los eventos') }}</h5>
+                    <div class="row col-12 mb-4">
                         <div class="col-lg-2 col-md-4 col-12 mb-2">
                             <span>{{ __('Buscar evento') }}</span>
                             <input type="search" class="form-control @error('search') is-invalid @enderror" placeholder="{{ __('Buscar evento por nombre') }}" wire:model.lazy="search">
@@ -54,7 +47,7 @@
                                 <div class="col-auto mx-2 p-1">
                                     <a href="{{ route('create.evento') }}" class="btn btn-success">{{ __('Crear evento') }}</a>
                                 </div>
-                            </div>                            
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -73,31 +66,27 @@
                                     <th scope="col">{{ __('Acción') }}</th>
                                 </tr>
                             </thead>
-                            <tbody wire:loading>
+                            <tbody wire:loading wire:taget="reiniciarentradas,reiniciarentrada">
                                 <tr>
                                     <td colspan="6" class="text-center justify-content-center" >
                                         <div class="text-center justify-content-center">
                                             <div class="spinner-grow  my-3" role="status">
                                             </div>
-                                        </div>                                        
+                                        </div>
                                     </td>
                                 </tr> 
                             </tbody>
-                            <tbody wire:loading.remove>
+                            <tbody wire:loading.remove wire:taget="reiniciarentradas,reiniciarentrada">
                                 @forelse ($this->Eventos as $evento)
                                     <tr>
                                         <th scope="row">#{{ $evento->id }}</th>
-                                        <td> 
-                                            <img  class="b-lazy"
-                                            src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" 
-                                            data-src="{{ asset(route('inicio.frontend') .'/images/upload/'.$evento->image) }}" alt="imagen-evento" style="max-width: 50px; border-radius:50%">
+                                        <td>
                                             @if ($evento->event_destacado == 1)
                                                 <i class="fas fa-star text-warning"></i>
                                             @endif
                                             {{ $evento->name }}
                                         </td>
                                         <td>{{ number_format( $evento->people, 0 ,',','.') }}</td>
-                                       
                                         <td>{{ $evento->organizador->first_name . ' ' . $evento->organizador->last_name}}</td>
                                         <td>
                                             @if ($evento->status == 1)
@@ -110,7 +99,8 @@
                                         </td>
                                         <td>
                                             <a class="btn btn-primary" href="{{ route('show.eventos', $evento->id) }}">{{ __('Seleccionar') }}</a>
-                                            <button class="btn btn-warning" type="button" wire:click="reiniciarentradas({{ $evento->id }})" ><i class="fas fa-redo"></i> &nbsp; {{ __('Reiniciar') }}</button>
+                                            <button class="btn btn-warning" type="button" wire:click="reiniciarentradas('{{ $evento->id }}'')" ><i class="fas fa-redo"></i> &nbsp; {{ __('Reiniciar') }}</button>
+                                            <button class="btn btn-secondary" type="button" wire:click="abrirdatos('{{ $evento->id }}'')" ><i class="fas fa-user-clock"></i> &nbsp; {{ __('Recordar datos') }}</button>
                                         </td>
                                     </tr>
                                 @empty
@@ -136,16 +126,8 @@
             </div>
         </div>
     </div>
-    @if ($readytoload)       
-        <script>
-            window.addEventListener('cargarimagen', event => {
-               ;(function() {
-                    // Initialize
-                    var bLazy = new Blazy();
-                    
-                })();
-            });
-        </script>
+    @if ($readytoload)      
+        @include('backendv2.eventos.modal.recordatos')
     @endif
     <script>
         window.addEventListener('errores', event => {
@@ -185,9 +167,8 @@
                             })
                     }
                 })
-        });
-       
-        window.addEventListener('reiniciado', event => {            
+        });       
+        window.addEventListener('reiniciado', event => {
             Swal.fire({
                 icon: 'success',
                 title: '¡Exito!',
@@ -195,6 +176,12 @@
                 showConfirmButton: false,
                 timer: 1500
             })
+        })
+        window.addEventListener('abrridatos', event => {
+            $('#recordardatos').modal('show');
+        })
+        window.addEventListener('cerrardatos', event => {
+            $('#recordardatos').modal('hide');
         })
     </script>
    
