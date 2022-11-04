@@ -139,7 +139,16 @@
                                                 <h6>{{ __('Estado') }}</h6>
                                             </div>
                                             <div class="card-body text-center justify-content-center" style="padding: 23px;">
-                                                <h3>{{ $estado_evento }}</h3>
+                                                @if ($estado_evento == 1)
+                                                    <i class="far fa-laugh-beam" style="font-size: 55px"></i>
+                                                @elseif($estado_evento == 2)
+                                                    <i class="far fa-smile-beam" style="font-size: 55px"></i>
+                                                @elseif($estado_evento == 3)
+                                                    <i class="far fa-meh text" style="font-size: 55px"></i>
+                                                @elseif($estado_evento == 4)
+                                                    <i class="far fa-frown" style="font-size: 55px"></i>
+                                                @endif
+                                                {{-- <h3>{{ $estado_evento }}</h3> --}}
                                             </div>
                                         </div>
                                     </div>
@@ -473,6 +482,17 @@
                 timer: 1700
             })
         })
+    </script>
+    @section('js')
+        <script>
+            $(window).scroll(function() {
+                $('.page-link').click(function(event) {
+                    event.preventDefault();
+                    $('html, body').animate({scrollTop: 0}, 600);
+                });
+            });
+        </script>
+    @endsection
     </script>
     <script>
         var options2 = {

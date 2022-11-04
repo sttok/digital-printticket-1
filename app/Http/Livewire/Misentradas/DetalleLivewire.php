@@ -627,19 +627,19 @@ class DetalleLivewire extends Component
       
         if($this->dias_restantes > 15){
             if ($this->porcentaje_venta > 75) {
-                $this->estado_evento = __('Execelente');
+                $this->estado_evento = 1;
             }elseif($this->porcentaje_venta > 50 && $this->porcentaje_venta < 75){
-                $this->estado_evento = __('Muy bien');
+                $this->estado_evento = 2;
             }elseif($this->estado_evento < 50){
-                $this->estado_evento = __('Regular');
+                $this->estado_evento = 3;
             }
         }elseif($this->dias_restantes < 15) {
             if ($this->porcentaje_venta > 75) {
-                $this->estado_evento = __('Execelente');
+                $this->estado_evento = 1;
             }elseif($this->porcentaje_venta > 50 && $this->porcentaje_venta < 75){
-                $this->estado_evento = __('Regular');
+                $this->estado_evento = 2;
             }elseif($this->estado_evento < 50){
-                $this->estado_evento = __('Mal');
+                $this->estado_evento = 4;
             }
         }
     }

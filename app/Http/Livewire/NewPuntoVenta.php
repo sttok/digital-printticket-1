@@ -76,7 +76,8 @@ class NewPuntoVenta extends Component
                 $this->notificacion == false;
                 $this->setting->contador_sms++;
                 $this->setting->update();
-            }    
+            }
+            DB::commit();
             $this->resetInput();
         } catch (Exception $e) {
             DB::rollBack();

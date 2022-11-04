@@ -33,7 +33,7 @@
         <div class="page-content">
             <div class="main-wrapper">
                 @yield('contenido')
-                @include('layouts.backendv2.toastinstall')
+                {{-- @include('layouts.backendv2.toastinstall') --}}
             </div>
         </div>    
         <!-- Javascripts -->
