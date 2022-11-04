@@ -2,8 +2,8 @@
 
 namespace App\Http\Livewire\Misentradas;
 
+use App\Exports\DescargarInformeExport;
 use Exception;
-use ZipArchive;
 use Carbon\Carbon;
 use App\Models\Event;
 use App\Models\Ticket;
@@ -13,17 +13,18 @@ use Livewire\Component;
 use App\Models\OrderChild;
 use Illuminate\Support\Str;
 use Livewire\WithPagination;
+use App\Models\DigitalOrdenCompra;
 use App\Models\OrderChildsDigital;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\ApiController;
-use App\Models\DigitalOrdenCompra;
 use App\Models\DigitalOrdenCompraDetalle;
-use Illuminate\Support\Facades\Storage;
 
 class DetalleLivewire extends Component
 {
+   
     use WithPagination;
     protected $listeners = ['ventarapidapalco1', 'abrirventas2', 'retornarnota', 'detalle'];
     protected $paginationTheme = 'bootstrap';
@@ -73,6 +74,51 @@ class DetalleLivewire extends Component
         }else{
             $this->reset('agrupar_palcos');
         }
+    }
+
+    public function descargarinforme(){
+        $data = array();
+        if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') || Auth::user()->hasRole('organization')) {
+            $orden_compra = DigitalOrdenCompra::with(['cliente:id,name,last_name'])->where('evento_id', $this->evento_id)->get();          
+            foreach ($orden_compra as $orden) {
+               $detalles = DigitalOrdenCompraDetalle::with(['entrada:id,identificador,consecutivo,status'])->where('digital_orden_compra_id', $orden->id)->get();
+               foreach ($detalles as $detalle) {
+                    $data[] = array(
+                        'orden_compra_identificador' => $orden->identificador,
+                        'nombre_entrada' => $detalle->entrada->evento->name,
+                        'Identificador' => $detalle->entrada->identificador,
+                        'Consecutivo' => $detalle->entrada->consecutivo,
+                        'Palco' => $detalle->entrada->mesas != null ? $detalle->entrada->mesas : 'No',
+                        'Asiento' => $detalle->entrada->asiento != null ? $detalle->entrada->asiento : 'No',
+                        'estado' => $detalle->entrada->status,
+                        'comprador' => $orden->cliente->name . ' ' . $orden->cliente->last_name,
+                        'endosado' => $detalle->endosado_id != null ? $detalle->endosado->name . ' ' . $detalle->endosado->last_name : 'No'
+                    );
+               }
+            }
+
+        }elseif (Auth::user()->hasRole('punto venta')) {
+            $orden_compra = DigitalOrdenCompra::where([
+                ['evento_id', $this->evento_id], ['vendedor_id', Auth::user()->id]
+                ])->with(['cliente:id,name,last_name'])->get();          
+            foreach ($orden_compra as $orden) {
+                 $detalles = DigitalOrdenCompraDetalle::where('digital_orden_compra_id', $orden->id)->with(['entrada'])->get();
+               foreach ($detalles as $detalle) {
+                    $data[] = array(
+                        'orden_compra_identificador' => $orden->identificador,
+                        'nombre_entrada' => $detalle->entrada->evento->name,
+                        'Identificador' => $detalle->entrada->identificador,
+                        'Consecutivo' => $detalle->entrada->consecutivo,
+                        'Palco' => $detalle->entrada->mesas != null ? $detalle->entrada->mesas : 'No',
+                        'Asiento' => $detalle->entrada->asiento != null ? $detalle->entrada->asiento : 'No',
+                        'estado' => $detalle->entrada->status,
+                        'comprador' => $orden->cliente->name . ' ' . $orden->cliente->last_name,
+                        'endosado' => $detalle->endosado_id != null ? $detalle->endosado->name . ' ' . $detalle->endosado->last_name : 'No'
+                    );
+               }
+            }
+        }
+        return Excel::download(new DescargarInformeExport($data), 'informe-'. Carbon::now()->isoFormat('D-M-YY') . '-' . rand(1,999) .'.xlsx');
     }
     
     public function ventarapidapalco1($data) {
@@ -411,10 +457,7 @@ class DetalleLivewire extends Component
     }
 
     public function eliminarendosado($id){
-        
         unset($this->entradas_seleccionadas_endosado[$id]);
-
-        
         $this->dispatchBrowserEvent('quitarendosado');
     }
 

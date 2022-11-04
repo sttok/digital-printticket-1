@@ -186,6 +186,9 @@
                                         <label class="form-check-label" wire:click="seleccionartodos()">{{ __('Seleccionar todos') }}</label>
                                     </div>
                                 </div>
+                                <div class="col-md-6 col-12 mb-2 ">
+                                    <button class="btn btn-success float-right" wire:click="descargarinforme()" ><i class="fas fa-file-download"></i> {{ __('Descargar informe') }}</button>                                    
+                                </div>
                             </div>
                         @endif
                         @if ($organizar == 1 || $organizar == 3)

@@ -12,4 +12,12 @@ class DigitalOrdenCompraDetalle extends Model
     public function digital(){
         return $this->hasOne(OrderChildsDigital::class, 'id', 'digital_id');
     }
+
+    public function entrada(){
+        return $this->hasOne(OrderChild::class, 'id', 'order_child_id');
+    }
+
+    public function endosado(){
+        return $this->hasOne(Appuser::class, 'id', 'endosado_id');
+    }
 }
