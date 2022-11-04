@@ -31,7 +31,7 @@ class DescargarInformeExport implements FromArray, ShouldAutoSize, WithStyles
     public function array(): array
     {
       
-        $array[] =  ['Identificador de venta',  'Nombre entrada', 'Identificador', 'Consecutivo', 'Palco', 'Asiento', 'Comprador', 'Endosado', 'Estado'];
+        $array[] =  ['Identificador de venta',  'Nombre entrada', 'Identificador', 'Consecutivo', 'Palco', 'Asiento', 'Comprador', 'Endosado', 'Estado', 'Fecha vendido'];
         foreach($this->data as $ent){
             $array[] = array(
                'Identificador de venta' => $ent['orden_compra_identificador'],
@@ -42,7 +42,8 @@ class DescargarInformeExport implements FromArray, ShouldAutoSize, WithStyles
                'Asiento' => $ent['Asiento'],
                'Comprador' => $ent['comprador'],
                'Endosado' => $ent['endosado'],
-               'Estado' => $ent['estado'] == 0 ? 'Pendiente' : 'Leida'
+               'Estado' => $ent['estado'] == 0 ? 'Pendiente' : 'Leida',
+               'Fecha vendido' => $ent['fecha_vendido']
             );
 
             // $ticket_digital = Ticket::find($entrada['id'])->forma_generar;

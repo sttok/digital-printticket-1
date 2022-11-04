@@ -134,7 +134,7 @@
                                         </div>
                                     </div>
                                     <div class="col-lg-4 col-md-6 col-12 mb-3">
-                                        <div class="card card-custom bg-secondary text-white" style="min-height: 153px">
+                                        <div class="card card-custom bg-secondary" style="min-height: 153px">
                                             <div class="card-header text-center justify-content-center" style="padding-bottom: 5px;">
                                                 <h6>{{ __('Estado') }}</h6>
                                             </div>
@@ -148,7 +148,6 @@
                                                 @elseif($estado_evento == 4)
                                                     <i class="far fa-frown" style="font-size: 55px"></i>
                                                 @endif
-                                                {{-- <h3>{{ $estado_evento }}</h3> --}}
                                             </div>
                                         </div>
                                     </div>
@@ -182,13 +181,24 @@
                             <div class="row col-12">
                                 <div class="col-md-6 col-12 mb-2 float-left">
                                     <div class="mb-4 form-check ml-1" >
-                                        <input type="checkbox" class="form-check-input" style="margin-left: 0px !important; margin-top: 0px; margin-right: 10px;" wire:click="seleccionartodos()" {{ $seleccionar_todos == true ? 'checked' : '' }}>
-                                        <label class="form-check-label" wire:click="seleccionartodos()">{{ __('Seleccionar todos') }}</label>
+                                        <input type="checkbox" class="form-check-input" style="margin-left: 0px !important; margin-top: 0px; margin-right: 10px;" wire:click.lazy="seleccionartodos()" {{ $seleccionar_todos == true ? 'checked' : '' }}>
+                                        <label class="form-check-label" wire:click.lazy="seleccionartodos()">{{ __('Seleccionar todos') }}</label>
                                     </div>
                                 </div>
-                                <div class="col-md-6 col-12 mb-2 ">
-                                    <button class="btn btn-success float-right" wire:click="descargarinforme()" ><i class="fas fa-file-download"></i> {{ __('Descargar informe') }}</button>                                    
-                                </div>
+                                @if ($filtrar_por == 1)
+                                    <div class="col-md-6 col-12 mb-2 ">
+                                        <button class="btn btn-success float-right" wire:click="descargarinforme()" >
+                                            <div wire:loading wire:target="descargarinforme">
+                                                <div class="spinner-grow spinner-grow-sm my-1" role="status" >
+                                                </div>
+                                            </div>
+                                            <div wire:loading.remove wire:target="descargarinforme">
+                                                <i class="fas fa-file-download"></i> {{ __('Descargar informe') }}
+                                            </div>
+                                        </button>
+                                    </div>
+                                @endif
+                               
                             </div>
                         @endif
                         @if ($organizar == 1 || $organizar == 3)
@@ -198,13 +208,13 @@
                                     <div class="card card-file-manager zoom" >
                                         <div class="d-flex">
                                             <div class="col-md-6 col-6 mb-2">
-                                                <div class="form-check">
+                                                <div class="form-check" wire:key="form-check-{{$entrada->id}}">
                                                     <input class="form-check-input" type="checkbox" value="{{ $entrada->id }}"  wire:model.lazy="entradas_array.{{$entrada->id}}">
                                                 </div>
                                             </div>
                                             <div class="col-md-6 col-6 mb-2">
                                                 <div class="dropdown card-dropdown dropstart" style="float: right;">
-                                                    <button class="btn btn-primary dropstart dropdown-toggle float-right" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <button class="btn btn-primary dropstart dropdown-toggle float-right" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" wire:key="btn-drop-{{$entrada->id}}">
                                                         <div wire:loading.inline wire:target="descargarentrada({{ $entrada->id }})">
                                                             <div class="spinner-grow spinner-grow-sm" role="status" >
                                                             </div>
@@ -213,7 +223,7 @@
                                                             <i class="fas fa-ellipsis-v"></i>
                                                         </div>
                                                     </button>
-                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="">
+                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="" wire:key="drop-{{$entrada->id}}">
                                                         <li>
                                                             @if ($entrada->endosado == 0)
                                                                 <button class="dropdown-item" type="button" wire:click="veruploads('{{ $entrada->id }}')">
@@ -253,7 +263,7 @@
                                                     <span class="badge bg-success" style="margin-left: 5px"><i class="fas fa-user-tag"></i></span>
                                                 @endif
                                             </h6>
-                                            <p class="card-text">{{ $entrada->created_at->diffForHumans() }}</p>
+                                            <p class="card-text">{{ 'Subido ' . $entrada->created_at->diffForHumans() }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -485,17 +495,16 @@
                 timer: 1700
             })
         })
-    </script>
-    @section('js')
-        <script>
-            $(window).scroll(function() {
-                $('.page-link').click(function(event) {
-                    event.preventDefault();
-                    $('html, body').animate({scrollTop: 0}, 600);
-                });
-            });
-        </script>
-    @endsection
+
+        window.addEventListener('compartirwhatsapp', event => {
+            var tab = window.open(event.detail.url, "_blank");
+            if(tab){
+                tab.focus(); //ir a la pestaña
+              }else{
+                alert('Pestañas bloqueadas, activa las ventanas emergentes (Popups) ');
+                return false;
+              }
+        })
     </script>
     <script>
         var options2 = {
