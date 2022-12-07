@@ -8,3 +8,4 @@ Route::domain('printticket.com.co')->group(function () {
     Route::get('/evento/{id}/{titulo}')->name('ver.evento.frontend');
     Route::get('p/{id}/{titulo}')->name('index.pagina');
 });
+

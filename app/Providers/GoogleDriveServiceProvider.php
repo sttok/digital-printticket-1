@@ -17,8 +17,6 @@ class GoogleDriveServiceProvider extends ServiceProvider
     public function boot()
     {
         \Storage::extend('google', function($app, $config) {
-
-
             $pr = Http::post('https://oauth2.googleapis.com/token',[
                 'client_id' => '1050410147847-m4g5t6son5eea9ppr9ll6acm9rp68je9.apps.googleusercontent.com',
                 'client_secret' =>  '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',

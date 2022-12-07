@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Carbon\Carbon;
 use App\Models\User;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\EventPuntoVenta;
@@ -36,8 +39,6 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-       
-       
         //  return $request;
         return redirect()->route('index.eventos');
     }
@@ -144,30 +145,61 @@ class HomeController extends Controller
             return view('backendv2.miseventos.detalle', compact('id'));
         }
          
-    }    
+    }
 
     public function verarchivo($base64){
+        return view('cliente.recepcion', compact('base64'));
+       
+    }
+
+    public function clienteordencompra($base64, $token){
+        $key = env('APP_KEY');
+        try {
+            $decoded = JWT::decode($token, new Key($key, 'HS256')); // Método HS256, aquí debería estar y emitido
+            return view('cliente.detalle', compact('token'));
+        } catch(\Firebase\JWT\SignatureInvalidException $e) {  // la firma es incorrecta
+            //echo $e->getMessage();
+            $ruta = route('ver.archivo', urlencode($base64)).'?errors='. urlencode($e->getMessage());
+            return redirect()->to($ruta);
+        }catch(\Firebase\JWT\BeforeValidException $e) {  // Firma después de un punto en el tiempo
+            $ruta = route('ver.archivo', urlencode($base64)).'?errors='. urlencode($e->getMessage());
+            return redirect()->to($ruta);
+        }catch(\Firebase\JWT\ExpiredException $e) {  // Token expiró
+            $ruta = route('ver.archivo', urlencode($base64)).'?errors='. urlencode($e->getMessage());
+            return redirect()->to($ruta);
+        }catch(Exception $e) {  // otros errorses
+            $ruta = route('ver.archivo', urlencode($base64)).'?errors='. urlencode($e->getMessage());
+            return redirect()->to($ruta);
+        }
+    }
+
+    public function descargarentrada($base64){
         $id = base64_decode($base64);
         $id = Str::after($id, '@kf#');
-        $entrada = OrderChildsDigital::findorfail($id);
-        
-        if($entrada->permiso_descargar == 1){
+        $entrada = OrderChildsDigital::where('id',$id)->first();
+        if(!empty($entrada)){
             if($entrada->provider == "local"){
-                    $r = 'storage/ticket-digital/';
-                    $url = Str::after($entrada->url, $r) ;
-                    if($entrada->descargas == null){
-                        $entrada->descargas = 1;
-                    }else{
-                        $entrada->descargas++;
-                    }
-                    $entrada->update();
-                    return Storage::disk('custom')->download('ticket-digital/'.$url);
-        
+                $r = 'storage/ticket-digital/';
+                $url = Str::after($entrada->url, $r) ;
+                if($entrada->descargas == null){
+                    $entrada->descargas = 1;
+                }else{
+                    $entrada->descargas++;
+                }
+                $entrada->update();
+                return Storage::disk('custom')->download('ticket-digital/'.$url);        
             }elseif($entrada->provider == 'drive'){
-                return view('backendv2.descargararchivodrive', compact('base64'));
+                $filename = Storage::disk("google")->url($entrada['url']);
+                if($entrada->descargas == null){
+                    $entrada->descargas = 1;
+                }else{
+                    $entrada->descargas++;
+                }
+                $entrada->update();
+                return redirect()->to($filename);
             }
         }else{
-            abort(403);
+            abort(404);
         }
     }
 

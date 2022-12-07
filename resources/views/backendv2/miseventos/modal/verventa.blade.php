@@ -11,11 +11,7 @@
                     <div class="col-auto mb 2">
                         <h5>{{ __('Nombre') }}</h5>
                         <h6>{{ $cliente['name'] . ' ' . $cliente['last_name'] }}</h6>
-                    </div>
-                    <div class="col-auto mb 2">
-                        <h5>{{ __('Correo') }}</h5>
-                        <h6>{{ $cliente['email'] }}</h6>
-                    </div>
+                    </div>                    
                     <div class="col-auto mb 2">
                         <h5>{{ __('Telefono') }}</h5>
                         <h6>{{ $cliente['phone'] }}</h6>

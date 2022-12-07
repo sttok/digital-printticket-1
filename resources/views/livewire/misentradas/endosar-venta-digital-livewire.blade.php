@@ -127,20 +127,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        window.addEventListener('abrirendosar', event => {
-            $('#endosarventa').modal('show');
-        })
-        window.addEventListener('cerrarendosar', event => {
-            $('#endosarventa').modal('hide');
-            Swal.fire({
-                icon: 'success',
-                title: '¡Exito!',
-                text: 'Ha sido endosado con exito',
-                showConfirmButton: false,
-                timer: 1500
-            })
-        })
-    </script>
 </div>

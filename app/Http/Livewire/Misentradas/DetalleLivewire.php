@@ -43,7 +43,7 @@ class DetalleLivewire extends Component
     public $organizar_por = 1;
     public $entradas_seleccionadas = [], $entradas_seleccionadas_endosado = [];
     public $search_telefono, $encontrado = false, $cliente, $estado_venta = 1, $abonado = 0, $total = 0, $metodo_de_pago = 1, $nota_venta;
-    public $nombre_cliente, $apellido_cliente, $correo_cliente, $imagen, $telefono, $prefijo_telefono = '+57', $phone, $contraseña_cliente, $notificar_nuevo = false, $cedula_cliente;
+    public $nombre_cliente, $apellido_cliente, $telefono, $prefijo_telefono = '+57', $phone,  $cedula_cliente;
     public $search_telefono_endosado, $endosado_id, $endosado_identificador, $encontrado_endosado = false, $cliente_endosado;
     public $enviado = false;
     public $digital_id;
@@ -193,39 +193,7 @@ class DetalleLivewire extends Component
         }
     }
 
-    public function buscarendosar($id, $ident){
-        $this->reset(['search_telefono_endosado', 'endosado_id', 'encontrado_endosado', 'cliente_endosado', 'endosado_identificador']);
-        $this->endosado_id = $id;
-        $this->endosado_identificador = $ident;
-        $this->dispatchBrowserEvent('abrirbuscarendosar');
-    }   
-
-    public function asignarentrada(){       
-        $this->validate([
-            'cliente_endosado' => 'required',
-            'endosado_id' => 'required',
-            'encontrado_endosado' => 'required|accepted'
-        ]);
-
-        if(!in_array($this->endosado_id, $this->entradas_seleccionadas_endosado)){
-            $this->entradas_seleccionadas_endosado[$this->endosado_id] = array(
-                'entrada_digital_id' => $this->endosado_id,
-                'cliente_id' => $this->cliente_endosado->id,
-                'cliente_name' => $this->cliente_endosado->name . ' ' . $this->cliente_endosado->last_name
-            );
-        }else{
-            $key = array_search($this->endosado_id,array_column($this->entradas_seleccionadas_endosado, 'entrada_digital_id'));
-            $r = array(
-                'entrada_digital_id' => $this->endosado_id,
-                'cliente_id' => $this->cliente_endosado->id,
-                'cliente_name' => $this->cliente_endosado->name . ' ' . $this->cliente_endosado->last_name
-            );
-            array_replace($this->entradas_seleccionadas_endosado[$key], $r);
-        }
-
-        $this->reset(['search_telefono_endosado', 'endosado_id', 'encontrado_endosado', 'cliente_endosado', 'endosado_identificador']);
-        $this->dispatchBrowserEvent('regresarcliente1');
-    }
+    
 
     public function asignarentrada2(){
         $this->phone = $this->prefijo_telefono . $this->telefono;
@@ -310,10 +278,7 @@ class DetalleLivewire extends Component
         }
     }
 
-    public function eliminarendosado($id){
-        unset($this->entradas_seleccionadas_endosado[$id]);
-        $this->dispatchBrowserEvent('quitarendosado');
-    }
+   
 
     public function veruploads($id){
         $this->reset(['entradas_array', 'entradas_seleccionadas', 'abonado', 'total']);
@@ -336,58 +301,76 @@ class DetalleLivewire extends Component
     }
 
     public function enviarentradas(){
-        if ($this->estado_venta != null ) {
-            if ($this->encontrado == true && $this->cliente != '') {
-                DB::beginTransaction();
-                try {
-                    $ordencompra = new DigitalOrdenCompra();
-                        $ordencompra->identificador = Str::upper(Str::random(7));
-                        $ordencompra->evento_id = $this->evento_id;
-                        $ordencompra->vendedor_id = Auth::user()->id;
-                        $ordencompra->cliente_id = $this->cliente->id;
-                        $ordencompra->cantidad_entradas = count($this->entradas_seleccionadas);
-                        $ordencompra->metodo_pago = $this->metodo_de_pago;
-                        $ordencompra->abonado = $this->abonado;
-                        $ordencompra->total = $this->total;
-                        $ordencompra->estado_venta = $this->estado_venta;
-                    $ordencompra->save();
-
-                    foreach ($this->entradas_seleccionadas as $es) {
-                        $ent = OrderChild::findorfail($es->order_child_id);
-                        $ent->customer_id = $this->cliente->id;
-                        $ent->vendedor_id = Auth::user()->id;
-                        if (array_key_exists($es['id'],$this->entradas_seleccionadas_endosado)){
-                            $ent->endosado_id = $this->entradas_seleccionadas_endosado[$es['id']]['cliente_id'];
-                        }
-                        $ent->update();
-                        $es->endosado = 1;
-                        $es->update();
-                        $key = base64_encode('@kf#'.$es->id);
-                        $es->url_1 = route('ver.archivo', $key);
-                        $detalle = new DigitalOrdenCompraDetalle();
-                            $detalle->digital_orden_compra_id = $ordencompra->id;
-                            $detalle->order_child_id =$es->order_child_id;
-                            if (array_key_exists($es['id'],$this->entradas_seleccionadas_endosado)){
-                                $detalle->endosado_id = $this->entradas_seleccionadas_endosado[$es['id']]['cliente_id'];
-                            }else{
-                                $detalle->endosado_id = null;
-                            }
-                            $detalle->digital_id = $es['id'];
-                        $detalle->save();
-                    }
-                    
-                    DB::commit();
-                    $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente', 'total_sin_endosar', 'total_endosadas', 
-                        'porcentaje_venta', 'dias_restantes', 'estado_evento']);
-                    $this->enviado = true;
-                    $this->dispatchBrowserEvent('verenviadas');
-                    $this->estadisticas();
-                } catch (Exception $e) {
-                    DB::rollBack();
-                    $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
+       
+        if ($this->estado_venta != null ) {            
+            DB::beginTransaction();
+            try {
+                if ($this->encontrado == false ) {
+                    $this->phone = $this->prefijo_telefono . $this->telefono;
+                   
+                    $this->validate([
+                        'nombre_cliente' => 'required|max:120|min:2',
+                        'prefijo_telefono' => 'required',
+                        'telefono' => 'required',
+                        'phone' => 'required|phone:COL,AUTO|unique:app_user,phone',
+                        'cedula_cliente' => 'required|integer|unique:app_user,cedula'
+                    ]);
+                    $cliente = new AppUser();
+                        $cliente->name = $this->nombre_cliente;
+                        $cliente->phone = $this->phone;
+                        $cliente->cedula = $this->cedula_cliente;
+                        $cliente->password = Hash::make($this->cedula_cliente);
+                        $cliente->provider = "LOCAL";
+                        $cliente->status = 1;
+                        $cliente->borrado = 0;
+                    $cliente->save();
+    
+                  $this->cliente = $cliente;
                 }
-            }else{
-                $this->dispatchBrowserEvent('errores', ['error' => __('Ha ocurrido un error, debe seleccionar un cliente')]);
+                $ordencompra = new DigitalOrdenCompra();
+                    $ordencompra->identificador = Str::upper(Str::random(7));
+                    $ordencompra->evento_id = $this->evento_id;
+                    $ordencompra->vendedor_id = Auth::user()->id;
+                    $ordencompra->cliente_id = $this->cliente->id;
+                    $ordencompra->cantidad_entradas = count($this->entradas_seleccionadas);
+                    $ordencompra->metodo_pago = $this->metodo_de_pago;
+                    $ordencompra->abonado = $this->abonado;
+                    $ordencompra->total = $this->total;
+                    $ordencompra->estado_venta = $this->estado_venta;
+                $ordencompra->save();
+                foreach ($this->entradas_seleccionadas as $es) {
+                    $ent = OrderChild::findorfail($es->order_child_id);
+                    $ent->customer_id = $this->cliente->id;
+                    $ent->vendedor_id = Auth::user()->id;
+                    if (array_key_exists($es['id'],$this->entradas_seleccionadas_endosado)){
+                        $ent->endosado_id = $this->entradas_seleccionadas_endosado[$es['id']]['cliente_id'];
+                    }
+                    $ent->update();
+                    $es->endosado = 1;
+                    $es->update();
+                    $key = base64_encode('@kf#'.$es->id);
+                    $es->url_1 = route('ver.archivo', $key);
+                    $detalle = new DigitalOrdenCompraDetalle();
+                        $detalle->digital_orden_compra_id = $ordencompra->id;
+                        $detalle->order_child_id =$es->order_child_id;
+                        if (array_key_exists($es['id'],$this->entradas_seleccionadas_endosado)){
+                            $detalle->endosado_id = $this->entradas_seleccionadas_endosado[$es['id']]['cliente_id'];
+                        }else{
+                            $detalle->endosado_id = null;
+                        }
+                        $detalle->digital_id = $es['id'];
+                    $detalle->save();
+                }
+                
+                DB::commit();
+                $this->resetExcept(['evento_id', 'readytoload', 'search', 'search_estado', 'entradas_seleccionadas', 'cliente', 'total_sin_endosar', 'total_endosadas', 
+                    'porcentaje_venta', 'dias_restantes', 'estado_evento']);
+                $this->enviado = true;
+                $this->dispatchBrowserEvent('verenviadas');
+                $this->estadisticas();
+            } catch (Exception $e) {
+                DB::rollBack();
+                $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
             }
         }else{
             $this->dispatchBrowserEvent('errores', ['error' => __('Debe seleccionar el estado de la venta')]);

@@ -3,13 +3,13 @@
         <img src="{{ asset(route('inicio.frontend') .'/images/upload/'.App\Models\Setting::find(1)->logo) }}" alt="">
     </div>
     <div class="authent-text">       
-        <p>{{ __('Ingresar el identificador de la entrada') }}</p>
+        <p>{{ __('Ingresar tu numero de cedula') }}</p>
     </div>
 
     <div>
         <div class="mb-3">
             <div class="form-floating">
-                <input type="number" class="form-control @error('identificador') is-invalid @enderror" id="identificador" placeholder="Ingrese identificador" wire:keydown.enter="validarr" wire:model.lazy="identificador"  wire:target="validarr" wire:loading.attr="disabled">
+                <input type="number" class="form-control @error('identificador') is-invalid @enderror" id="identificador" placeholder="Ingrese cedula" wire:keydown.enter="validarr" wire:model.lazy="identificador"  wire:target="validarr" wire:loading.attr="disabled">
                 <label for="identificador">Idenficador</label>
                 @error('identificador')
                     <div class="invalid-feedback ">{{ $message }}  </div>
@@ -23,7 +23,7 @@
     </div>
     <div>
         <ul class="my-3">
-            <li>{{ __('El vendedor debe facilitarte el identificador de la entrada') }}</li>
+            <li>{{ __('Debes ingresar el numero de cedula de la persona que realizo la compra') }}</li>
         </ul>
     </div>
 

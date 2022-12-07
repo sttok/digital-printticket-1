@@ -94,10 +94,10 @@
                                             <option value="+52">+52 MEX</option>
                                             <option value="+34">+34 ESP</option>
                                             <option value="+507">+507 PAN</option>
-                                        </select>   
+                                        </select>
                                         @error('prefijo')
                                             <div class="invalid-feedback ">{{ $message }}  </div>
-                                        @enderror  
+                                        @enderror
                                     </div>
                                     <div class="col-md-8 col-8" >
                                         <input type="tel" class="form-control @error('telefono') is-invalid @enderror @error('phone') is-invalid @enderror" name="telefono" id="telefono" tabindex="1" required autofocus value="{{ old('telefono') }}">

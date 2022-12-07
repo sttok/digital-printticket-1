@@ -289,7 +289,7 @@ trait DetalleLivewireTrait {
                     $texto .= $text;
                 }              
                 $url = 'https://api.whatsapp.com/send?phone='. urlencode( $telefono_cliente ) . '&text='. $texto;
-                $this->dispatchBrowserEvent('compartirwhatsapp', ['url' => $url]);
+                $this->dispatchBrowserEvent('compartirwhatsapp1', ['url' => $url]);
             }else{
                 $this->dispatchBrowserEvent('errores', ['error' => __('Ha ocurrido un error, contacta al administrador')]);
             }
@@ -297,7 +297,7 @@ trait DetalleLivewireTrait {
             $this->dispatchBrowserEvent('errores', ['error' => __('Ha ocurrido un error, contacta al administrador')]);
         }
     }
-
+    
     public function compartirsms(){
         $r = DigitalOrdenCompraDetalle::where('digital_id', $this->detalle_id)->first();
         if(!empty($r)){

@@ -42,7 +42,7 @@ class PalcosDigitalLivewire extends Component
     
     private function loadDaatos(){
         $entradas_digitales = OrderChildsDigital::where([
-        ['evento_id', $this->evento_id],  ['zona_id', $this->palco['id']
+            ['evento_id', $this->evento_id],  ['zona_id', $this->palco['id']
         ]])->get();
 
         $orden_palcos = [];

@@ -1,4 +1,4 @@
-<div class="row" wire:init="loadDatos">    
+<div class="row" wire:init="loadDatos">
     <style>
         .form-check .form-check-input{
             margin-left: 0px !important;
@@ -76,7 +76,7 @@
                         <div class="row col-lg-6 col-md-12 col-12 mb-3">
                             <div class="col-md-6 col-12 mb-2">
                                 <span>{{ __('Buscar por identificador') }}</span>
-                                <input type="search" class="form-control @error('search') is-invalid @enderror" placeholder="{{ __('Buscar por identificador') }}" wire:model="search">
+                                <input type="search" class="form-control @error('search') is-invalid @enderror " placeholder="{{ __('Buscar por identificador') }}" wire:model="search" {{ $agrupar_palcos == true ? 'disabled' : '' }}>
                                 @error('search')
                                     <div class="invalid-feedback ">{{ $message }}  </div>
                                 @enderror
@@ -97,7 +97,7 @@
     
                             <div class="col-md-6 col-12 mb-2">
                                 <span>{{ __('Organizar') }}</span>
-                                <select class="form-control @error('organizar') is-invalid @enderror"  wire:model="organizar">
+                                <select class="form-control @error('organizar') is-invalid @enderror"  wire:model="organizar" {{ $agrupar_palcos == true ? 'disabled' : '' }}>
                                     <option value="1">{{ __('Icono grande') }}</option>
                                     <option value="3">{{ __('Icono mediano') }}</option>
                                     <option value="2">{{ __('Listar') }}</option>
@@ -198,12 +198,10 @@
                                         </button>
                                     </div>
                                 @endif
-                               
                             </div>
                         @endif
                         @if ($organizar == 1 || $organizar == 3)
-                            @forelse ($this->Entradas as $entrada)
-                                
+                            @forelse ($this->Entradas as $entrada)                                
                                 <div class="col-lg-{{ $organizar == 1 ? 3 : 2 }} col-md-{{ $organizar == 1 ? 6 : 3 }} col-{{ $organizar == 1 ? 12 : 6 }}" >
                                     <div class="card card-file-manager zoom" >
                                         <div class="d-flex">
@@ -226,25 +224,25 @@
                                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="" wire:key="drop-{{$entrada->id}}">
                                                         <li>
                                                             @if ($entrada->endosado == 0)
-                                                                <button class="dropdown-item" type="button" wire:click="veruploads('{{ $entrada->id }}')">
+                                                                <button class="dropdown-item" type="button" wire:click="veruploads('{{ $entrada->id }}')" wire:key="b1-sell-{{ $entrada->id }}">
                                                                     <i class="fas fa-tag"></i> {{ __('Venta') }}
                                                                 </button>
-                                                                <button class="dropdown-item" type="button" wire:click="abrirventarapida1('{{ $entrada->id }}')" >
+                                                                <button class="dropdown-item" type="button" wire:click="abrirventarapida1('{{ $entrada->id }}')" wire:key="b1-sell-fast-{{ $entrada->id }}">
                                                                     <i class="fas fa-shipping-fast"></i> {{ __('Venta rapida') }}
                                                                 </button>
                                                             @else
-                                                                <button class="dropdown-item" type="button" wire:click="detalle('{{ $entrada->id }}')" >
+                                                                <button class="dropdown-item" type="button" wire:click="detalle('{{ $entrada->id }}')" wire:key="b1-detail-{{ $entrada->id }}">
                                                                     <i class="fas fa-receipt"></i> {{ __('Detalle') }}
                                                                 </button>
-                                                                <button class="dropdown-item" type="button" wire:click="enviarcompartir('{{ $entrada->id }}')" >
+                                                                <button class="dropdown-item" type="button" wire:click="enviarcompartir('{{ $entrada->id }}')" wire:key="b1-share-{{ $entrada->id }}">
                                                                     <i class="fas fa-share-alt"></i> {{ __('Compartir') }}
                                                                 </button>
                                                             @endif
-                                                            <button class="dropdown-item" type="button" wire:click="endosar('{{ $entrada->id }}')">
+                                                            <button class="dropdown-item" type="button" wire:click="endosar('{{ $entrada->id }}')" wire:key="b1-endosar-{{ $entrada->id }}">
                                                                 <i class="fas fa-user-check" ></i> {{ __('Endosar') }}
                                                             </button>
                                                             @if ($entrada->permiso_descargar == 1)
-                                                                <button class="dropdown-item" type="button" wire:click="descargar('{{ $entrada->id }}')">
+                                                                <button class="dropdown-item" type="button" wire:click="descargar('{{ $entrada->id }}')" wire:key="b1-download-{{ $entrada->id }}">
                                                                     <i class="fas fa-cloud-download-alt"></i> {{ __('Descargar') }}
                                                                 </button>
                                                             @endif
@@ -288,8 +286,8 @@
                                         @forelse($this->Entradas as $entrada)
                                             <tr>
                                                 <th scope="row">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" value="{{ $entrada->id }}" id="flexCheckChecked" wire:model.lazy="entradas_array.{{$entrada->id}}">
+                                                    <div class="form-check" wire:key="formm-checkk-{{$entrada->id}}">
+                                                        <input class="form-check-input" type="checkbox" wire:key="formm-checkk1-{{$entrada->id}}" value="{{ $entrada->id }}" id="flexCheckChecked" wire:model.lazy="entradas_array.{{$entrada->id}}">
                                                     </div>
                                                 </th>
                                                 <td> 
@@ -306,26 +304,26 @@
                                                 </td>
                                                 <td>
                                                     @if ($entrada->endosado == 0)
-                                                        <button class="btn btn-primary mb-2"  type="button" wire:click="veruploads('{{ $entrada->id }}')">
+                                                        <button class="btn btn-primary mb-2"  type="button" wire:click="veruploads('{{ $entrada->id }}')" wire:key="b-sell-{{ $entrada->id }}">
                                                             <i class="fas fa-tag"></i> {{ __('Vender') }}
                                                         </button>
-                                                        <button class="btn btn-primary mb-2" type="button" wire:click="abrirventarapida1('{{ $entrada->id }}')" >
+                                                        <button class="btn btn-primary mb-2" type="button" wire:click="abrirventarapida1('{{ $entrada->id }}')"  wire:key="b-sell-fast-{{ $entrada->id }}">
                                                             <i class="fas fa-shipping-fast"></i> {{ __('Venta rapida') }}
                                                         </button>
                                                     @else
-                                                        <button class="btn btn-primary mb-2" type="button" wire:click="detalle('{{ $entrada->id }}')" >
+                                                        <button class="btn btn-primary mb-2" type="button" wire:click="detalle('{{ $entrada->id }}')" wire:key="b-detail-{{ $entrada->id }}">
                                                             <i class="fas fa-receipt"></i> {{ __('Detalle') }}
                                                         </button>
-                                                        <button class="btn btn-primary mb-2" type="button" wire:click="enviarcompartir('{{ $entrada->id }}')" >
+                                                        <button class="btn btn-primary mb-2" type="button" wire:click="enviarcompartir('{{ $entrada->id }}')" wire:key="b-share-{{ $entrada->id }}">
                                                             <i class="fas fa-share-alt"></i> {{ __('Compartir') }}
                                                         </button>
                                                     @endif
                                                     
-                                                    <button class="btn btn-primary mb-2" type="button" wire:click="endosar('{{ $entrada->id }}')">
+                                                    <button class="btn btn-primary mb-2" type="button" wire:click="endosar('{{ $entrada->id }}')" wire:key="b-endosar-{{ $entrada->id }}">
                                                         <i class="fas fa-user-check" ></i> {{ __('Endosar') }}
                                                     </button>
                                                     @if ($entrada->permiso_descargar == 1)
-                                                        <button class="btn btn-success mb-2" type="button" wire:click="descargar('{{ $entrada->id }}')">
+                                                        <button class="btn btn-success mb-2" type="button" wire:click="descargar('{{ $entrada->id }}')" wire:key="b-download-{{ $entrada->id }}">
                                                             <i class="fas fa-cloud-download-alt"></i> {{ __('Descargar') }}
                                                         </button>
                                                     @endif
@@ -353,30 +351,35 @@
                         @endif
                     </div>
                     @if (count($entradas_array) > 0)
-                        <a href="#" class="btn-flotante" wire:click="abrirventas()"><i class="fas fa-check"></i> {{ count(array_filter($entradas_array, function($k) { return $k != null;} )) . ' Seleccionados' }} </a>
+                        <a href="javascript: void(0)" class="btn-flotante" wire:click="abrirventas()">
+                            <div wire:loading.inline wire:target="abrirventas,veruploads">
+                                <div class="spinner-grow spinner-grow-sm" role="status" ></div>
+                            </div>
+                            <div wire:loading.remove wire:target="abrirventas,veruploads" style="display: inline;">
+                                <i class="fas fa-check"></i> {{ count(array_filter($entradas_array, function($k) { return $k != null;} )) . ' Seleccionados' }} 
+                            </div>
+                        </a>
                     @else
-                        <a href="#" class="btn-flotante btn-secondary" wire:click="abrirventas()"><i class="fas fa-times"></i></a>
+                        <a href="javascript: void(0)" class="btn-flotante btn-secondary" wire:click="abrirventas()"><i class="fas fa-times"></i></a>
                     @endif
                 </div>
             @else
                 @livewire('misentradas.palcos-digital-livewire', ['evento_id' => $evento_id])
             @endif
-            
         </div>
     </div>
-    @if ($readytoload)       
-        @include('backendv2.cliente.modal.create')
-        @include('backendv2.miseventos.modal.buscaruser')
+    @if ($readytoload)
+        {{-- @include('backendv2.cliente.modal.create') --}}
+        {{-- @include('backendv2.miseventos.modal.buscaruser') --}}
         @include('backendv2.miseventos.modal.ver')
+        @include('backendv2.miseventos.modal.venta')
         @if ($enviado == true)
             @include('backendv2.miseventos.modal.verventa')
-        @else
-            @include('backendv2.miseventos.modal.venta')
         @endif
         @include('backendv2.miseventos.modal.ventarapida')
         @livewire('misentradas.compartir-venta-digital-livewire')
         @livewire('misentradas.endosar-venta-digital-livewire')
-    @endif   
+    @endif
     
     <script>
         window.addEventListener('errores', event => {
@@ -495,17 +498,52 @@
                 timer: 1700
             })
         })
-
-        window.addEventListener('compartirwhatsapp', event => {
-            var tab = window.open(event.detail.url, "_blank");
+        window.addEventListener('compartirwhatsapp1', event => {
+            var tab = window.open(event.detail.url);
             if(tab){
                 tab.focus(); //ir a la pestaña
-              }else{
+            }else{
                 alert('Pestañas bloqueadas, activa las ventanas emergentes (Popups) ');
                 return false;
-              }
+            }
         })
     </script>
+    
+    <script>
+        window.addEventListener('abrircompartir', event => {
+            $('#verventa').modal('hide');
+            $('#compartir').modal('show');
+        })
+        window.addEventListener('abrirventa', event => {
+            $('#compartir').modal('hide');
+            $('#verventa').modal('show');
+        })
+        window.addEventListener('enviadosms', event => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Enviado!',
+                text: 'Mensaje enviado correctamente',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        })
+    </script>
+    <script>
+        window.addEventListener('abrirendosar', event => {
+            $('#endosarventa').modal('show');
+        })
+        window.addEventListener('cerrarendosar', event => {
+            $('#endosarventa').modal('hide');
+            Swal.fire({
+                icon: 'success',
+                title: '¡Exito!',
+                text: 'Ha sido endosado con exito',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        })
+    </script>
+    
     <script>
         var options2 = {
                 chart: {

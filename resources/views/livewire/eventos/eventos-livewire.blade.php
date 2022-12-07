@@ -207,14 +207,11 @@
                                         </td>
                                         <td>
                                             <a class="btn btn-primary"
-                                                href="{{ route('show.eventos', $evento->id) }}">{{ __('Seleccionar') }}</a>
+                                                href="{{ route('show.eventos', $evento->id) }}">{{ __('Endosar') }}</a>
                                             <button class="btn btn-warning" type="button"
                                                 wire:click="reiniciarentradas('{{ $evento->id }}'')"><i
-                                                    class="fas fa-redo"></i> &nbsp; {{ __('Reiniciar') }}</button>
-                                            <button class="btn btn-secondary" type="button"
-                                                wire:click="abrirdatos('{{ $evento->id }}'')"><i
-                                                    class="fas fa-user-clock"></i> &nbsp;
-                                                {{ __('Recordar datos') }}</button>
+                                                    class="fas fa-redo"></i> &nbsp; {{ __('Descargar') }}</button>
+                                        
                                         </td>
                                     </tr>
                                 @empty

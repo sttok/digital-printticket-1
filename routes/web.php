@@ -26,7 +26,9 @@ Route::get('/login/google/redirect', [HomeController::class, 'logingoogleredirec
 Route::get('/login/google/callback', [HomeController::class, 'loginhandleProviderCallback'])->name('login.callback.google');
 
 Route::get('ent/{base64}', [HomeController::class, 'verarchivo'])->name('ver.archivo');
-  
+Route::get('ent/{base64}/{token}', [HomeController::class, 'clienteordencompra'])->name('ordencompra.cliente');
+Route::get('descargar/{base64}', [HomeController::class, 'descargarentrada'])->name('descargar.entrada');
+
 
 ////// PERSONALIZADO V2 ////////////////
 Route::group(['middleware' => ['auth']], function () {

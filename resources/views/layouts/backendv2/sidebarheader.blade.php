@@ -16,7 +16,7 @@
                         <span><i class="fas fa-moon"></i></span>
                     </button>
                 </li>
-                <li>                    
+                <li>
                     <a class="nav-link" href="https://play.google.com/store/apps/details?id=co.printticket.readerticket&hl=es_CO&gl=US" >
                         <img class="img-fluid" src="{{ asset('images/googleplay.png') }}" style="width: 120px;margin-top: -10px;" >
                     </a>
@@ -56,13 +56,15 @@
                             <small>05-05-22</small>
                         </div>
                         </div>
-                    </a>               
+                    </a>
                 </div>
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link profile-dropdown" href="#" id="profileDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src="{{ route('inicio.frontend').('/storage/perfil/'.Auth::user()->image) }}" alt=""></a>
                 <div class="dropdown-menu dropdown-menu-end profile-drop-menu" aria-labelledby="profileDropDown">
+                    <a class="dropdown-item" href="javascript: void(0)">{{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}</a>
+                    
                     {{-- <a class="dropdown-item" href="{{ route('create.evento') }}"><i data-feather="plus"></i>{{ __('Crear evento') }}</a>
                     <a class="dropdown-item" href="{{ route('index.ubicaciones') }}"><i data-feather="map-pin"></i>{{ __('Ubicaciones') }}</a>
                     <a class="dropdown-item" href="#"><i data-feather="shopping-bag"></i>{{ __('Pedidos') }}</a>
