@@ -2,22 +2,22 @@
     <div class="container">
         <div class="row justify-content-md-center">
             <div class="col-md-12 col-lg-10">
-                <div class="card login-box-container" style="top: 50%">
-                    <div class="authent-logo">
+                <div class="card login-box-container" >
+                    <div class="authent-logo p-3">
                         <img src="{{ asset(route('inicio.frontend') .'/images/upload/'.\App\Models\Setting::find(1)->logo)}}" alt="">
                     </div>
                     <div class="card-body row">
                         <div class="col-12 mb-3 row">
-                            <div class="col-md-3 col-6 mb-1">
+                            <div class="col-md-3 col-12 mb-2">
                                 <h5>{{ __('Cliente')}}</h5> <span>{{  $this->Cliente->name . ' ' . $this->Cliente->last_name }}</span>
                             </div>
-                            <div class="col-md-3 col-6 mb-1">
+                            <div class="col-md-3 col-12 mb-2">
                                 <h5>{{ __('Identificador')}}</h5> <span>#{{  $this->Ordencompra->identificador }}</span>
                             </div>
-                            <div class="col-md-3 col-6 mb-1">
+                            <div class="col-md-3 col-12 mb-2">
                                 <h5>{{ __('Evento') }}</h5> <span>{{ $this->Ordencompra->evento->name }}</span>
                             </div>
-                            <div class="col-md-3 col-6 mb-1">
+                            <div class="col-md-3 col-12 mb-2">
                                 <h5>{{ __('Cantidad entradas') }}</h5> <span>x{{ number_format($this->Ordencompra->cantidad_entradas, 0, ',', '.') }}</span>
                             </div>
                         </div>
@@ -29,8 +29,8 @@
                                             <th scope="col">#</th>
                                             <th scope="col">{{ __('Entrada') }}</th>
                                             <th scope="col">{{ __('Identificador') }}</th>
-                                            <th scope="col">{{ __('Consecutivo') }}</th>
-                                            <th scope="col">{{ __('Salto') }}</th>
+                                            <th scope="col">{{ __('Palco') }}</th>
+                                            <th scope="col">{{ __('Asiento') }}</th>
                                             <th scope="col">{{ __('Endosado') }}</th>
                                             <th scope="col">{{ __('Acción') }}</th>
                                         </tr>
@@ -41,8 +41,8 @@
                                                 <th scope="row">#{{ $loop->iteration }}</th>
                                                 <td>{{ $detalle->entrada->evento->name }}</td>
                                                 <td>{{ $detalle->entrada->identificador }}</td>
-                                                <td>{{ number_format($detalle->entrada->consecutivo, 0, ',', '.') }}</td>
-                                                <td>{{ number_format($detalle->entrada->salto, 0, ',', '.') }}</td>
+                                                <td>{{ $detalle->entrada->mesas != '' ? $detalle->entrada->mesas : 'No'}}</td>
+                                                <td>{{ $detalle->entrada->asiento != '' ? $detalle->entrada->asiento : 'No' }}</td>
                                                 <td>
                                                     @if ($detalle->endosado_id != null)
                                                         <span class="badge bg-success">{{ $detalle->endosado->name . ' ' . $detalle->endosado->last_name }}</span>
@@ -143,6 +143,7 @@
         window.addEventListener('cerrarModals', event => {
             $('#compartir').modal('hide');
             $('#compartirphone').modal('hide');
+            $('#endosar').modal('hide');
         })
         window.addEventListener('openCompartir', event => {
             $('#compartirphone').modal('hide');

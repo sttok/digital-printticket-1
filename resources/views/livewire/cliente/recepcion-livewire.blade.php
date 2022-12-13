@@ -4,16 +4,16 @@
             <div class="col-md-12 col-lg-4">
                 <div class="card login-box-container">
                     <div class="card-body">
-                        <div class="authent-logo">
+                        <div class="authent-logo mb-1">
                             <img src="{{ asset(route('inicio.frontend') .'/images/upload/'.\App\Models\Setting::find(1)->logo)}}" alt="">
                         </div>
 
-                        <div class="authent-text">
+                        <div class="authent-text mb-1">
                             <p>{{ __('Bienvenido a ') }} <b>{{ \App\Models\Setting::find(1)->app_name }}</b> </p>
                             <p>{{ __('Ingresa tu cedula para recibir las entradas') }}.</p>
                         </div>
 
-                        <div>
+                        <div class="my-1">
                             <div class="mb-3">
                                 <div class="form-floating">
                                     <input type="text" class="form-control  @error('cedula') is-invalid @enderror" id="floatingInput" wire:model.defer="cedula"

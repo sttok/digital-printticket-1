@@ -77,7 +77,7 @@ class UserController extends Controller
                 if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') ) {
                     return redirect()->route('index.eventos');
                 }elseif(Auth::user()->hasRole('organization') || Auth::user()->hasRole('punto venta')){
-                       return redirect()->route('mis.eventos');
+                    return redirect()->route('mis.eventos');
                 } else {
                     Auth::logout();
                     $request->session()->invalidate();

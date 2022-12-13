@@ -10,7 +10,7 @@
                     <a class="nav-link" href="{{ route('inicio.frontend')  }}">{{ __('Inicio') }}</a>
                 </li>
 
-                <li class="nav-item ml-2" style="padding: 5px 0;">
+                {{-- <li class="nav-item ml-2" style="padding: 5px 0;">
                     <button class="darkModeSwitch" id="switch">
                         <span><i class="fas fa-sun"></i></span>
                         <span><i class="fas fa-moon"></i></span>
@@ -20,7 +20,7 @@
                     <a class="nav-link" href="https://play.google.com/store/apps/details?id=co.printticket.readerticket&hl=es_CO&gl=US" >
                         <img class="img-fluid" src="{{ asset('images/googleplay.png') }}" style="width: 120px;margin-top: -10px;" >
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </div>
         <div class="logo">
@@ -35,45 +35,33 @@
         <div class="" id="headerNav">
             <ul class="navbar-nav">
                <li class="nav-item">
-                    <a class="nav-link" href="{{ asset(route('inicio.frontend') .'/storage/public/'.\App\Models\Setting::find(1)->modo_uso_digital)}}" target="_blank" rel="noopener noreferrer">{{ __('Modo de uso') }}</a>
+                    <a class="nav-link" href="{{ asset(route('inicio.frontend') .'/storage/public/'.\App\Models\Setting::find(1)->modo_uso_digital)}}" target="_blank" rel="noopener noreferrer">
+                        @desktop
+                            {{ __('Modo de uso') }}
+                        @elsedesktop
+                            <i class="fas fa-hands-helping text-primary" style="font-size: 22px"></i>
+                        @enddesktop
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ asset(route('inicio.frontend') .'/storage/public/'.\App\Models\Setting::find(1)->modo_uso_digital)}}" target="_blank" rel="noopener noreferrer">{{ __('Procesos de seguridad') }}</a>
-                </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link notifications-dropdown" href="#" id="notificationsDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">1</a>
-                <div class="dropdown-menu dropdown-menu-end notif-drop-menu" aria-labelledby="notificationsDropDown">
-                    <h6 class="dropdown-header">{{ __('Notificaciones') }}</h6>
-                    <a href="#">
-                        <div class="header-notif">
-                        <div class="notif-image">
-                            <span class="notification-badge bg-info text-white">
-                            <i class="fas fa-bullhorn"></i>
-                            </span>
-                        </div>
-                        <div class="notif-text">
-                            <p class="bold-notif-text">{{ __('Proximamente') }}</p>
-                            <small>05-05-22</small>
-                        </div>
-                        </div>
+                    <a class="nav-link" href="{{ asset(route('inicio.frontend') .'/storage/public/'.\App\Models\Setting::find(1)->modo_uso_digital)}}" target="_blank" rel="noopener noreferrer">
+                        @desktop
+                            {{ __('Procesos de seguridad') }}
+                        @elsedesktop
+                            <i class="fas fa-id-card-alt text-primary" style="font-size: 22px"></i>
+                        @enddesktop
                     </a>
-                </div>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link profile-dropdown" href="#" id="profileDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="{{ route('inicio.frontend').('/storage/perfil/'.Auth::user()->image) }}" alt=""></a>
-                <div class="dropdown-menu dropdown-menu-end profile-drop-menu" aria-labelledby="profileDropDown">
-                    <a class="dropdown-item" href="javascript: void(0)">{{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}</a>
-                    
-                    {{-- <a class="dropdown-item" href="{{ route('create.evento') }}"><i data-feather="plus"></i>{{ __('Crear evento') }}</a>
-                    <a class="dropdown-item" href="{{ route('index.ubicaciones') }}"><i data-feather="map-pin"></i>{{ __('Ubicaciones') }}</a>
-                    <a class="dropdown-item" href="#"><i data-feather="shopping-bag"></i>{{ __('Pedidos') }}</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{{ route('index.estadisticas.web') }}"><i data-feather="trending-up"></i>{{ __('Estadisticas visita') }}</a>
-                    <a class="dropdown-item" href="{{ route('index.configuracion') }}"><i data-feather="settings"></i>{{ __('Configuracion') }}</a> --}}
-                    <a class="dropdown-item" href="{{ route('logout') }}"><i data-feather="log-out"></i>{{ __('Cerrar Sesion') }}</a>
-                </div>
-            </li>
+                </li>
+            
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link profile-dropdown" href="#" id="profileDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{{ route('inicio.frontend').('/storage/perfil/'.Auth::user()->image) }}" alt=""></a>
+                    <div class="dropdown-menu dropdown-menu-end profile-drop-menu" aria-labelledby="profileDropDown">
+                        <a class="dropdown-item" href="javascript: void(0)">{{ Auth::user()->first_name . ' ' . Auth::user()->last_name }}</a>
+                        <a class="dropdown-item" href="{{ route('logout') }}"><i data-feather="log-out"></i>{{ __('Cerrar Sesion') }}</a>
+                    </div>
+                </li>
             </ul>
         </div>
     </nav>

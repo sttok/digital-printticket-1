@@ -197,8 +197,7 @@ class CreateEventoLivewire extends Component
                                 $puntodeventa->save();
                                 
                             }
-                    }
-                        
+                        }
                     }
                 }
                 $colores = array(
@@ -211,7 +210,9 @@ class CreateEventoLivewire extends Component
                     "#00b9ff",
                     "#ff0000",
                     "#adadad",
-                    "#FFD700"
+                    "#FFD700",
+                    "#ff0080",
+                    "#9fd5d1"
                 );
                 foreach (collect($this->entradas_array) as $entrada) {
                     $ticket_number = chr(rand(65, 90)) . chr(rand(65, 90)) . '-' . rand(999, 99900);

@@ -18,7 +18,6 @@ class RecepcionLivewire extends Component
     protected $queryString = [
         'errors' => ['except' => '', 'as' => 'errors'],
     ];
-    
 
     public function mount($id){
         $this->codigo = $id;
@@ -49,7 +48,7 @@ class RecepcionLivewire extends Component
             $cliente = AppUser::find($orden_compra->cliente_id);
             if($cliente){
                 if($cliente->cedula == $this->cedula){
-                    $key = env('APP_KEY');
+                    $key = "T3NjYXJNYW4xNCNLZiMyNjU3NTQ5Nw==";
                     $payload = [
                         "iss"=> route('inicio.frontend'),
                         "aud"=> route('inicio.frontend'),

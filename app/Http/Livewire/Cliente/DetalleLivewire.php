@@ -10,6 +10,7 @@ use App\Models\Setting;
 use Livewire\Component;
 use App\Models\OrderChild;
 use Illuminate\Support\Str;
+use Livewire\WithPagination;
 use App\Models\DigitalOrdenCompra;
 use App\Models\OrderChildsDigital;
 use Illuminate\Support\Facades\DB;
@@ -20,12 +21,17 @@ use App\Models\DigitalOrdenCompraDetalle;
 
 class DetalleLivewire extends Component
 {
-    protected $listeners = ['endosado2', ''];
+    use WithPagination;
+    protected $paginationTheme = 'bootstrap';
+    protected $listeners = ['endosado2'];
     public $token;
     public $decodificado;
     public $entrada_id, $metodo_compartir = 0;
     public $readytoLoad = false;
     public $prefijo = '+57', $telefono, $phone, $nombre_endosado, $apellido_endosado, $cedula_endosado;
+    protected $queryString = [
+        'page' => ['except' => '', 'as' => 'p'],
+    ];    
 
     public function mount($token){
         $this->token = $token;
@@ -39,7 +45,6 @@ class DetalleLivewire extends Component
 
     public function loadDatos(){
         $this->readytoLoad = true;
-        //dd($this->decodificado);
     }
 
     public function updatedCedulaEndosado(){
@@ -49,7 +54,6 @@ class DetalleLivewire extends Component
                 $this->dispatchBrowserEvent('cedulaEncontrada', ['nombre' => $endosado->name. ' ' . $endosado->last_name]);
             }
         }
-       
     }
 
     public function endosar($id){
@@ -116,7 +120,6 @@ class DetalleLivewire extends Component
     }
 
     public function endosado2(){
-        //dd('hola');
         DB::beginTransaction();
         try {
             $cliente = AppUser::where('id',  $this->decodificado['cliente'])->first();
@@ -250,7 +253,7 @@ class DetalleLivewire extends Component
     }
 
     private function decodificar(){
-        $key = env('APP_KEY');
+        $key = "T3NjYXJNYW4xNCNLZiMyNjU3NTQ5Nw==";
         $this->decodificado = JWT::decode($this->token, new Key($key, 'HS256'));
         $this->decodificado = (array)$this->decodificado->data;
     }
@@ -264,7 +267,7 @@ class DetalleLivewire extends Component
     }
 
     public function getOrdencompradetalleProperty(){
-        return DigitalOrdenCompraDetalle::with(['entrada:id,identificador,salto,consecutivo,status,mesas,asiento,customer_id,ticket_id','endosado:id,name,last_name'])->where('digital_orden_compra_id', $this->Ordencompra->id)->paginate(16);
+        return DigitalOrdenCompraDetalle::with(['entrada:id,identificador,salto,consecutivo,status,mesas,asiento,customer_id,ticket_id'])->where('digital_orden_compra_id', $this->Ordencompra->id)->paginate(24);
     }
 
     public function getEntradaProperty(){

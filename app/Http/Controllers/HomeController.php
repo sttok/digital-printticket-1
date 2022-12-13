@@ -123,7 +123,7 @@ class HomeController extends Controller
     public function miseventos(){
         //abort_if(Gate::denies('asignar_ticket'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') || Auth::user()->hasRole('organization') || Auth::user()->hasRole('punto venta')) {
-             return view('backendv2.miseventos.index');
+             return view('miseventos.index');
         }else{
             abort(403);
         }
@@ -137,12 +137,12 @@ class HomeController extends Controller
                 ['punto_id', Auth::user()->id], ['event_id', $id]
             ])->first();
             if(!empty($event_punto_ventas)){
-                return view('backendv2.miseventos.detalle', compact('id'));
+                return view('miseventos.detalle', compact('id'));
             }else{
                 abort(403);
             }
         }else{
-            return view('backendv2.miseventos.detalle', compact('id'));
+            return view('miseventos.detalle', compact('id'));
         }
          
     }
@@ -153,7 +153,7 @@ class HomeController extends Controller
     }
 
     public function clienteordencompra($base64, $token){
-        $key = env('APP_KEY');
+        $key = "T3NjYXJNYW4xNCNLZiMyNjU3NTQ5Nw==";
         try {
             $decoded = JWT::decode($token, new Key($key, 'HS256')); // Método HS256, aquí debería estar y emitido
             return view('cliente.detalle', compact('token'));

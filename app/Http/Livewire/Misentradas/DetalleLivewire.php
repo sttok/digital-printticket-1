@@ -99,7 +99,7 @@ class DetalleLivewire extends Component
                     foreach ($detalle as $ent) {
                         $digital = $ent->digital;
                         $nombre = $digital->zona->name;
-                        $digial['entrada'] = $nombre;                       
+                        $digial['entrada'] = $nombre;
                         $this->entradas_seleccionadas[] = $digital;
                     }
                     $this->dispatchBrowserEvent('verventaa');
@@ -259,7 +259,6 @@ class DetalleLivewire extends Component
     }
 
     public function abrirventas(){
-        
         if (count($this->entradas_array) > 0) {
             $this->dispatchBrowserEvent('abrirmodalventa');
             $this->cargarentradas();
@@ -302,7 +301,7 @@ class DetalleLivewire extends Component
 
     public function enviarentradas(){
        
-        if ($this->estado_venta != null ) {            
+        if ($this->estado_venta != null ) {
             DB::beginTransaction();
             try {
                 if ($this->encontrado == false ) {

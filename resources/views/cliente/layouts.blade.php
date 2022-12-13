@@ -18,6 +18,7 @@
         <!-- Styles -->
         <link href="https://fonts.googleapis.com/css?family=Poppins:400,500,700,800&display=swap" rel="stylesheet">
         <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+        <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
         <link href="{{ asset('backendv2/plugins/font-awesome/css/all.min.css') }}" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
         @livewireStyles        
@@ -71,7 +72,7 @@
             }
         </style>
       
-        <section class="section">
+        <section class="section" style="padding: 30px; background-color: transparent !important;">
             @yield('contenido')
         </section>
     
