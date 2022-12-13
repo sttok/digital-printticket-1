@@ -1,5 +1,8 @@
 body{
     background: radial-gradient(20% 45% at 50% 50%, #00ABB1 1%, #012E72 74.35%);;
+    background: radial-gradient(20% 45% at 50% 50%, #00ABB1 1%, #012E72 74.35%);;
+    background: radial-gradient(20% 45% at 50% 50%, #00ABB1 1%, #012E72 74.35%);;
+    background: radial-gradient(20% 45% at 50% 50%, #00ABB1 1%, #012E72 74.35%);;
 }
 
 .text-primary{
@@ -8,7 +11,7 @@ body{
 
 .btn-info{
     background-color: #4584FF !important;
-    color: #fefefe !important;
+    color: #fefefe !important; 
 }
 
 .loader{
