@@ -23,7 +23,12 @@
         @laravelPWA
         @yield('css')
     </head>
-    <body class="{{ request()->is('mis-eventos*') ? 'sidebar-hidden' : '' }}" >   
+    @desktop
+        <body class="{{ request()->is('mis-eventos*') ? 'sidebar-hidden' : '' }}" >   
+    @elsedesktop
+        <body class="" >   
+    @enddesktop
+   
         <div class='loader'>
             <div class='spinner-grow text-primary' role='status'>
             <span class='sr-only'>{{ __('Cargando') }}...</span>

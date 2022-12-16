@@ -230,6 +230,7 @@
      
      <script>
         window.addEventListener('openReporte1', event => {
+            $('body').removeClass("sidebar-hidden");
             $('#reporte').modal('show');
         });
         window.addEventListener('cerrarModalReporte', event => {
@@ -240,6 +241,7 @@
             $('#verventa').modal('show');
         });     
         window.addEventListener('openEstadisticas1', event => {
+            $('body').removeClass("sidebar-hidden");
             $('#estadisitica').modal('show');
         });
         window.addEventListener('cerrarModalEstadisitica', event => {
