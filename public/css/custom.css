@@ -93,6 +93,7 @@ body{
     box-shadow: 0px 0px 25px 15px rgba(5, 200, 200, 1);
 }
 
+
 @media only screen and (max-width: 600px) {
  	.btn-flotante {
 		font-size: 15px;
@@ -122,6 +123,9 @@ body{
     }
     .d-sm-none{
         display: none;
+    }
+    .card.card-custom .card-body h2{
+        font-size: 40px;
     }
     
 }

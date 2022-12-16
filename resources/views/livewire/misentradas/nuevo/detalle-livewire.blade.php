@@ -34,12 +34,24 @@
                                         @endif
                                     </div>
                                     <div class="col-md-2 col-3">
-                                        <button class="btn btn-secondary" type="button" wire:click="quitarEntrada('{{ $zona->id }}')" ><i class="fas fa-minus"></i></button>
+                                        <button class="btn btn-secondary" type="button" wire:click="quitarEntrada('{{ $zona->id }}')" >
+                                            <div wire:loading wire:target="quitarEntrada('{{ $zona->id }}')">
+                                                <div class="spinner-grow spinner-grow-sm my-1" role="status" >
+                                                </div>
+                                            </div>
+                                            <i class="fas fa-minus" wire:loading.remove wire:target="quitarEntrada('{{ $zona->id }}')"></i>
+                                        </button>
                                     </div>
                                     <div class="col-md-1 d-md-block d-sm-none">
                                     </div>
                                     <div class="col-md-2 col-3">
-                                        <button class="btn btn-secondary" type="button" wire:click="agregarEntrada('{{ $zona->id }}')" ><i class="fas fa-plus"></i></button>
+                                        <button class="btn btn-secondary" type="button" wire:click="agregarEntrada('{{ $zona->id }}')" >
+                                            <div wire:loading wire:target="agregarEntrada('{{ $zona->id }}')">
+                                                <div class="spinner-grow spinner-grow-sm my-1" role="status" >
+                                                </div>
+                                            </div>
+                                            <i class="fas fa-plus" wire:loading.remove wire:target="agregarEntrada('{{ $zona->id }}')"></i>
+                                        </button>
                                     </div>
                                 </div>
                             @empty

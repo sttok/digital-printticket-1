@@ -40,7 +40,14 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <button class="btn btn-primary" wire:click="detalleReporte({{ $historial->id }})"><i class="fas fa-search"></i></button>
+                                        {{-- <button class="btn btn-primary" wire:click="detalleReporte({{ $historial->id }})"><i class="fas fa-search"></i></button> --}}
+                                        <a class="dropdown dropleft btn btn-primary" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> 
+                                            <i class="fas fa-ellipsis-v"></i> 
+                                        </a>
+                                        <div class="dropdown-menu dropleft" aria-labelledby="profileDropDown" style="left: auto !important;">
+                                            <a class="dropdown-item" href="javascript: void(0)" wire:click="detalleReporte({{ $historial->id }})"> <i class="fas fa-search"></i> {{ __('Detalle') }}</a>
+                                            <a class="dropdown-item" href="javascript: void(0)" wire:click="descargarReporte({{ $historial->id }})" > <i class="fas fa-cloud-download-alt"></i> {{ __('Descargar') }}</a>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
