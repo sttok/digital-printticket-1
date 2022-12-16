@@ -19,6 +19,7 @@
         <link href="https://fonts.googleapis.com/css?family=Poppins:400,500,700,800&display=swap" rel="stylesheet">
         <link href="{{ asset('css/app.css') }}" rel="stylesheet">
         <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
+        @laravelPWA
     </head>
     <body class="login-page">
         <style>
@@ -129,6 +130,10 @@
                                 </div>
                                 <div class="d-block my-2">
                                     <small>Copyright © {{ Carbon\Carbon::now()->isoFormat('Y') }}. Hecho con ❤️ de Sttok Publicidad.</small>
+                                </div>
+                                <div class="d-block my-2">
+                                    @include('alertas.alerta')
+                                    @include('alertas.session')
                                 </div>
                             </form>
                         </div>

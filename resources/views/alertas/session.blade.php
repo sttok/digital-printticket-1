@@ -25,7 +25,7 @@
       <div class="alert alert-warning alert-dismissible fade show" role="alert" style="color: #4f4f4f; background-color: #ffee01; border-color: #ffee01; border-radius: 1rem;">
         <i class="fas fa-exclamation-triangle"></i>&nbsp;&nbsp;{{Session::get('warning')}}
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">×</span>
+          <span aria-hidden="true">x</span>
         </button>
 
       </div>

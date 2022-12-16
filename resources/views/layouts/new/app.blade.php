@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="robots" content="noindex, follow" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="Panel de control para uso de printticket v2">
+        <meta name="description" content="Panel digital de control para uso de printticket v2">
         <meta name="keywords" content="admin,dashboard">
         <meta name="author" content="Sttok Publicidad">
 
@@ -23,8 +23,8 @@
         @laravelPWA
         @yield('css')
     </head>
-    <body class="" >   
-        <div class='loader '>
+    <body class="{{ request()->is('mis-eventos*') ? 'sidebar-hidden' : '' }}" >   
+        <div class='loader'>
             <div class='spinner-grow text-primary' role='status'>
             <span class='sr-only'>{{ __('Cargando') }}...</span>
             </div>
@@ -34,7 +34,6 @@
         <div class="page-content">
             <div class="main-wrapper">
                 @yield('contenido')
-                {{-- @include('layouts.backendv2.toastinstall') --}}
             </div>
         </div>    
         <!-- Javascripts -->

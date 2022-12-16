@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Misentradas\Nuevo;
 
 use Exception;
+use Carbon\Carbon;
 use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\AppUser;
@@ -11,7 +12,6 @@ use Livewire\Component;
 use App\Models\OrderChild;
 use Illuminate\Support\Str;
 use Livewire\WithPagination;
-use PhpParser\Node\Stmt\Foreach_;
 use App\Models\DigitalOrdenCompra;
 use App\Models\OrderChildsDigital;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +23,11 @@ class DetalleLivewire extends Component
 {
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
+    protected $queryString = [
+        'search' => ['except' => '', 'as' => 's'],
+        'page' => ['except' => 1, 'as' => 'p'],
+    ];
+    public $search, $estadisticas = array(), $estado_evento;
     public $evento_id;
     public $disponibles = [];
     public $loaded = false, $readyToLoad = false, $enviado = false;
@@ -41,11 +46,114 @@ class DetalleLivewire extends Component
 
     public function render()
     {
+        $this->estadisticas();
         return view('livewire.misentradas.nuevo.detalle-livewire');
     }
 
+    public function detalleReporte($id){
+        $historial = DigitalOrdenCompra::where('id', $id)->first();
+        $detalles = DigitalOrdenCompraDetalle::where('digital_orden_compra_id', $id)->get();
+
+        foreach ($detalles as $detalle) {
+            $this->venta_realizada[] = array(
+                'name_entrada' => $detalle->entrada->evento->name,
+                'identificador' => $detalle->entrada->identificador,
+                'consecutivo' => $detalle->entrada->consecutivo,
+                'palco' => $detalle->entrada->mesas,
+                'asiento' => $detalle->entrada->asiento
+            );
+        }
+        $this->cliente = AppUser::find($historial->cliente_id);
+        $this->venta_id = $id;
+        $this->enviado = true;
+        $this->dispatchBrowserEvent('abrirDetalle');
+    }
+
+    private function calcularestadisticas($total, $endosadas){
+        if($total > 0){
+            $this->porcentaje_venta = round( ($endosadas / $total) * 100 );
+        }else{
+            $this->porcentaje_venta = 0;
+        }
+      
+        if($this->dias_restantes > 15){
+            if ($this->porcentaje_venta > 75) {
+                $this->estado_evento = 1;
+            }elseif($this->porcentaje_venta > 50 && $this->porcentaje_venta < 75){
+                $this->estado_evento = 2;
+            }elseif($this->estado_evento < 50){
+                $this->estado_evento = 3;
+            }
+        }elseif($this->dias_restantes < 15) {
+            if ($this->porcentaje_venta > 75) {
+                $this->estado_evento = 1;
+            }elseif($this->porcentaje_venta > 50 && $this->porcentaje_venta < 75){
+                $this->estado_evento = 2;
+            }elseif($this->estado_evento < 50){
+                $this->estado_evento = 4;
+            }
+        }
+    }  
+
+    private function estadisticas()
+    {
+        $year = Carbon::now()->format('Y');
+        for ($i = 1; $i <= 12; $i++) {
+            switch ($i) {
+                case 1:
+                    $nombre = 'Ene';
+                    break;
+                case 2:
+                    $nombre = 'Feb';
+                    break;
+                case 3:
+                    $nombre = 'Mar';
+                    break;
+                case 4:
+                    $nombre = 'Abr';
+                    break;
+                case 5:
+                    $nombre = 'May';
+                    break;
+                case 6:
+                    $nombre = 'Jun';
+                    break;
+                case 7:
+                    $nombre = 'Jul';
+                    break;
+                case 8:
+                    $nombre = 'Ago';
+                    break;
+                case 9:
+                    $nombre = 'Sep';
+                    break;
+                case 10:
+                    $nombre = 'Oct';
+                    break;
+                case 11:
+                    $nombre = 'Nov';
+                    break;
+                case 12:
+                    $nombre = 'Dic';
+                    break;
+            }
+            $apartadas = DigitalOrdenCompra::where('evento_id', $this->evento_id)->whereYear('created_at', $year)->whereMonth('created_at', $i)->where('estado_venta', 1)->sum('cantidad_entradas');
+            $abonadas = DigitalOrdenCompra::where('evento_id', $this->evento_id)->whereYear('created_at', $year)->whereMonth('created_at', $i)->where('estado_venta', 2)->sum('cantidad_entradas');
+            $total = DigitalOrdenCompra::where('evento_id', $this->evento_id)->whereYear('created_at', $year)->whereMonth('created_at', $i)->where('estado_venta', 3)->sum('cantidad_entradas');
+
+            $array[$i - 1] = array(
+                'Nombre' => $nombre,
+                'Apartadas' => (int)$apartadas,
+                'Abonadas' => (int)$abonadas,
+                'Total' => (int)$total
+            );
+        }
+
+        $this->estadisticas = $array;
+    }
+
     public function loadDatos(){
-        $this->readyToLoad = true;
+        $this->readyToLoad = true;        
     }
 
     public function cargarDatos(){
@@ -56,15 +164,17 @@ class DetalleLivewire extends Component
                 ['ticket_id',  $zona->id], ['customer_id', 0]
             ])
             ->groupBy('ticket_id')
-            ->first();
-
-    
+            ->first();    
             $this->disponibles[$zona->id] = array(
                 'ticket_id' => $zona->id,
                 'cantidad_restantes' => json_decode(json_encode($restan->restante))
             );
         }
         $this->loaded = true;
+        $hoy = Carbon::now();
+        $final = Carbon::parse($this->Evento->end_time);
+        $this->dias_restantes = $hoy->diffInDays($final);
+        $this->calcularestadisticas($this->Evento->people, 100);
     }
 
     public function confirmarVenta(){
@@ -76,8 +186,7 @@ class DetalleLivewire extends Component
         }
     }
 
-    public function procesarCompra(){
-       
+    public function procesarCompra(){       
         if ($this->estado_venta != null ) {
             DB::beginTransaction();
             try {
@@ -347,6 +456,20 @@ class DetalleLivewire extends Component
         $this->dispatchBrowserEvent('cerrarmodals');
     }
 
+    public function cerrarModalReporte(){
+        $this->dispatchBrowserEvent('cerrarModalReporte');
+        $this->resetPage();
+        $this->reset('search');
+    }
+
+    public function cerrarModalEstadisticas(){
+        $this->dispatchBrowserEvent('cerrarModalEstadisitica');
+    }
+
+    public function updatedSearch(){
+        $this->resetPage();
+    }
+
     public function borrarEntradaCarrito($id){
         unset( $this->entradas_seleccionadas[$id]);
     }
@@ -359,7 +482,6 @@ class DetalleLivewire extends Component
 
     public function cerrarshow(){
         $this->dispatchBrowserEvent('cerrarshow1');
-        $this->resetExcept(['evento_id', 'readytoload', 'cliente', 'agrupar_palcos', 'enviado']);
     }
 
     public function getEventoProperty(){
@@ -374,5 +496,16 @@ class DetalleLivewire extends Component
 
     public function getSettingProperty(){
         return Setting::findorfail(1)->app_name;
-    } 
+    }
+
+    public function getHistorialsProperty(){
+        if($this->readyToLoad){
+        
+            return DigitalOrdenCompra::where([
+               ['identificador', 'LIKE', '%'. $this->search. '%'], ['evento_id', $this->evento_id]
+            ])->orderBy('id', 'DESC')->paginate(12);
+        }else{
+            return [];
+        }        
+    }
 }

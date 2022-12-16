@@ -13,6 +13,10 @@ class DigitalOrdenCompra extends Model
         return $this->hasOne(AppUser::class, 'id', 'cliente_id');
     }
 
+    public function vendedor(){
+        return $this->hasOne(User::class, 'id', 'vendedor_id');
+    }
+
     public function evento(){
         return $this->hasOne(Event::class, 'id', 'evento_id');
     }

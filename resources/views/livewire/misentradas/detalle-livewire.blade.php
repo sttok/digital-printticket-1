@@ -201,7 +201,7 @@
                             </div>
                         @endif
                         @if ($organizar == 1 || $organizar == 3)
-                            @forelse ($this->Entradas as $entrada)                                
+                            @forelse ($this->Entradas as $entrada)
                                 <div class="col-lg-{{ $organizar == 1 ? 3 : 2 }} col-md-{{ $organizar == 1 ? 6 : 3 }} col-{{ $organizar == 1 ? 12 : 6 }}" >
                                     <div class="card card-file-manager zoom" >
                                         <div class="d-flex">
