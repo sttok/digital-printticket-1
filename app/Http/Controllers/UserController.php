@@ -2,28 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use DB;
-use App;
-use Rave;
-use Carbon\Carbon;
-use App\Models\User;
-use App\Models\Event;
-use App\Models\Order;
-use App\Models\Ticket;
-use App\Models\AppUser;
 use App\Models\Setting;
-use App\Models\ciudades;
-use App\Models\EventScanner;
-use App\Models\MetodoDePago;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
-use App\Models\MetodoDePagoEntrada;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Redirect;
-use Spatie\Permission\Models\Permission;
-use Symfony\Component\Console\Input\Input;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
@@ -59,6 +41,7 @@ class UserController extends Controller
     public function adminLogin(Request $request)
     {
         if (!Auth::check()) {
+
             $request['phone'] = $request['prefijo'] . $request['telefono'];
             $request->validate([
                 'phone' => 'bail|required|phone:CO,AUTO',
@@ -74,21 +57,32 @@ class UserController extends Controller
             $remember = $request->get('remember');
             if (Auth::attempt($userdata, $remember)) {
                 $request->session()->regenerate();
-                if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin') ) {
+
+                if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin')) {
                     return redirect()->route('index.eventos');
-                }elseif(Auth::user()->hasRole('organization') || Auth::user()->hasRole('punto venta')){
+                } elseif (Auth::user()->hasRole('organization') || Auth::user()->hasRole('punto venta')) {
+
                     return redirect()->route('mis.eventos');
                 } else {
                     Auth::logout();
                     $request->session()->invalidate();
                     $request->session()->regenerateToken();
-                    return Redirect::back()->with('error', __('Solo la persona autorizada puede iniciar sesion.'));
+                    return redirect()->route('iniciar');
                 }
             } else {
                 return Redirect::back()->with('error', __('Usuario o contraseña invalido'));
             }
         } else {
-            return redirect()->back();
+            if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Superadmin')) {
+                return redirect()->route('index.eventos');
+            } elseif (Auth::user()->hasRole('organization') || Auth::user()->hasRole('punto venta')) {
+                return redirect()->route('mis.eventos');
+            } else {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return redirect()->route('iniciar');
+            }
         }
     }
 
@@ -98,18 +92,9 @@ class UserController extends Controller
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            return redirect()->route('inicio');
+            return redirect()->route('iniciar');
         } else {
-            abort(404);
+            return redirect()->route('iniciar');
         }
     }
-
-
-
-
-
-
-
-
-
 }

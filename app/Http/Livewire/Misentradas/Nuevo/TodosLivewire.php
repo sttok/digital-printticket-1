@@ -10,37 +10,71 @@ use Illuminate\Support\Facades\Auth;
 
 class TodosLivewire extends Component
 {
+    public $status = 1;
+    // public $loading = false;
+
     public function render()
     {
         return view('livewire.misentradas.nuevo.todos-livewire');
     }
 
-    public function abrirentradas($id){
+    public function abrirentradas($id)
+    {
         return redirect()->route('mis.eventos.show', $id);
     }
 
-    public function getFoldersProperty(){
+    /**
+     * Change the filter status
+     * @param int $newStatus
+     * 
+     */
+    public function changeEstado($newStatus)
+    {
+
+        $this->status = $newStatus;
+    }
+
+    public function getFoldersProperty()
+    {
+        // $this->loading = true;
         if (Auth::user()->hasRole('punto venta')) {
             $event_punto_ventas = EventPuntoVenta::where('punto_id', Auth::user()->id)->get();
 
             $idd = array();
             foreach ($event_punto_ventas as $epv) {
-               $idd[] = $epv->event_id;
+                $idd[] = $epv->event_id;
             }
 
             $eventos = Event::whereIn('id', $idd)
-            ->where([ ['is_deleted', 0], ['status', ['1', '2']] ])->get();
-        }else{
+                ->where('is_deleted', 0)
+                ->whereIn('status', [1, 2])
+                ->when($this->status == 1, function ($query) {
+                    $query->where('end_time', '>=', now());
+                })
+                ->when($this->status == 0, function ($query) {
+                    $query->where('end_time', '<', now());
+                })
+                ->get();
+        } else {
             $eventos = Event::where([
-                ['organizador_id', Auth::user()->id], ['is_deleted', 0], ['status', ['1', '2']]
-            ])->get();
+                ['organizador_id', Auth::user()->id],
+                ['is_deleted', 0],
+                ['status', [1, 2]]
+            ])
+                ->when($this->status == 1, function ($query) {
+                    $query->where('end_time', '>=', now());
+                })
+                ->when($this->status == 0, function ($query) {
+                    $query->where('end_time', '<', now());
+                })
+                ->get();
         }
-        
+
 
         $evenn = [];
         foreach ($eventos as $event) {
             $digital = OrderChildsDigital::where('evento_id', $event->id)->get();
-            if(count($digital) > 0){
+            if (count($digital) > 0) {
                 $evenn[] = array(
                     'id' => $event->id,
                     'nombre' => $event->name,
@@ -50,7 +84,7 @@ class TodosLivewire extends Component
                     'total' => $event->ticket_digital->sum('quantity'),
                     'estado' => 1
                 );
-            }else{
+            } else {
                 $evenn[] = array(
                     'id' => $event->id,
                     'nombre' => $event->name,
@@ -62,6 +96,7 @@ class TodosLivewire extends Component
                 );
             }
         }
+        // $this->loading = false;
         return collect($evenn)->sortByDesc('estado');
     }
 }
