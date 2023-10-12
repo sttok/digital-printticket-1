@@ -655,25 +655,25 @@ class DetalleLivewire extends Component
                 $query->where('digital_orden_compras.evento_id', $this->evento_id)
                     ->where('digital_orden_compras.identificador', 'LIKE', '%' . $this->search . '%');
             });
+
             if (Auth::user()->hasRole('punto venta')) {
                 $query->where('digital_orden_compras.vendedor_id', Auth::user()->id);
             }
 
-            // $query->orWhereHas('cliente', function ($query) {
-            //     $query->where('name', 'LIKE', '%' . $this->search . '%')
-            //         ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
-            //         ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
-            //         ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
-            // });
+            $query->orWhereHas('cliente', function ($query) {
+                $query->where(function ($query) {
+                    $query->where('name', 'LIKE', '%' . $this->search . '%')
+                        ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
+                        ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
+                        ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
+                });
+            });
 
             $results = $query
                 ->join('app_user', 'digital_orden_compras.cliente_id', '=', 'app_user.id')
                 ->select('digital_orden_compras.*', 'app_user.id AS appuser_id')
                 ->orderBy('digital_orden_compras.id', 'DESC')
                 ->paginate(12);
-
-            return $results;
-
 
             return $results;
         } else {
