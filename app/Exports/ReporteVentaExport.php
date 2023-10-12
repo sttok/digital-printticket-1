@@ -9,7 +9,6 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use App\Models\DigitalOrdenCompra;
-use App\Models\OrderChildsDigital;
 use App\Models\DigitalOrdenCompraDetalle;
 
 
