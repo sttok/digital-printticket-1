@@ -52,7 +52,7 @@
                         <tbody>
                             @forelse ($this->Historials as $historial)
                                 <tr
-                                    class=" {{ $historial->anulado == 1 ? 'bg-info' : '' }} {{ $historial->anulado == 2 ? 'bg-danger text-white' : '' }}">
+                                    class=" {{ $historial->anulado == 1 ? 'bg-info text-white' : '' }} {{ $historial->anulado == 2 ? 'bg-danger text-white' : '' }}">
                                     @desktop
                                         <th scope="row">{{ $historial->id }}</th>
                                     @elsedesktop

@@ -651,23 +651,26 @@ class DetalleLivewire extends Component
     public function getHistorialsProperty()
     {
         if ($this->readyToLoad) {
-            $query = DigitalOrdenCompra::where(function ($query) {
-                $query->where('digital_orden_compras.evento_id', $this->evento_id)
-                    ->where('digital_orden_compras.identificador', 'LIKE', '%' . $this->search . '%');
-            });
+            $query = DigitalOrdenCompra::query()
+                ->where('digital_orden_compras.evento_id', $this->evento_id);
 
             if (Auth::user()->hasRole('punto venta')) {
                 $query->where('digital_orden_compras.vendedor_id', Auth::user()->id);
             }
 
-            $query->orWhereHas('cliente', function ($query) {
-                $query->where(function ($query) {
-                    $query->where('name', 'LIKE', '%' . $this->search . '%')
-                        ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
-                        ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
-                        ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
+            $search = $this->search;
+
+            if (!empty($search)) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('digital_orden_compras.identificador', 'LIKE', '%' . $search . '%')
+                        ->orWhereHas('cliente', function ($query) use ($search) {
+                            $query->where('name', 'LIKE', '%' . $search . '%')
+                                ->orWhere('last_name', 'LIKE', '%' . $search . '%')
+                                ->orWhere('cedula', 'LIKE', '%' . $search . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $search . '%');
+                        });
                 });
-            });
+            }
 
             $results = $query
                 ->join('app_user', 'digital_orden_compras.cliente_id', '=', 'app_user.id')
