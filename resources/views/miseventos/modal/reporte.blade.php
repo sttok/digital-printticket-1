@@ -11,19 +11,19 @@
                 <div class="modal-body">
                     <div class="d-flex">
                         <div
-                            class="col-md-{{ Auth::user()->hasRole('organization') || Auth::user()->hasRole('Admin') ? 4 : 12 }} col-12">
+                            class="col-md-{{ Auth::user()->hasRole('organization') || Auth::user()->hasRole('Admin') ? 6 : 12 }} col-12">
                             <span>{{ __('Buscar por identificador de venta, nombre, apellido, telefono o cedula') }}</span>
                             <input type="search" class="form-control" wire:model="search">
                         </div>
 
                         @if (Auth::user()->hasRole('organization') || Auth::user()->hasRole('Admin'))
-                            <div class="col-md-4 col-12 text-center justify-content-center">
+                            <div class="col-md-3 col-12 text-center justify-content-center">
                                 <span>{{ __('Descargar reporte') }}</span><br>
                                 <button type="button" class="btn btn-primary" wire:click="descargarReporteOrganizador">
                                     <i class="fas fa-cloud-download-alt"></i>
                                 </button>
                             </div>
-                            <div class="col-md-4 col-12 text-center justify-content-center">
+                            <div class="col-md-3 col-12 text-center justify-content-center">
                                 <span>{{ __('Descargar Anulados') }}</span><br>
                                 <button type="button" class="btn btn-danger"
                                     wire:click="descargarReporteOrganizadorAnulados">

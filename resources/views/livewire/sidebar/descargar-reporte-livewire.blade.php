@@ -64,7 +64,7 @@
         <script>
             window.addEventListener('downloadReportAnulados', event => {
                 Swal.fire({
-                    title: '¿Que reporte desea descargar?',
+                    title: '¿Que reporte anulados desea descargar?',
                     icon: 'question',
                     showDenyButton: true,
                     showCancelButton: true,

@@ -14,7 +14,7 @@ class DescargarReporteLivewire extends Component
     public $eventoId;
     public $dataPuntosVentas = [];
     public $readyToLoad2 = false;
-    protected $listeners = ['downloadReportesAll', 'downloadReportesPuntoVenta'];
+    protected $listeners = ['downloadReportesAll', 'downloadReportesPuntoVenta', 'downloadReportesAllAnulados', 'downloadReportesAllAnulados'];
 
     public function mount($eventoId)
     {
