@@ -8,7 +8,7 @@
                     showDenyButton: true,
                     showCancelButton: true,
                     confirmButtonText: 'Todos',
-                    denyButtonText: `Filtrar por puntos de ventas`,
+                    denyButtonText: `Por puntos de ventas`,
                     cancelButtonText: 'Cancelar'
                 }).then((result) => {
                     /* Read more about isConfirmed, isDenied below */
