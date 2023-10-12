@@ -23,6 +23,13 @@
                                     <i class="fas fa-cloud-download-alt"></i>
                                 </button>
                             </div>
+                            <div class="col-md-4 col-12 text-center justify-content-center">
+                                <span>{{ __('Descargar Anulados') }}</span><br>
+                                <button type="button" class="btn btn-danger"
+                                    wire:click="descargarReporteOrganizadorAnulados">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </div>
                         @endif
                     </div>
 

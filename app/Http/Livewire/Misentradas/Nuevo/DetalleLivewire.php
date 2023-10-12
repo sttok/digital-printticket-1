@@ -705,8 +705,12 @@ class DetalleLivewire extends Component
 
     public function descargarReporteOrganizador()
     {
-        //$this->dispatchBrowserEvent('cerrarModalReporte');
         $this->dispatchBrowserEvent('downloadReport');
+    }
+
+    public function descargarReporteOrganizadorAnulados()
+    {
+        $this->dispatchBrowserEvent('downloadReportAnulados');
     }
 
     public function solicitarAnulacion()

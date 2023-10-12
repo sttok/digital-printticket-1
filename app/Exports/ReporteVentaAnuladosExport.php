@@ -9,10 +9,11 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use App\Models\DigitalOrdenCompra;
+use App\Models\DigitalOrdenCompraAnulado;
 use App\Models\DigitalOrdenCompraDetalle;
 
 
-class ReporteVentaExport implements FromArray, ShouldAutoSize, WithStyles
+class ReporteVentaAnuladosExport implements FromArray, ShouldAutoSize, WithStyles
 {
     use Exportable;
     protected $id;
@@ -33,7 +34,7 @@ class ReporteVentaExport implements FromArray, ShouldAutoSize, WithStyles
 
     public function array(): array
     {
-        $array[] =  ['Vendedor', 'Identificador de venta',  'Nombre entrada', 'Identificador entrada', 'Consecutivo', 'Palco', 'Asiento', 'Comprador', 'Endosado', 'Fecha vendido'];
+        $array[] =  ['Vendedor', 'Identificador de venta',  'Nombre entrada', 'Identificador entrada', 'Consecutivo', 'Palco', 'Asiento', 'Comprador', 'Endosado', 'Fecha vendido', 'Anulación solicitada', 'Anulación aceptada', 'Fecha de Anulacion'];
 
         $data = $this->data;
 
@@ -41,13 +42,15 @@ class ReporteVentaExport implements FromArray, ShouldAutoSize, WithStyles
             ->when(!$this->data['all'], function ($query) use ($data) {
                 return $query->where('vendedor_id', $this->data['puntoVentaId']);
             })
-            ->where('anulado', '!=', 2)
+            ->where('anulado', 2)
             ->orderBy('created_at', 'DESC')
             ->orderBy('identificador', 'DESC')
             ->with(['vendedor', 'cliente'])->get();
 
         foreach ($dataVenta as $venta) {
             $detalles = DigitalOrdenCompraDetalle::where('digital_orden_compra_id', $venta->id)->with(['entrada'])->get();
+
+            $anulado = DigitalOrdenCompraAnulado::where('compra_id', $venta->id)->with(['usuario', 'organizador'])->first();
 
             foreach ($detalles as $ent) {
                 $array[] = array(
@@ -60,7 +63,10 @@ class ReporteVentaExport implements FromArray, ShouldAutoSize, WithStyles
                     'Asiento' => $ent->entrada->asiento,
                     'Comprador' => $venta->cliente->name . ' ' . $venta->cliente->last_name,
                     'Endosado' => $ent->endosado != null ? $ent->endosado->name . ' ' . $ent->endosado->last_name : 'No',
-                    'Fecha vendido' => Carbon::create($venta['created_at'])->isoFormat('LLLL')
+                    'Fecha vendido' => Carbon::create($venta['created_at'])->isoFormat('LLLL'),
+                    'Anulación solicitada' => $anulado->organizador->name . ' ' . $anulado->organizador->last_name,
+                    'Anulación aceptada' => $anulado->usuario->name . ' ' . $anulado->usuario->last_name,
+                    'Fecha de Anulacion' => Carbon::create($anulado['created_at'])->isoFormat('LLLL')
                 );
             }
         }

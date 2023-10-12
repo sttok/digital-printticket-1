@@ -72,7 +72,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                @if ($estadoVenta == 1 && $estadoAnulacion == 0)
+                @if ($estadoAnulacion == 0)
                     <button type="button" class="btn btn-danger float-left" wire:loading.attr="disabled"
                         wire:click="solicitarAnulacion()">
                         <div wire:loading wire:target="solicitarAnulacion">
