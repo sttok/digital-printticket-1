@@ -12,6 +12,7 @@ use Livewire\Component;
 use App\Models\OrderChild;
 use Illuminate\Support\Str;
 use Livewire\WithPagination;
+use App\Models\TicketPuntoVenta;
 use App\Models\DigitalOrdenCompra;
 use App\Models\OrderChildsDigital;
 use Illuminate\Support\Facades\DB;
@@ -19,10 +20,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DescargarInformeExport;
+use App\Http\Controllers\ApiController;
+use App\Models\DigitalOrdenCompraAnulado;
 use App\Models\DigitalOrdenCompraDetalle;
 use App\Exports\DescargarReporteVentaExport;
-use App\Http\Controllers\ApiController;
-use App\Models\TicketPuntoVenta;
 
 class DetalleLivewire extends Component
 {
@@ -45,7 +46,7 @@ class DetalleLivewire extends Component
 
     public $clienteNombre, $clienteTelefono, $clienteCedula;
 
-    public $venta_id, $venta_realizada = [];
+    public $venta_id, $venta_realizada = [], $estadoVenta = 0, $estadoAnulacion = 0;
 
     public $porcentaje_venta = 0, $dias_restantes = 0;
 
@@ -112,7 +113,7 @@ class DetalleLivewire extends Component
         $historial = DigitalOrdenCompra::where('id', $id)->first();
         $detalles = DigitalOrdenCompraDetalle::where('digital_orden_compra_id', $id)->get();
 
-        $this->reset('venta_realizada');
+        $this->reset(['venta_realizada', 'estadoVenta', 'estadoAnulacion']);
         foreach ($detalles as $detalle) {
             $this->venta_realizada[] = array(
                 'name_entrada' => $detalle->entrada->evento->name,
@@ -122,6 +123,10 @@ class DetalleLivewire extends Component
                 'asiento' => $detalle->entrada->asiento
             );
         }
+
+        $this->estadoVenta = $historial->estado_venta;
+        $this->estadoAnulacion = $historial->anulado;
+
         $this->cliente = AppUser::find($historial->cliente_id);
         $this->venta_id = $id;
         $this->enviado = true;
@@ -706,5 +711,25 @@ class DetalleLivewire extends Component
     {
         //$this->dispatchBrowserEvent('cerrarModalReporte');
         $this->dispatchBrowserEvent('downloadReport');
+    }
+
+    public function solicitarAnulacion()
+    {
+        $historial = DigitalOrdenCompra::where('id', $this->venta_id)->first();
+
+        $anulacion = new DigitalOrdenCompraAnulado();
+        $anulacion->identificador = $historial->identificador;
+        $anulacion->compra_id = $historial->id;
+        $anulacion->organizador_id = Auth::user()->id;
+        $anulacion->estado = 0;
+        $anulacion->save();
+
+
+        $historial->anulado = 1;
+        $historial->update();
+
+        $this->cerrarshow();
+
+        $this->dispatchBrowserEvent('solicitadoAnulacion');
     }
 }

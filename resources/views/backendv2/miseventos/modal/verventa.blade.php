@@ -12,7 +12,7 @@
                         <h5>{{ __('Nombre') }}</h5>
                         <h6>{{ $cliente['name'] . ' ' . $cliente['last_name'] }}</h6>
                     </div>
-                    
+
                     <div class="col-auto mb 2">
                         <h5>{{ __('Telefono') }}</h5>
                         <h6>{{ $cliente['phone'] }}</h6>
@@ -22,6 +22,20 @@
                         <h5>{{ __('Cedula') }}</h5>
                         <h6>{{ $cliente['cedula'] }}</h6>
                     </div>
+
+                    @if ($estadoAnulacion > 0)
+                        <div class="col-auto mb 2">
+                            <h5>{{ __('Estado anulacion') }}</h5>
+                            @if ($estadoAnulacion == 1)
+                                <h6 class="badge bg-success">Espera de aprobacion</h6>
+                            @elseif($estadoAnulacion == 2)
+                                <h6 class="badge bg-danger">Anulado</h6>
+                            @elseif($estadoAnulacion == 3)
+                                <h6 class="badge bg-warning">No aprobado</h6>
+                            @endif
+                        </div>
+                    @endif
+
 
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -58,7 +72,22 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success float-left" wire:loading.attr="disabled" wire:click="compartirventawhatsapp2()">
+
+                @if ($estadoVenta == 1)
+                    <button type="button" class="btn btn-danger float-left" wire:loading.attr="disabled"
+                        wire:click="solicitarAnulacion()">
+                        <div wire:loading wire:target="solicitarAnulacion">
+                            <div class="spinner-grow spinner-grow-sm" role="status">
+                            </div>
+                        </div>
+                        <div wire:loading.remove wire:target="solicitarAnulacion" style="display: inline;">
+                            <i class="fas fa-ban"></i> &nbsp; {{ __('Solicitar Anulación') }}
+                        </div>
+                    </button>
+                @endif
+
+                <button type="button" class="btn btn-success float-left" wire:loading.attr="disabled"
+                    wire:click="compartirventawhatsapp2()">
                     <div wire:loading wire:target="compartirventawhatsapp2">
                         <div class="spinner-grow spinner-grow-sm" role="status">
                         </div>
@@ -68,7 +97,8 @@
                     </div>
                 </button>
 
-                <button type="button" class="btn btn-secondary float-left" wire:loading.attr="disabled" wire:click="compartirsms()">
+                <button type="button" class="btn btn-secondary float-left" wire:loading.attr="disabled"
+                    wire:click="compartirsms()">
                     <div wire:loading wire:target="compartirsms">
                         <div class="spinner-grow spinner-grow-sm" role="status">
                         </div>

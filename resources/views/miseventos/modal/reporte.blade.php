@@ -82,13 +82,20 @@
                                     </td>
                                     <td>{{ number_format($historial->cantidad_entradas, 0, ',', '.') }}</td>
                                     <td>
-                                        @if ($historial->estado_venta == 1)
-                                            <span class="badge bg-secondary">{{ __('Separado') }}</span>
-                                        @elseif($historial->estado_venta == 2)
-                                            <span class="badge bg-secondary">{{ __('Abonado') }}</span>
-                                        @elseif($historial->estado_venta == 3)
-                                            <span class="badge bg-secondary">{{ __('Pago total') }}</span>
+                                        @if ($historial->anulado == 1)
+                                            <span class="badge bg-secondary">{{ __('Espera de anulacion') }}</span>
+                                        @elseif ($historial->anulado == 2)
+                                            <span class="badge bg-danger">{{ __('Aulado') }}</span>
+                                        @else
+                                            @if ($historial->estado_venta == 1)
+                                                <span class="badge bg-secondary">{{ __('Separado') }}</span>
+                                            @elseif($historial->estado_venta == 2)
+                                                <span class="badge bg-secondary">{{ __('Abonado') }}</span>
+                                            @elseif($historial->estado_venta == 3)
+                                                <span class="badge bg-secondary">{{ __('Pago total') }}</span>
+                                            @endif
                                         @endif
+
                                     </td>
                                     @desktop
                                         <td>

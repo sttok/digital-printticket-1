@@ -295,6 +295,24 @@
                     return false;
                 }
             })
+            window.addEventListener('solicitadoAnulacion', event => {
+                let timerInterval
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Exito! ',
+                    text: '¡La solicitud de anulación ha sido realizada con exito!',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval)
+                    }
+                }).then((result) => {
+
+                })
+            })
         </script>
 
         <script>
