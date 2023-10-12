@@ -656,10 +656,10 @@ class DetalleLivewire extends Component
                     $query->where('digital_orden_compras.identificador', 'LIKE', '%' . $this->search . '%')
                         ->where('digital_orden_compras.evento_id', $this->evento_id)
                         ->orWhereHas('cliente', function ($query) {
-                            $query->where('cliente.name', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('cliente.last_name', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('cliente.cedula', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('cliente.phone', 'LIKE', '%' . $this->search . '%');
+                            $query->where('name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
                         });
                 })
                     ->where('digital_orden_compras.vendedor_id', Auth::user()->id)
@@ -672,10 +672,10 @@ class DetalleLivewire extends Component
                     $query->where('digital_orden_compras.identificador', 'LIKE', '%' . $this->search . '%')
                         ->where('digital_orden_compras.evento_id', $this->evento_id)
                         ->orWhereHas('cliente', function ($query) {
-                            $query->where('cliente.name', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('cliente.last_name', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('cliente.cedula', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('cliente.phone', 'LIKE', '%' . $this->search . '%');
+                            $query->where('name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
                         });
                 })
                     ->join('app_user', 'digital_orden_compras.cliente_id', '=', 'app_user.id')
