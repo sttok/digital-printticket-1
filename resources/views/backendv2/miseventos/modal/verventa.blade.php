@@ -25,7 +25,7 @@
 
                     @if ($estadoAnulacion > 0)
                         <div class="col-auto mb 2">
-                            <h5>{{ __('Estado anulacion') }}</h5>
+                            <h5>{{ __('Estado anulación') }}</h5>
                             @if ($estadoAnulacion == 1)
                                 <h6 class="badge bg-success">Espera de aprobacion</h6>
                             @elseif($estadoAnulacion == 2)
@@ -73,7 +73,7 @@
             </div>
             <div class="modal-footer">
 
-                @if ($estadoVenta == 1)
+                @if ($estadoVenta == 1 && $estadoAnulacion == 0)
                     <button type="button" class="btn btn-danger float-left" wire:loading.attr="disabled"
                         wire:click="solicitarAnulacion()">
                         <div wire:loading wire:target="solicitarAnulacion">
@@ -86,27 +86,30 @@
                     </button>
                 @endif
 
-                <button type="button" class="btn btn-success float-left" wire:loading.attr="disabled"
-                    wire:click="compartirventawhatsapp2()">
-                    <div wire:loading wire:target="compartirventawhatsapp2">
-                        <div class="spinner-grow spinner-grow-sm" role="status">
+                @if ($estadoAnulacion != 2)
+                    <button type="button" class="btn btn-success float-left" wire:loading.attr="disabled"
+                        wire:click="compartirventawhatsapp2()">
+                        <div wire:loading wire:target="compartirventawhatsapp2">
+                            <div class="spinner-grow spinner-grow-sm" role="status">
+                            </div>
                         </div>
-                    </div>
-                    <div wire:loading.remove wire:target="compartirventawhatsapp2" style="display: inline;">
-                        <i class="fab fa-whatsapp"></i> &nbsp; {{ __('Compartir whatsapp') }}
-                    </div>
-                </button>
+                        <div wire:loading.remove wire:target="compartirventawhatsapp2" style="display: inline;">
+                            <i class="fab fa-whatsapp"></i> &nbsp; {{ __('Compartir whatsapp') }}
+                        </div>
+                    </button>
 
-                <button type="button" class="btn btn-secondary float-left" wire:loading.attr="disabled"
-                    wire:click="compartirsms()">
-                    <div wire:loading wire:target="compartirsms">
-                        <div class="spinner-grow spinner-grow-sm" role="status">
+                    <button type="button" class="btn btn-secondary float-left" wire:loading.attr="disabled"
+                        wire:click="compartirsms()">
+                        <div wire:loading wire:target="compartirsms">
+                            <div class="spinner-grow spinner-grow-sm" role="status">
+                            </div>
                         </div>
-                    </div>
-                    <div wire:loading.remove wire:target="compartirsms" style="display: inline;">
-                        <i class="far fa-comment-dots"></i> &nbsp; {{ __('Compartir sms') }}
-                    </div>
-                </button>
+                        <div wire:loading.remove wire:target="compartirsms" style="display: inline;">
+                            <i class="far fa-comment-dots"></i> &nbsp; {{ __('Compartir sms') }}
+                        </div>
+                    </button>
+                @endif
+
 
                 <button type="button" class="btn btn-secondary" wire:loading.attr="disabled"
                     wire:click="cerrarshow()">{{ __('Cerrar') }}</button>
