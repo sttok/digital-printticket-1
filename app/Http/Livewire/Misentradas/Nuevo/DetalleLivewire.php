@@ -654,17 +654,17 @@ class DetalleLivewire extends Component
             $query = DigitalOrdenCompra::where(function ($query) {
                 $query->where('digital_orden_compras.evento_id', $this->evento_id)
                     ->where('digital_orden_compras.identificador', 'LIKE', '%' . $this->search . '%');
-            })
-                ->orWhereHas('cliente', function ($query) {
-                    $query->where('name', 'LIKE', '%' . $this->search . '%')
-                        ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
-                        ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
-                        ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
-                });
-
+            });
             if (Auth::user()->hasRole('punto venta')) {
                 $query->where('digital_orden_compras.vendedor_id', Auth::user()->id);
             }
+
+            $query->orWhereHas('cliente', function ($query) {
+                $query->where('name', 'LIKE', '%' . $this->search . '%')
+                    ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
+                    ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
+                    ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
+            });
 
             $results = $query
                 ->join('app_user', 'digital_orden_compras.cliente_id', '=', 'app_user.id')
