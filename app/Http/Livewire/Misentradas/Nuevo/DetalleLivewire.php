@@ -717,18 +717,15 @@ class DetalleLivewire extends Component
     {
         $historial = DigitalOrdenCompra::where('id', $this->venta_id)->first();
 
+        $historial->anulado = 1;
+        $historial->update();
+
         $anulacion = new DigitalOrdenCompraAnulado();
         $anulacion->identificador = $historial->identificador;
         $anulacion->compra_id = $historial->id;
         $anulacion->organizador_id = Auth::user()->id;
         $anulacion->estado = 0;
         $anulacion->save();
-
-
-        $historial->anulado = 1;
-        $historial->update();
-
-        $this->cerrarshow();
 
         $this->dispatchBrowserEvent('solicitadoAnulacion');
     }

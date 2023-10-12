@@ -301,6 +301,8 @@
                 }
             })
             window.addEventListener('solicitadoAnulacion', event => {
+                $('#verventa').modal('hide');
+                $('#reporte').modal('show');
                 let timerInterval
                 Swal.fire({
                     icon: 'success',
