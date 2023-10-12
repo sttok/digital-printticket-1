@@ -10,8 +10,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="d-flex">
-                        <div
-                            class="col-md-{{ Auth::user()->hasRole('organization') || Auth::user()->hasRole('Admin') ? 6 : 12 }} col-12">
+                        <div class="col-md-6 col-12">
                             <span>{{ __('Buscar por identificador de venta, nombre, apellido, telefono o cedula') }}</span>
                             <input type="search" class="form-control" wire:model="search">
                         </div>
@@ -24,14 +23,23 @@
                                     <i class="fas fa-cloud-download-alt"></i>
                                 </button>
                             </div>
-                            <div class="col-md-3 col-12 text-center justify-content-center">
-                                <span>{{ __('Descargar Anulados') }}</span><br>
+                        @endif
+                        <div class="col-md-3 col-12 text-center justify-content-center">
+                            <span>{{ __('Descargar Anulados') }}</span><br>
+                            @if (Auth::user()->hasRole('organization') || Auth::user()->hasRole('Admin'))
                                 <button type="button" class="btn btn-danger"
                                     wire:click="descargarReporteOrganizadorAnulados" wire:loading.attr="disabled">
                                     <i class="fas fa-ban"></i>
                                 </button>
-                            </div>
-                        @endif
+                            @elseif(Auth::user()->hasRole('punto venta'))
+                                <button type="button" class="btn btn-danger"
+                                    wire:click="descargarReporteOrganizadorAnuladosPuntoVenta"
+                                    wire:loading.attr="disabled">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            @endif
+                        </div>
+
                     </div>
 
 

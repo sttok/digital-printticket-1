@@ -23,6 +23,7 @@ use App\Exports\DescargarInformeExport;
 use App\Http\Controllers\ApiController;
 use App\Models\DigitalOrdenCompraAnulado;
 use App\Models\DigitalOrdenCompraDetalle;
+use App\Exports\ReporteVentaAnuladosExport;
 use App\Exports\DescargarReporteVentaExport;
 
 class DetalleLivewire extends Component
@@ -711,6 +712,16 @@ class DetalleLivewire extends Component
     public function descargarReporteOrganizadorAnulados()
     {
         $this->dispatchBrowserEvent('downloadReportAnulados');
+    }
+
+    public function descargarReporteOrganizadorAnuladosPuntoVenta()
+    {
+        $data = [
+            'all' => false,
+            'puntoVentaId' => Auth::user()->id,
+            'eventoId' => $this->evento_id,
+        ];
+        return Excel::download(new ReporteVentaAnuladosExport($data), 'informe-anulados-' . Carbon::now()->isoFormat('D-M-YY') . '-kf' . rand(1, 999) . '.xlsx');
     }
 
     public function solicitarAnulacion()
