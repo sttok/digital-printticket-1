@@ -616,6 +616,7 @@ class DetalleLivewire extends Component
     public function cerrarshow()
     {
         $this->dispatchBrowserEvent('cerrarshow1');
+        $this->detalleReporte($this->venta_id);
     }
 
     public function getEventoProperty()
