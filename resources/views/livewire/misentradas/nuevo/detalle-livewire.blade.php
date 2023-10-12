@@ -23,26 +23,23 @@
                     <div class="card-body row">
                         @if ($readyToLoad)
                             @forelse ($this->Zonas as $zona)
-                                <div class="col-md-4 col-12 border row my-3 p-3 rounded"
+                                <div class="col-lg-6 col-md-12 col-12 border row my-3 p-3 rounded"
                                     style="margin-right:10px; max-height: 135px;">
                                     <div class="col-md-2 d-md-block  d-sm-none">
                                         <i class="fas fa-ticket-alt" style="font-size: 28px; color: #091763"></i>
                                     </div>
-                                    <div class="col-md-5 col-6">
+                                    <div class="col-lg-5 col-md-8 col-6">
                                         <span class="font-weight-bold">{{ $zona->name }}</span><br>
                                         @if ($loaded)
                                             <small>{{ number_format($disponibles[$zona->id]['cantidad_restantes'], 0, ',', '.') }}
                                                 {{ $zona->forma_generar == 1 ? __('Disponibles') : __('Asientos') }}
                                             </small>
-                                            <h6>{{ number_format($disponibles[$zona->id]['cantidad_vendidas'], 0, ',', '.') }}
-                                                {{ $zona->forma_generar == 1 ? __('Vendidos') : __('Asientos') }}
-                                            </h6>
                                         @else
                                             <small>{{ __('Cargando') }}...</small>
                                         @endif
                                     </div>
-                                    <div class="col-md-2 col-3">
-                                        <button class="btn btn-secondary" type="button"
+                                    <div class="col-lg-2 col-md-6 col-3 text-center">
+                                        <button class="btn btn-secondary btn-block" type="button"
                                             wire:click="quitarEntrada('{{ $zona->id }}')">
                                             <div wire:loading wire:target="quitarEntrada('{{ $zona->id }}')">
                                                 <div class="spinner-grow spinner-grow-sm my-1" role="status">
@@ -54,8 +51,8 @@
                                     </div>
                                     <div class="col-md-1 d-md-block d-sm-none">
                                     </div>
-                                    <div class="col-md-2 col-3">
-                                        <button class="btn btn-secondary" type="button"
+                                    <div class="col-lg-2 col-md-5 col-3 text-center">
+                                        <button class="btn btn-secondary btn-block" type="button"
                                             wire:click="agregarEntrada('{{ $zona->id }}')">
                                             <div wire:loading wire:target="agregarEntrada('{{ $zona->id }}')">
                                                 <div class="spinner-grow spinner-grow-sm my-1" role="status">
@@ -197,6 +194,24 @@
 
         @livewire('misentradas.compartir-venta-digital-livewire')
 
+        <div>
+            @desktop
+                <a href="https://wa.me/573113190487?text%C2%A1Hola%20PrintTicket%21%20Me%20gustar%C3%ADa%20soporte%20t%C3%A9cnico%20en%20el%20servicio%20Digital"
+                    target="_blank" class="btn-flotante btn-whatsapp">
+                    Soporte tecnico
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+            @elsedesktop
+                <a href="https://wa.me/573113190487?text%C2%A1Hola%20PrintTicket%21%20Me%20gustar%C3%ADa%20soporte%20t%C3%A9cnico%20en%20el%20servicio%20Digital"
+                    target="_blank" class="btn-flotante btn-whatsapp"
+                    style="bottom: 80px !important; right: -210px !important;">
+                    <i class="fab fa-whatsapp" style="font-size:25px !important"></i>
+                </a>
+            @enddesktop
+
+        </div>
+
+
         <script>
             window.addEventListener('errores', event => {
                 Swal.fire(
@@ -246,8 +261,26 @@
                     }
                 })
             })
+            window.addEventListener('enviadosms', event => {
+                let timerInterval
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Exito! ',
+                    text: '¡El mensaje ha sido enviado correctamente!',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval)
+                    }
+                }).then((result) => {
+
+                })
+            })
             window.addEventListener('cerrarshow1', event => {
-                $('#buscarclient').modal('hide');
+                $('#buscarCliente').modal('hide');
                 $('#ventas').modal('hide');
                 $('#verventa').modal('hide');
                 $('#verenlace').modal('hide');

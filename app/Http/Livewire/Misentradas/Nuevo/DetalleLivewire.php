@@ -21,6 +21,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DescargarInformeExport;
 use App\Models\DigitalOrdenCompraDetalle;
 use App\Exports\DescargarReporteVentaExport;
+use App\Http\Controllers\ApiController;
+use App\Models\TicketPuntoVenta;
 
 class DetalleLivewire extends Component
 {
@@ -41,7 +43,11 @@ class DetalleLivewire extends Component
     public $search_telefono, $encontrado = false, $cliente, $estado_venta = 1, $abonado = 0, $total = 0, $metodo_de_pago = 1, $nota_venta;
     public $nombre_cliente, $apellido_cliente, $telefono, $prefijo_telefono = '+57', $phone,  $cedula_cliente;
 
+    public $clienteNombre, $clienteTelefono, $clienteCedula;
+
     public $venta_id, $venta_realizada = [];
+
+    public $porcentaje_venta = 0, $dias_restantes = 0;
 
     public function mount($event_id)
     {
@@ -106,6 +112,7 @@ class DetalleLivewire extends Component
         $historial = DigitalOrdenCompra::where('id', $id)->first();
         $detalles = DigitalOrdenCompraDetalle::where('digital_orden_compra_id', $id)->get();
 
+        $this->reset('venta_realizada');
         foreach ($detalles as $detalle) {
             $this->venta_realizada[] = array(
                 'name_entrada' => $detalle->entrada->evento->name,
@@ -213,24 +220,20 @@ class DetalleLivewire extends Component
     public function cargarDatos()
     {
         foreach ($this->Zonas as $zona) {
-            $restante = DB::table('order_child')
-                ->select(DB::raw('count(id) as restante'))
+            $data = DB::table('order_child')
                 ->where([
-                    ['ticket_id', $zona->id],
-                    ['customer_id', 0]
+                    ['ticket_id',  $zona->id], ['customer_id', 0]
                 ])
-                ->groupBy('ticket_id')
-                ->first();
+                ->pluck('id')
+                ->toArray();
 
-            $cantidadVendidas = $zona->quantity - ($restante->restante ?? 0);
+            $restan = OrderChildsDigital::whereIn('order_child_id', $data)->count();
 
-            $this->disponibles[$zona->id] = [
+            $this->disponibles[$zona->id] = array(
                 'ticket_id' => $zona->id,
-                'cantidad_restantes' => $restante->restante ?? 0,
-                'cantidad_vendidas' => $cantidadVendidas
-            ];
+                'cantidad_restantes' =>  $restan
+            );
         }
-
         $this->loaded = true;
         $hoy = Carbon::now();
         $final = Carbon::parse($this->Evento->end_time);
@@ -248,13 +251,27 @@ class DetalleLivewire extends Component
         }
     }
 
+    public function validacionCLiente()
+    {
+        return AppUser::where('phone', $this->phone)
+            ->orWhere('cedula', $this->cedula_cliente)
+            ->exists();
+    }
+
     public function procesarCompra()
     {
         if ($this->estado_venta != null) {
             DB::beginTransaction();
             try {
+                $this->reset('venta_realizada');
+
                 if ($this->encontrado == false) {
                     $this->phone = $this->prefijo_telefono . $this->telefono;
+                    $validacionCliente = $this->validacionCLiente();
+                    if ($validacionCliente) {
+                        $this->dispatchBrowserEvent('errores', ['error' => __('Ya existe el usuario, realiza una busqueda con el telefono o cedula.')]);
+                        return null;
+                    }
 
                     $this->validate([
                         'nombre_cliente' => 'required|max:120|min:2',
@@ -262,6 +279,9 @@ class DetalleLivewire extends Component
                         'telefono' => 'required',
                         'phone' => 'required|phone:COL,AUTO|unique:app_user,phone',
                         'cedula_cliente' => 'required|integer|unique:app_user,cedula'
+                    ], [
+                        'phone.unique' => 'Ya existe un usuario con este numero de telefono',
+                        'cedula_cliente.unique' => 'Ya existe un usuario con este numero de cedula',
                     ]);
                     $cliente = new AppUser();
                     $cliente->name = $this->nombre_cliente;
@@ -269,6 +289,7 @@ class DetalleLivewire extends Component
                     $cliente->cedula = $this->cedula_cliente;
                     $cliente->password = Hash::make($this->cedula_cliente);
                     $cliente->provider = "LOCAL";
+                    $cliente->image = 'defaultuser.png';
                     $cliente->status = 1;
                     $cliente->borrado = 0;
                     $cliente->save();
@@ -288,7 +309,10 @@ class DetalleLivewire extends Component
                 $ordencompra->save();
 
                 $contador = 0;
+                $contador2 = 0;
+
                 foreach ($this->entradas_seleccionadas as $es) {
+                    $contador2 = $contador2 + $es['cantidad'];
                     $entrada = Ticket::findorfail($es['entrada_id']);
 
                     if ($entrada->forma_generar == 1) {
@@ -300,41 +324,61 @@ class DetalleLivewire extends Component
                             ['ticket_id', $entrada->id], ['customer_id',  0], ['endosado_id', 0]
                         ])->whereIn('id', $this->entradas_palcos_seleccionados[$entrada->id])->get();
                     }
-                    if (count($childs) == $es['cantidad']) {
-                        $contador++;
-                        foreach ($childs as $item) {
-                            $item->customer_id = $this->cliente->id;
-                            $item->vendedor_id = Auth::user()->id;
-                            $item->update();
-                            $detalle = new DigitalOrdenCompraDetalle();
-                            $detalle->digital_orden_compra_id = $ordencompra->id;
-                            $detalle->order_child_id = $item->id;
-                            $detalle->endosado_id = null;
-                            $detalle->digital_id = OrderChildsDigital::where('order_child_id', $item->id)->first()->id;
-                            $detalle->save();
 
-                            $this->venta_realizada[] = array(
-                                'name_entrada' => $entrada->name,
-                                'id' => $item->id,
-                                'identificador' => $item->identificador,
-                                'consecutivo' => $item->consecutivo,
-                                'palco' => $item->mesas,
-                                'asiento' => $item->asiento,
-                            );
+                    if (count($childs) == $es['cantidad']) {
+                        $msg = [];
+                        foreach ($childs as $item) {
+                            $OrderChildsDigital = OrderChildsDigital::where('order_child_id', $item->id)->first();
+
+                            if ($OrderChildsDigital != null) {
+                                $item->customer_id = $this->cliente->id;
+                                $item->vendedor_id = Auth::user()->id;
+                                $item->update();
+                                $detalle = new DigitalOrdenCompraDetalle();
+                                $detalle->digital_orden_compra_id = $ordencompra->id;
+                                $detalle->order_child_id = $item->id;
+                                $detalle->endosado_id = null;
+                                $detalle->digital_id = $OrderChildsDigital->id;
+                                $detalle->save();
+
+                                $this->venta_realizada[] = array(
+                                    'name_entrada' => $entrada->name,
+                                    'id' => $item->id,
+                                    'identificador' => $item->identificador,
+                                    'consecutivo' => $item->consecutivo,
+                                    'palco' => $item->mesas,
+                                    'asiento' => $item->asiento,
+                                );
+                                $contador++;
+                            } else {
+                                $error = __('Ha ocurrido un error, no se han encontrado la entrada digital disponibles para "' . $entrada['name'] . '" con el identificador ' . $item['identificador']);
+                                $msg[] = $error;
+                                $this->dispatchBrowserEvent('errores', ['error' => $error]);
+                                DB::rollBack();
+                                break;
+                            }
                         }
                     } else {
                         DB::rollBack();
                         $this->dispatchBrowserEvent('errores', ['error' => __('Ha ocurrido un error, no se han encontrado entradas disponibles para ' . $es['name'])]);
                     }
                 }
-                $ordencompra->cantidad_entradas = $contador;
-                $ordencompra->update();
-                $this->venta_id = $ordencompra->id;
-                DB::commit();
-                $this->resetExcept(['evento_id', 'readytoload', 'cliente', 'venta_id', 'venta_realizada']);
-                $this->enviado = true;
-                $this->dispatchBrowserEvent('verenviadas');
+
+                if ($contador2 == $contador) {
+                    $ordencompra->cantidad_entradas = $contador;
+                    $ordencompra->update();
+                    $this->venta_id = $ordencompra->id;
+                    DB::commit();
+                    $this->resetExcept(['evento_id', 'readyToLoad', 'cliente', 'venta_id', 'venta_realizada', 'dias_restantes', 'Zonas']);
+                    $this->enviado = true;
+                    $this->dispatchBrowserEvent('verenviadas');
+                    $this->cargarDatos();
+                } else {
+                    $this->dispatchBrowserEvent('errores', ['error' => implode(', ', $msg)]);
+                    DB::rollBack();
+                }
             } catch (Exception $e) {
+                dd($e);
                 DB::rollBack();
                 $this->dispatchBrowserEvent('errores', ['error' => $e->getMessage()]);
             }
@@ -346,8 +390,13 @@ class DetalleLivewire extends Component
     public function buscarcliente()
     {
         $this->validate([
-            'search_telefono' => 'nullable|max:120'
+            'search_telefono' => 'required|max:120'
+        ], [
+            'search_telefono.required' => 'El campo de busqueda no puede estar vacio',
+            'search_telefono.max' => 'El campo de busqueda no puede tener mas de 120 caracteres'
         ]);
+
+        $this->reset(['encontrado', 'cliente']);
 
         $cl = AppUser::where([
             ['phone', 'LIKE', '%' . $this->search_telefono]
@@ -355,12 +404,14 @@ class DetalleLivewire extends Component
             ['cedula', 'LIKE',  $this->search_telefono]
         ])->first();
 
-        if ($cl != '') {
+        if ($cl != null) {
             $this->encontrado = true;
-            $this->cliente = $cl->makeVisible(['name', 'last_name', 'phone', 'email']);
+            $this->clienteNombre = $cl->name . ' ' . $cl->last_name;
+            $this->clienteTelefono = $cl->phone;
+            $this->clienteCedula = $cl->cedula;
+            $this->cliente = $cl;
             $this->reset('search_telefono');
         } else {
-            $this->reset(['encontrado', 'cliente']);
             $this->dispatchBrowserEvent('clientenoencontrado');
         }
     }
@@ -416,6 +467,7 @@ class DetalleLivewire extends Component
         $url = route('ver.archivo', $key);
 
         $texto =  urlencode('*¡Gracias por comprar con ' . $this->Setting . '!*') .  '%0d%0a' .
+            urlencode('*Nombre*: ' . $orden->cliente->name . ' ' .  $orden->cliente->last_name) .  '%0d%0a' .
             urlencode('*Evento*: ' . $orden->evento->name) .  '%0d%0a' .
             urlencode('*Identificador venta*: ' . $orden->identificador) .  '%0d%0a' .
             urlencode('*Cantidad entradas*: x' . $orden->cantidad_entradas) .  '%0d%0a' .
@@ -433,12 +485,15 @@ class DetalleLivewire extends Component
         if (!empty($orden)) {
             $telefono = $orden->cliente->phone;
             $texto =  urlencode('¡Gracias por comprar con ' . $this->Setting . '!') .  '%0d%0a' .
+                urlencode('Nombre: ' . $orden->cliente->name . ' ' .  $orden->cliente->last_name) .  '%0d%0a' .
                 urlencode('Evento: ' . $orden->evento->name) .  '%0d%0a' .
                 urlencode('Identificador venta: ' . $orden->identificador) .  '%0d%0a' .
                 urlencode('Cantidad entradas: x' . $orden->cantidad_entradas) .  '%0d%0a' .
-                urlencode('Descargar aca : _' . $url . '_') . '%0d%0a';
+                urlencode('Descargar aca : ' . $url) . '%0d%0a';
 
             $this->enviarsms2($telefono, $texto);
+
+            $this->dispatchBrowserEvent('enviadosms');
         } else {
             $this->dispatchBrowserEvent('errores', ['error' => __('Ha ocurrido un error, contacta al administrador')]);
         }
@@ -529,7 +584,6 @@ class DetalleLivewire extends Component
     {
         $this->dispatchBrowserEvent('cerrarModalReporte');
         $this->resetPage();
-        $this->reset('search');
     }
 
     public function cerrarModalEstadisticas()
@@ -566,9 +620,22 @@ class DetalleLivewire extends Component
 
     public function getZonasProperty()
     {
-        return Ticket::where([
-            ['event_id', $this->evento_id], ['is_deleted', 0], ['tipo', 1], ['categoria', 2], ['status', 1], ['is_deleted', 0]
-        ])->get();
+        if (Auth::user()->hasRole('punto venta')) {
+            $data = DB::table('ticket_punto_ventas')
+                ->where([
+                    ['pventa_id',   Auth::user()->id], ['event_id', $this->evento_id]
+                ])
+                ->pluck('ticket_id')
+                ->toArray();
+
+            return Ticket::where([
+                ['event_id', $this->evento_id], ['is_deleted', 0], ['tipo', 1], ['categoria', 2], ['status', 1], ['is_deleted', 0]
+            ])->whereIn('id', $data)->select('id', 'event_id', 'name', 'tipo', 'categoria', 'ticket_per_order', 'palcos', 'puestos', 'forma_generar')->get();
+        } else {
+            return Ticket::where([
+                ['event_id', $this->evento_id], ['is_deleted', 0], ['tipo', 1], ['categoria', 2], ['status', 1], ['is_deleted', 0]
+            ])->select('id', 'event_id', 'name', 'tipo', 'categoria', 'ticket_per_order', 'palcos', 'puestos', 'forma_generar')->get();
+        }
     }
 
     public function getSettingProperty()
@@ -579,12 +646,65 @@ class DetalleLivewire extends Component
     public function getHistorialsProperty()
     {
         if ($this->readyToLoad) {
-
-            return DigitalOrdenCompra::where([
-                ['identificador', 'LIKE', '%' . $this->search . '%'], ['evento_id', $this->evento_id]
-            ])->orderBy('id', 'DESC')->paginate(12);
+            if (Auth::user()->hasRole('punto venta')) {
+                return DigitalOrdenCompra::where(function ($query) {
+                    $query->where('identificador', 'LIKE', '%' . $this->search . '%')
+                        ->where('evento_id', $this->evento_id)
+                        ->orWhereHas('cliente', function ($query) {
+                            $query->where('name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
+                        });
+                })
+                    ->where('vendedor_id', Auth::user()->id)
+                    ->join('app_user', 'digital_orden_compras.cliente_id', '=', 'app_user.id')
+                    ->select('digital_orden_compras.*',  'app_user.id AS appuser_id')
+                    ->orderBy('digital_orden_compras.id', 'DESC')
+                    ->paginate(12);
+            } else {
+                return DigitalOrdenCompra::where(function ($query) {
+                    $query->where('identificador', 'LIKE', '%' . $this->search . '%')
+                        ->where('evento_id', $this->evento_id)
+                        ->orWhereHas('cliente', function ($query) {
+                            $query->where('name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
+                        });
+                })
+                    ->join('app_user', 'digital_orden_compras.cliente_id', '=', 'app_user.id')
+                    ->select('digital_orden_compras.*',  'app_user.id AS appuser_id')
+                    ->orderBy('digital_orden_compras.id', 'DESC')
+                    ->paginate(12);
+            }
         } else {
             return [];
         }
+    }
+
+    private function enviarsms2($telefono, $mensaje)
+    {
+        $data = array(
+            'telefono' => $telefono,
+            'mensaje' => $mensaje,
+        );
+        $data = (new ApiController)->sendsms2($data);
+    }
+
+
+    public function cerrarVenta()
+    {
+        $this->reset([
+            'encontrado', 'cliente', 'estado_venta', 'abonado', 'total', 'metodo_de_pago', 'search_telefono', 'clienteNombre', 'clienteTelefono', 'clienteCedula', 'nombre_cliente', 'prefijo_telefono',
+            'telefono', 'cedula_cliente'
+        ]);
+        $this->dispatchBrowserEvent('cerrarshow1');
+    }
+
+    public function descargarReporteOrganizador()
+    {
+        //$this->dispatchBrowserEvent('cerrarModalReporte');
+        $this->dispatchBrowserEvent('downloadReport');
     }
 }
