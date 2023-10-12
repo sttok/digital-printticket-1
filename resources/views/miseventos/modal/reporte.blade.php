@@ -11,7 +11,7 @@
                 <div class="modal-body">
                     <div class="d-flex">
                         <div
-                            class="col-md-{{ Auth::user()->hasRole('organization') || Auth::user()->hasRole('Admin') ? 8 : 12 }} col-12">
+                            class="col-md-{{ Auth::user()->hasRole('organization') || Auth::user()->hasRole('Admin') ? 4 : 12 }} col-12">
                             <span>{{ __('Buscar por identificador de venta, nombre, apellido, telefono o cedula') }}</span>
                             <input type="search" class="form-control" wire:model="search">
                         </div>
