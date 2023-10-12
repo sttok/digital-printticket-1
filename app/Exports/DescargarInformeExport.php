@@ -14,6 +14,7 @@ class DescargarInformeExport implements FromArray, ShouldAutoSize, WithStyles
 {
     use Exportable;
     protected $id;
+    protected $data;
 
     public function __construct(array $data)
     {
@@ -31,21 +32,21 @@ class DescargarInformeExport implements FromArray, ShouldAutoSize, WithStyles
     public function array(): array
     {
         $array[] =  ['Identificador de venta',  'Nombre entrada', 'Identificador', 'Consecutivo', 'Palco', 'Asiento', 'Comprador', 'Endosado', 'Estado', 'Fecha vendido'];
-        foreach($this->data as $ent){
+        foreach ($this->data as $ent) {
             $array[] = array(
-               'Identificador de venta' => $ent['orden_compra_identificador'],
-               'Nombre entrada' => $ent['nombre_entrada'],
-               'Identificador' => $ent['Identificador'],
-               'Consecutivo' => $ent['Consecutivo'],
-               'Palco' => $ent['Palco'],
-               'Asiento' => $ent['Asiento'],
-               'Comprador' => $ent['comprador'],
-               'Endosado' => $ent['endosado'],
-               'Estado' => $ent['estado'] == 0 ? 'Pendiente' : 'Leida',
-               'Fecha vendido' => $ent['fecha_vendido']
+                'Identificador de venta' => $ent['orden_compra_identificador'],
+                'Nombre entrada' => $ent['nombre_entrada'],
+                'Identificador' => $ent['Identificador'],
+                'Consecutivo' => $ent['Consecutivo'],
+                'Palco' => $ent['Palco'],
+                'Asiento' => $ent['Asiento'],
+                'Comprador' => $ent['comprador'],
+                'Endosado' => $ent['endosado'],
+                'Estado' => $ent['estado'] == 0 ? 'Pendiente' : 'Leida',
+                'Fecha vendido' => $ent['fecha_vendido']
             );
         }
-       
+
         return [$array];
     }
 }
