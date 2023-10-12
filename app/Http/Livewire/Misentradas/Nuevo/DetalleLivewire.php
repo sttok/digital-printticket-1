@@ -660,14 +660,14 @@ class DetalleLivewire extends Component
                 $query->where('digital_orden_compras.vendedor_id', Auth::user()->id);
             }
 
-            $query->orWhereHas('cliente', function ($query) {
-                $query->where(function ($query) {
-                    $query->where('name', 'LIKE', '%' . $this->search . '%')
-                        ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
-                        ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
-                        ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
-                });
-            });
+            // $query->orWhereHas('cliente', function ($query) {
+            //     $query->where(function ($query) {
+            //         $query->where('name', 'LIKE', '%' . $this->search . '%')
+            //             ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
+            //             ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
+            //             ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
+            //     });
+            // });
 
             $results = $query
                 ->join('app_user', 'digital_orden_compras.cliente_id', '=', 'app_user.id')
