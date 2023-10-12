@@ -286,6 +286,11 @@
                 $('#verenlace').modal('hide');
                 $('#compartir').modal('hide');
             })
+
+            window.addEventListener('cerrarshow2', event => {
+                $('#verventa').modal('hide');
+                $('#reporte').modal('show');
+            })
             window.addEventListener('compartirwhatsapp1', event => {
                 var tab = window.open(event.detail.url);
                 if (tab) {
