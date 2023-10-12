@@ -51,7 +51,8 @@
                         </thead>
                         <tbody>
                             @forelse ($this->Historials as $historial)
-                                <tr>
+                                <tr
+                                    class=" {{ $historial->anulado == 1 ? 'bg-info' : '' }} {{ $historial->anulado == 2 ? 'bg-danger text-white' : '' }}">
                                     @desktop
                                         <th scope="row">{{ $historial->id }}</th>
                                     @elsedesktop
@@ -85,7 +86,7 @@
                                         @if ($historial->anulado == 1)
                                             <span class="badge bg-secondary">{{ __('Espera de anulacion') }}</span>
                                         @elseif ($historial->anulado == 2)
-                                            <span class="badge bg-danger">{{ __('Aulado') }}</span>
+                                            <span class="badge bg-danger">{{ __('Anulado') }}</span>
                                         @else
                                             @if ($historial->estado_venta == 1)
                                                 <span class="badge bg-secondary">{{ __('Separado') }}</span>
