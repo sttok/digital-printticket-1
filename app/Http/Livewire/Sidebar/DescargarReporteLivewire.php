@@ -52,7 +52,7 @@ class DescargarReporteLivewire extends Component
             'puntoVentaId' => null,
             'eventoId' => $this->eventoId,
         ];
-        return Excel::download(new ReporteVentaExport($data), 'informe-' . Carbon::now()->isoFormat('D-M-YY') . '-' . rand(1, 999) . '.xlsx');
+        return Excel::download(new ReporteVentaExport($data), 'informe-' . Carbon::now()->isoFormat('D-M-YY') . '-kf' . rand(1, 999) . '.xlsx');
     }
 
     public function downloadReportesPuntoVenta($id)
@@ -62,7 +62,7 @@ class DescargarReporteLivewire extends Component
             'puntoVentaId' => $id,
             'eventoId' => $this->eventoId,
         ];
-        return Excel::download(new ReporteVentaExport($data), 'informe-' . Carbon::now()->isoFormat('D-M-YY') . '-' . rand(1, 999) . '.xlsx');
+        return Excel::download(new ReporteVentaExport($data), 'informe-' . Carbon::now()->isoFormat('D-M-YY') . '-kf' . rand(1, 999) . '.xlsx');
     }
 
     public function downloadReportesAllAnulados()
@@ -72,7 +72,7 @@ class DescargarReporteLivewire extends Component
             'puntoVentaId' => null,
             'eventoId' => $this->eventoId,
         ];
-        return Excel::download(new ReporteVentaAnuladosExport($data), 'informe-anulados-' . Carbon::now()->isoFormat('D-M-YY') . '-' . rand(1, 999) . '.xlsx');
+        return Excel::download(new ReporteVentaAnuladosExport($data), 'informe-anulados-' . Carbon::now()->isoFormat('D-M-YY') . '-kf' . rand(1, 999) . '.xlsx');
     }
 
     public function downloadReportesPuntoVentaAnulados($id)
@@ -82,7 +82,7 @@ class DescargarReporteLivewire extends Component
             'puntoVentaId' => $id,
             'eventoId' => $this->eventoId,
         ];
-        return Excel::download(new ReporteVentaAnuladosExport($data), 'informe-anulados-' . Carbon::now()->isoFormat('D-M-YY') . '-' . rand(1, 999) . '.xlsx');
+        return Excel::download(new ReporteVentaAnuladosExport($data), 'informe-anulados-' . Carbon::now()->isoFormat('D-M-YY') . '-kf' . rand(1, 999) . '.xlsx');
     }
 
     public function getPuntosventasProperty()
