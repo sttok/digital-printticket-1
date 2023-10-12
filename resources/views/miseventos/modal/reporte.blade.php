@@ -19,14 +19,15 @@
                         @if (Auth::user()->hasRole('organization') || Auth::user()->hasRole('Admin'))
                             <div class="col-md-3 col-12 text-center justify-content-center">
                                 <span>{{ __('Descargar reporte') }}</span><br>
-                                <button type="button" class="btn btn-primary" wire:click="descargarReporteOrganizador">
+                                <button type="button" class="btn btn-primary" wire:click="descargarReporteOrganizador"
+                                    wire:loading.attr="disabled">>
                                     <i class="fas fa-cloud-download-alt"></i>
                                 </button>
                             </div>
                             <div class="col-md-3 col-12 text-center justify-content-center">
                                 <span>{{ __('Descargar Anulados') }}</span><br>
                                 <button type="button" class="btn btn-danger"
-                                    wire:click="descargarReporteOrganizadorAnulados">
+                                    wire:click="descargarReporteOrganizadorAnulados" wire:loading.attr="disabled">>
                                     <i class="fas fa-ban"></i>
                                 </button>
                             </div>
