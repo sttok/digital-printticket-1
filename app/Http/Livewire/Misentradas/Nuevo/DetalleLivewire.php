@@ -653,29 +653,29 @@ class DetalleLivewire extends Component
         if ($this->readyToLoad) {
             if (Auth::user()->hasRole('punto venta')) {
                 return DigitalOrdenCompra::where(function ($query) {
-                    $query->where('identificador', 'LIKE', '%' . $this->search . '%')
-                        ->where('evento_id', $this->evento_id)
+                    $query->where('digital_orden_compras.identificador', 'LIKE', '%' . $this->search . '%')
+                        ->where('digital_orden_compras.evento_id', $this->evento_id)
                         ->orWhereHas('cliente', function ($query) {
-                            $query->where('name', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
+                            $query->where('cliente.name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('cliente.last_name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('cliente.cedula', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('cliente.phone', 'LIKE', '%' . $this->search . '%');
                         });
                 })
-                    ->where('vendedor_id', Auth::user()->id)
+                    ->where('digital_orden_compras.vendedor_id', Auth::user()->id)
                     ->join('app_user', 'digital_orden_compras.cliente_id', '=', 'app_user.id')
                     ->select('digital_orden_compras.*',  'app_user.id AS appuser_id')
                     ->orderBy('digital_orden_compras.id', 'DESC')
                     ->paginate(12);
             } else {
                 return DigitalOrdenCompra::where(function ($query) {
-                    $query->where('identificador', 'LIKE', '%' . $this->search . '%')
-                        ->where('evento_id', $this->evento_id)
+                    $query->where('digital_orden_compras.identificador', 'LIKE', '%' . $this->search . '%')
+                        ->where('digital_orden_compras.evento_id', $this->evento_id)
                         ->orWhereHas('cliente', function ($query) {
-                            $query->where('name', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('last_name', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('cedula', 'LIKE', '%' . $this->search . '%')
-                                ->orWhere('phone', 'LIKE', '%' . $this->search . '%');
+                            $query->where('cliente.name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('cliente.last_name', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('cliente.cedula', 'LIKE', '%' . $this->search . '%')
+                                ->orWhere('cliente.phone', 'LIKE', '%' . $this->search . '%');
                         });
                 })
                     ->join('app_user', 'digital_orden_compras.cliente_id', '=', 'app_user.id')
